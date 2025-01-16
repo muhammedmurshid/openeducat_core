@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+   <!-- Odoo View Definition for Whatsapp Message Form -->
+   <record id="fee_collection_wizard_view_form" model="ir.ui.view">
+       <field name="name">fee.collection.view.form</field>
+       <field name="model">fee.collection.wizard</field>
+       <field name="priority" eval="8"/>
+       <field name="arch" type="xml">
+           <form string="Fee Collection">
+               <group>
+                   <field name="wallet_amount"/>
+                   <field name="fee_type"/>
+                   <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
+                   <field name="other_fee" invisible="fee_type != 'Other Fee'"/>
+                   <field name="remarks"/>
+                   <field name="amount_inc_tax"/>
+                   <field name="tax"/>
+                   <field name="amount_exc_tax"/>
+                   <field name="payment_mode"/>
+
+               </group>
+               <group>
+                   <field name="collection_id"/>
+               </group>
+
+               <footer>
+                   <button name="act_submit" string="Submit" type="object" class="oe_highlight"/>
+                   <button name="cancel" string="Cancel" special="cancel"/>
+               </footer>
+           </form>
+       </field>
+   </record>
+</odoo>
