@@ -37,7 +37,7 @@ class OpBatch(models.Model):
     course_id = fields.Many2one('op.course', 'Course', required=True)
     active = fields.Boolean(default=True)
     state = fields.Selection(
-        [('draft', 'Draft'), ('in_progress', 'In Progress'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
+        [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
     remaining_days = fields.Integer(string="Remaining Days", compute="_compute_remaining_days", store=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
@@ -87,10 +87,10 @@ class OpBatch(models.Model):
     @api.depends('lump_fee_including_tax','lump_fee_excluding_tax')
     def _compute_total_lump_sum_fee(self):
         for i in self:
-            i.total_lump_sum_fee = i.lump_fee_excluding_tax + i.lump_fee_including_tax
+            i.total_lump_sum_fee = i.lump_fee_including_tax
 
     def act_confirm_batch(self):
-        self.state = 'in_progress'
+        self.state = 'batch_approval'
         print('hi')
 
     _sql_constraints = [
