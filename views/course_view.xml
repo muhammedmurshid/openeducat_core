@@ -26,7 +26,7 @@
             <field name="arch" type="xml">
                 <form string="Course">
                     <header>
-                        <button name="act_create_product" type="object" string="Add Product" class="oe_highlight" invisible="product_added == True"/>
+<!--                        <button name="act_create_product" type="object" string="Add Product" class="oe_highlight" invisible="product_added == True"/>-->
                     </header>
                     <sheet>
                         <div name="button_box" class="oe_button_box">
@@ -49,11 +49,12 @@
                                 <field name="department_id" groups="openeducat_core.group_multi_department"/>
                             </group>
                             <group>
-                                <field name="product_added" invisible="1"/>
+<!--                                <field name="product_added" invisible="1"/>-->
                                 <field name="parent_id"/>
                                 <field name="max_unit_load"/>
-                                <field name="related_product_id"/>
-                                <field name="course_fee"/>
+                                <field name="academic_head_id"/>
+<!--                                <field name="related_product_id"/>-->
+<!--                                <field name="course_fee"/>-->
                             </group>
                         </group>
                         <notebook>

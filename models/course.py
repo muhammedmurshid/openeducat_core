@@ -47,10 +47,11 @@ class OpCourse(models.Model):
     course_type = fields.Selection(
         [('indian', 'Indian'), ('international', 'International'), ('crash', 'Crash'), ('repeaters', 'Repeaters'),
          ('nil', 'Nil')], string="Type")
+    academic_head_id = fields.Many2one('res.users', string="Academic Head")
 
-    related_product_id = fields.Many2one('product.product', string="Related Product")
-    course_fee = fields.Float(string="Course Fee", related="related_product_id.list_price")
-    product_added = fields.Boolean(string="Product Added")
+    # related_product_id = fields.Many2one('product.product', string="Related Product")
+    # course_fee = fields.Float(string="Course Fee", related="related_product_id.list_price")
+    # product_added = fields.Boolean(string="Product Added")
 
     _sql_constraints = [
         ('unique_course_code',
@@ -95,5 +96,5 @@ class ProductDetails(models.TransientModel):
             'detailed_type': 'service',
 
         })
-        self.course_id.related_product_id = product.id
-        self.course_id.product_added = True
+        # self.course_id.related_product_id = product.id
+        # self.course_id.product_added = True

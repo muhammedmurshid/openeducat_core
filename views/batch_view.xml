@@ -37,12 +37,13 @@
                         <group>
                             <group name="main">
                                 <field name="name"/>
+                                <field name="academic_year"/>
                                 <field name="start_date"/>
                                 <field name="batch_type"/>
                                 <field name="course_id"/>
 <!--                                <field name="branch_id"/>-->
                                 <field name="max_no_of_students"/>
-                                <field name="initiated_id"/>
+                                <field name="initiated_id" string="Coordinator"/>
                             </group>
                             <group>
                                 <field name="code"/>

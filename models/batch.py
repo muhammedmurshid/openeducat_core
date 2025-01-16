@@ -53,6 +53,8 @@ class OpBatch(models.Model):
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
         default=lambda self: self.env.user.company_id.currency_id.id)
+    academic_year = fields.Selection([('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year")
+
     total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1)
     batch_type = fields.Selection(
         [('present_batch', 'Present Batch'), ('future_batch', 'Future Batch'), ],

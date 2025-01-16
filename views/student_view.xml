@@ -176,6 +176,7 @@
                                         <field name="category_id"/>
                                         <field name="user_id" string="User" readonly="1"/>
                                         <field name="partner_id" placeholder="Partner" required="0"/>
+<!--                                        <field name="branch_id"/>-->
                                     </group>
                                     <separator string="miscellaneous" colspan="2"/>
                                     <group colspan="3">
@@ -189,6 +190,7 @@
                                     <group>
                                         <field name="batch_id" style="background-color:#89d674;"/>
                                         <field name="course_id"/>
+
                                         <field name="admission_fee" widget="monetary"/>
                                         <field name="batch_fee" widget="monetary"/>
                                         <field name="discount" widget="monetary"/>
