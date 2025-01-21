@@ -217,6 +217,8 @@
                                         <field name="payment_mode"/>
                                         <field name="payment_type"/>
                                         <field name="fee_type"/>
+                                        <field name="branch"/>
+                                        <field name="cheque_no"/>
                                         <field name="invoice_no"/>
                                         <field name="reference_no"/>
                                         <field name="amount_exc_tax"/>

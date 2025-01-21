@@ -17,6 +17,9 @@
                    <field name="tax"/>
                    <field name="amount_exc_tax"/>
                    <field name="payment_mode"/>
+                   <field name="branch" invisible="payment_mode != 'Cash'" required="payment_mode == 'Cash'"/>
+                   <field name="cheque_no" invisible="payment_mode == 'Cash'" required="payment_mode != 'Cash'"/>
+
 
                </group>
                <group>
