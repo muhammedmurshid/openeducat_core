@@ -9,9 +9,10 @@
                 <tree string="Batch">
                     <field name="name"/>
                     <field name="code"/>
+                    <field name="course_id"/>
                     <field name="start_date"/>
                     <field name="end_date"/>
-                    <field name="course_id"/>
+                    <field name="state" widget="badge"/>
                 </tree>
             </field>
         </record>

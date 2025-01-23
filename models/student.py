@@ -72,9 +72,9 @@ class OpStudent(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _inherits = {"res.partner": "partner_id"}
 
-    first_name = fields.Char('First Name', translate=True)
-    middle_name = fields.Char('Middle Name', translate=True)
-    last_name = fields.Char('Last Name', translate=True)
+    # first_name = fields.Char('First Name', translate=True)
+    # middle_name = fields.Char('Middle Name', translate=True)
+    # last_name = fields.Char('Last Name', translate=True)
     birth_date = fields.Date('Birth Date')
     blood_group = fields.Selection([
         ('A+', 'A+ve'),
@@ -134,15 +134,15 @@ class OpStudent(models.Model):
                 self.total_payable_tax = self.batch_id.total_lump_sum_fee - self.discount
             self.due_amount = self.total_payable_tax - self.paid_amount
 
-    @api.onchange('first_name', 'middle_name', 'last_name')
-    def _onchange_name(self):
-        if not self.middle_name:
-            self.name = str(self.first_name) + " " + str(
-                self.last_name
-            )
-        else:
-            self.name = str(self.first_name) + " " + str(
-                self.middle_name) + " " + str(self.last_name)
+    # @api.onchange('first_name', 'middle_name', 'last_name')
+    # def _onchange_name(self):
+    #     if not self.middle_name:
+    #         self.name = str(self.first_name) + " " + str(
+    #             self.last_name
+    #         )
+    #     else:
+    #         self.name = str(self.first_name) + " " + str(
+    #             self.middle_name) + " " + str(self.last_name)
 
     @api.constrains('birth_date')
     def _check_birthdate(self):

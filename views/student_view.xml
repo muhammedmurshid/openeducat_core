@@ -67,7 +67,7 @@
                     <!--                        font-family: "FontAwesome";-->
                     <!--                        }-->
                     <!--                    </style>-->
-                    <field name="title" optional="show"/>
+<!--                    <field name="title" optional="show"/>-->
                     <field name="name"/>
                     <field name="gender" optional="hide"/>
                     <field name="birth_date" optional="hide"/>
@@ -90,6 +90,22 @@
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
                 <form string="Student">
+                    <style>
+                        .btn-collect_fee {
+                        background-color: #12cc4d;
+                        width: 120px;
+                        height: 40px;
+                        font-size: 14px;
+                        text-align: center;
+                        }
+                        .btn-drop {
+                        background-color: red;
+                        width: 120px;
+                        height: 40px;
+                        font-size: 14px;
+                        text-align: center;
+                        }
+                    </style>
                     <header>
                         <button type="object" name="create_student_user"
                                 string="Create Student User"
@@ -98,9 +114,9 @@
                                 invisible="user_id != False"/>
                         <button name="act_allocate_to_batch" type="object" string="Allocate to Batch"
                                 class="oe_highlight" invisible="state != 'confirm'"/>
-                        <button name="act_drop_student" string="Drop" type="object" style="background-color: #5453FD;"
+                        <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
-                        <button name="act_collect_fee" string="Collect Fee" type="object" class="oe_highlight"
+                        <button name="act_collect_fee" string="Collect Fee" type="object" class="btn-collect_fee"
                                 invisible="state == 'stoped'"/>
                         <field name="state" widget="statusbar"/>
                     </header>
@@ -117,27 +133,31 @@
                             </div>
                             <div class="mb16 col-8 col-lg-10 px-0">
                                 <div class="row">
-                                    <h2 class="col-12 col-lg-2">
-                                        <field name="title" placeholder="Title"/>
-                                    </h2>
+<!--                                    <h2 class="col-12 col-lg-2">-->
+<!--                                        <field name="title" placeholder="Title"/>-->
+<!--                                    </h2>-->
                                     <h2 class="col-12 col-lg-10">
-                                        <field name="name" placeholder="Name" required="1" invisible="1"/>
+<!--                                        <field name="name" placeholder="Name" required="1" invisible="1"/>-->
                                         <table>
                                             <tr>
                                                 <td style="padding-right:10px;">
-                                                    <field name="first_name" required="1" placeholder="First Name"/>
+                                                    <field name="name" required="1" placeholder="Student Name"/>
                                                 </td>
-                                                <td style="padding-right:10px;">
-                                                    <field name="middle_name" placeholder="Middle Name"/>
-                                                </td>
-                                                <td style="padding-right:10px;">
-                                                    <field name="last_name" required="1" placeholder="Last Name"/>
-                                                </td>
+<!--                                                <td style="padding-right:10px;">-->
+<!--                                                    <field name="middle_name" placeholder="Middle Name"/>-->
+<!--                                                </td>-->
+<!--                                                <td style="padding-right:10px;">-->
+<!--                                                    <field name="last_name" required="1" placeholder="Last Name"/>-->
+<!--                                                </td>-->
                                             </tr>
                                         </table>
+
                                     </h2>
                                 </div>
+                                <field name="mobile" placeholder="Mobile Number"/>
+                                <field name="email" required="1" placeholder="Email Address"/>
                             </div>
+
                         </div>
                         <notebook colspan="4">
                             <page name="personal_information" string="Personal Information">
@@ -167,8 +187,8 @@
                                     </group>
                                     <group>
                                         <field name="currency_id" invisible="1"/>
-                                        <field name="email" required="1"/>
-                                        <field name="mobile"/>
+
+
                                         <field name="lang"/>
                                         <field name="blood_group"/>
                                         <field name="nationality"/>
@@ -176,7 +196,7 @@
                                         <field name="category_id"/>
                                         <field name="user_id" string="User" readonly="1"/>
                                         <field name="partner_id" placeholder="Partner" required="0"/>
-<!--                                        <field name="branch_id"/>-->
+                                        <!--                                        <field name="branch_id"/>-->
                                     </group>
                                     <separator string="miscellaneous" colspan="2"/>
                                     <group colspan="3">
