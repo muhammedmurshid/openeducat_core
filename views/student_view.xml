@@ -211,19 +211,26 @@
                                         <field name="batch_id" style="background-color:#89d674;"/>
                                         <field name="course_id"/>
 
-                                        <field name="admission_fee" widget="monetary"/>
-                                        <field name="batch_fee" widget="monetary"/>
-                                        <field name="discount" widget="monetary"/>
-                                        <field name="total_payable_tax" widget="monetary"/>
-                                        <field name="paid_amount" widget="monetary"/>
-                                        <field name="due_amount" widget="monetary"/>
+
                                         <!--                                        <field name="fee_type"/>-->
                                         <!--                                        <field name="batch_id"/>-->
                                         <!--                                        <field name="branch_id"/>-->
                                         <!--                                        <field name="course_id"/>-->
                                     </group>
+                                    <group string="Admission Fee">
+                                        <field name="admission_fee" widget="monetary"/>
+                                    </group>
                                     <group>
-                                        <field name="wallet_balance"/>
+                                        <field name="wallet_balance" style="background-color:#1739fc; width:40px; color:white;"/>
+                                        <field name="fee_type"/>
+                                    </group>
+                                    <group string="Lump Sum Fee Details" name="fee_details" invisible="fee_type != 'lump_sum_fee'">
+
+                                        <field name="batch_fee" widget="monetary"/>
+                                        <field name="discount" widget="monetary"/>
+                                        <field name="total_payable_tax" widget="monetary"/>
+                                        <field name="paid_amount" widget="monetary"/>
+                                        <field name="due_amount" widget="monetary"/>
                                     </group>
                                 </group>
                             </page>
@@ -232,17 +239,25 @@
 
                                 <field name="payment_ids">
                                     <tree editable="bottom">
+
                                         <field name="sl_no"/>
+                                        <field name="currency_id" invisible="1"/>
                                         <field name="date"/>
                                         <field name="payment_mode"/>
-                                        <field name="payment_type"/>
+<!--                                        <field name="payment_type"/>-->
                                         <field name="fee_type"/>
+                                        <field name="fee_name" string="Payment Type"/>
                                         <field name="branch"/>
                                         <field name="cheque_no"/>
                                         <field name="invoice_no"/>
                                         <field name="reference_no"/>
-                                        <field name="amount_exc_tax"/>
-                                        <field name="amount_inc_tax"/>
+                                        <field name="amount_exc_tax" widget="monetary"/>
+                                        <field name="tax_amount" widget="monetary"/>
+<!--                                        <field name="cgst_amount" invisible="1"/>-->
+<!--                                        <field name="sgst_amount" invisible="1"/>-->
+                                        <field name="amount_inc_tax" widget="monetary"/>
+<!--                                        <field name="amount_in_words" invisible="1"/>-->
+                                        <button name="act_print_invoice" type="object" class="fa fa-download"/>
                                     </tree>
                                 </field>
                                 <!--                                        <field name="admission_fee"/>-->

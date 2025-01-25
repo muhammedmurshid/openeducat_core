@@ -1,36 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-   <!-- Odoo View Definition for Whatsapp Message Form -->
-   <record id="fee_collection_wizard_view_form" model="ir.ui.view">
-       <field name="name">fee.collection.view.form</field>
-       <field name="model">fee.collection.wizard</field>
-       <field name="priority" eval="8"/>
-       <field name="arch" type="xml">
-           <form string="Fee Collection">
-               <group>
-                   <field name="wallet_amount"/>
-                   <field name="fee_type"/>
-                   <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
-                   <field name="other_fee" invisible="fee_type != 'Other Fee'"/>
-                   <field name="remarks"/>
-                   <field name="amount_inc_tax"/>
-                   <field name="tax"/>
-                   <field name="amount_exc_tax"/>
-                   <field name="payment_mode"/>
-                   <field name="branch" invisible="payment_mode != 'Cash'" required="payment_mode == 'Cash'"/>
-                   <field name="cheque_no" invisible="payment_mode == 'Cash'" required="payment_mode != 'Cash'"/>
+    <!-- Odoo View Definition for Whatsapp Message Form -->
+    <record id="fee_collection_wizard_view_form" model="ir.ui.view">
+        <field name="name">fee.collection.view.form</field>
+        <field name="model">fee.collection.wizard</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <form string="Fee Collection">
+                <group>
+                    <group>
+                        <field name="wallet_amount" style="background-color:#1739fc; width:40px; color:white;"/>
+                        <field name="fee_type" style="background-color:#fc8f47;"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
+                        <field name="other_fee" invisible="fee_type != 'Other Fee'"/>
+                        <field name="batch_id" invisible="fee_type != 'Batch Fee'"/>
+
+                        <field name="amount_exc_tax" widget="monetary"/>
+                        <field name="tax_id" string="Tax id" invisible="1"/>
+
+                        <field name="amount_inc_tax" widget="monetary"/>
 
 
-               </group>
-               <group>
-                   <field name="collection_id"/>
-               </group>
+                        <field name="payment_mode"/>
 
-               <footer>
-                   <button name="act_submit" string="Submit" type="object" class="oe_highlight"/>
-                   <button name="cancel" string="Cancel" special="cancel"/>
-               </footer>
-           </form>
-       </field>
-   </record>
+                    </group>
+                    <group>
+                        <field name="non_tax"/>
+                        <field name="collection_id" invisible="1"/>
+                        <field name="remarks"/>
+                        <field name="cgst_amount"/>
+                        <field name="sgst_amount"/>
+                        <field name="tax" widget="monetary"/>
+
+                        <field name="branch" invisible="payment_mode != 'Cash'" required="payment_mode == 'Cash'"/>
+                        <field name="cheque_no" invisible="payment_mode == 'Cash'" required="payment_mode != 'Cash'"/>
+                    </group>
+
+
+                </group>
+
+
+                <footer>
+                    <button name="act_submit" string="Submit" type="object" class="oe_highlight"/>
+                    <button name="cancel" string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
 </odoo>

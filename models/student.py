@@ -21,7 +21,7 @@
 
 from odoo import models, fields, api, _, tools
 from odoo.exceptions import ValidationError, UserError
-
+from num2words import num2words
 
 class OpStudentCourse(models.Model):
     _name = "op.student.course"
@@ -108,6 +108,7 @@ class OpStudent(models.Model):
                              string="Status", default="confirm")
     active = fields.Boolean(default=True)
     batch_id = fields.Many2one('op.batch', string="Batch", required=1)
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", required=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course")
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
@@ -251,6 +252,53 @@ class FeeCollectionWizard(models.TransientModel):
         [('Admission Fee', 'Admission Fee'), ('Coaching Fee 1st Installment', 'Coaching Fee 1st Installment'),
          ('Coaching Fee 2nd Installment', 'Coaching Fee 2nd Installment'),
          ('Coaching Fee 3rd Installment', 'Coaching Fee 3rd Installment')], string="Fee Name")
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    tax_id = fields.Many2one('account.tax', string="Tax")
+    non_tax = fields.Boolean(string="Non Taxable")
+    batch_id = fields.Many2one('op.batch', string="Batch")
+
+    cgst_amount = fields.Float(string="CGST Amount")
+    sgst_amount = fields.Float(string="SGST Amount")
+
+    @api.onchange('fee_type')
+    def _onchange_fee_types(self):
+        if self.fee_type == 'Ancillary Fee(Non Taxable)':
+            self.other_fee = False
+            self.batch_id = False
+        elif self.fee_type == 'Other Fee':
+            self.fee_name = False
+            self.batch_id = False
+        else:
+            self.batch_id = self.collection_id.batch_id.id
+            self.fee_name = False
+            self.other_fee = False
+
+
+    @api.onchange('tax_id','amount_exc_tax','tax','non_tax')
+    def _onchange_amount_tax(self):
+        if self.non_tax == 0:
+            if self.amount_exc_tax:
+                tax_amount = 0
+                tax = self.env['account.tax'].sudo().search([('name', '=', 'GST')])
+                self.tax_id = tax.id
+                print(tax.amount, 'amt')
+                if tax.amount_type == 'group':
+                    for i in tax.children_tax_ids:
+                        tax_amount += i.amount
+                        print(i.name, 'jjjjj')
+                self.tax = self.amount_exc_tax * tax_amount / 100
+
+        elif self.non_tax == 1:
+            self.tax_id = False
+            self.tax = 0
+
+        self.amount_inc_tax = self.amount_exc_tax + self.tax
+        if self.tax != 0:
+            self.cgst_amount = self.tax / 2
+            self.sgst_amount = self.tax / 2
+        # if self.amount_inc_tax and self.amount_exc_tax:
+        #     self.tax = self.amount_inc_tax - self.amount_exc_tax
+
 
     def act_submit(self):
         print('hhi')
@@ -277,10 +325,17 @@ class FeeCollectionWizard(models.TransientModel):
                                         'amount_exc_tax': self.amount_exc_tax,
                                         'amount_inc_tax': self.amount_inc_tax,
                                         'cheque_no': self.cheque_no,
-                                        'branch': self.branch
+                                        'branch': self.branch,
+                                        'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+                                        'tax_amount': self.tax,
+                                        'cgst_amount': self.cgst_amount,
+                                        'sgst_amount': self.sgst_amount
                                     }),
                                 ]
                             })
+                            if self.other_fee:
+                                if self.other_fee == 'Admission Fee':
+                                    self.collection_id.admission_fee = self.amount_inc_tax
                             if self.fee_type == 'Batch Fee':
                                 if self.collection_id.paid_amount == 0:
                                     self.collection_id.paid_amount = self.amount_inc_tax
@@ -302,10 +357,17 @@ class FeeCollectionWizard(models.TransientModel):
                                         'amount_exc_tax': self.amount_exc_tax,
                                         'amount_inc_tax': self.amount_inc_tax,
                                         'cheque_no': self.cheque_no,
-                                        'branch': self.branch
+                                        'branch': self.branch,
+                                        'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+                                        'tax_amount': self.tax,
+                                        'cgst_amount': self.cgst_amount,
+                                        'sgst_amount': self.sgst_amount
                                     }),
                                 ]
                             })
+                            if self.other_fee:
+                                if self.other_fee == 'Admission Fee':
+                                    self.collection_id.admission_fee = self.amount_inc_tax
                             if self.fee_type == 'Batch Fee':
                                 self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_exc_tax
                         else:
@@ -325,10 +387,17 @@ class FeeCollectionWizard(models.TransientModel):
                             'amount_exc_tax': self.amount_exc_tax,
                             'amount_inc_tax': self.amount_inc_tax,
                             'cheque_no': self.cheque_no,
-                            'branch': self.branch
+                            'branch': self.branch,
+                            'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+                            'tax_amount': self.tax,
+                            'cgst_amount': self.cgst_amount,
+                            'sgst_amount': self.sgst_amount,
                         }),
                     ]
                 })
+                if self.other_fee:
+                    if self.other_fee == 'Admission Fee':
+                        self.collection_id.admission_fee = self.amount_inc_tax
                 if self.fee_type == 'Batch Fee':
                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_exc_tax
 
@@ -347,17 +416,59 @@ class PaymentHistoryFeeCollection(models.Model):
     sl_no = fields.Integer(string="No")
     date = fields.Datetime(string="Date")
     payment_mode = fields.Char(string="Payment Mode")
-    payment_type = fields.Char(string="Payment Type")
+    # payment_type = fields.Char(string="Payment Type")
     fee_type = fields.Char(string="Fee Type")
     invoice_no = fields.Char(string="Invoice No")
     reference_no = fields.Char(string="Reference No")
-    amount_exc_tax = fields.Char(string="Amount (Exc. Tax)")
-    amount_inc_tax = fields.Char(string="Amount (Inc. Tax)")
+    amount_exc_tax = fields.Float(string="Amount (Exc. Tax)")
+    amount_inc_tax = fields.Float(string="Amount (Inc. Tax)")
+    fee_name = fields.Char(string="Fee Name")
     payment_id = fields.Many2one('op.student', string="Payment")
+    company_id = fields.Many2one(string='Company', comodel_name='res.company', default=lambda self: self.env.company)
+    cgst_amount = fields.Float(string="CGST Amount")
+    sgst_amount = fields.Float(string="SGST Amount")
+    currency_id = fields.Many2one(
+        'res.currency',
+        string="Currency",
+        default=lambda self: self.env.company.currency_id.id
+    )
     branch = fields.Selection(
         [('Corporate Office & City Campus', 'Corporate Office & City Campus'), ('Cochin Campus', 'Cochin Campus'),
          ('Calicut Campus', 'Calicut Campus'), ('Trivandrum Campus', 'Trivandrum Campus'),
          ('Kottayam Campus', 'Kottayam Campus'),
          ('Perinthalmanna Branch', 'Perinthalmanna Branch'), ('Bangalore Campus', 'Bangalore Campus')], string="Branch")
     cheque_no = fields.Char(string="Cheque No/Reference No")
+    tax_amount = fields.Float(string="Tax")
+    amount_in_words = fields.Char(string="Amount in Words", compute="_compute_amount_in_words", store=1)
+    # @api.depends('amount_inc_tax', 'currency_id')
+    # def _compute_amount_in_words(self):
+    #     for record in self:
+    #         # Convert the amount to words, specifying the language and currency
+    #         if record.currency_id:
+    #             record.amount_in_words = amount_to_text(
+    #                 record.amount_inc_tax,
+    #                 lang=self.env.user.lang or 'en',
+    #                 currency=record.currency_id.name
+    #             )
+    #         else:
+    #             record.amount_in_words = amount_to_text(
+    #                 record.amount_inc_tax,
+    #                 lang=self.env.user.lang or 'en'
+    #             )
+
+    @api.depends('amount_inc_tax')
+    def _compute_amount_in_words(self):
+        print('workssssss')
+        self.amount_in_words = num2words(self.amount_inc_tax, lang='en').upper()
+        # print(f"Amount in words: {amount_in_words}")
+
+    def act_print_invoice(self):
+        # print('hi')
+        # print(self.env.context)
+        # data = {
+        #     'model_id': self.id,
+        #     'form': self.env.context
+        # }
+
+        return self.env.ref('logic_base_17.action_report_students_payment_history').report_action(self)
 
