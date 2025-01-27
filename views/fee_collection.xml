@@ -9,7 +9,7 @@
             <form string="Fee Collection">
                 <group>
                     <group>
-                        <field name="wallet_amount" style="background-color:#1739fc; width:40px; color:white;"/>
+                        <field name="wallet_amount" style="background-color:#283880; color:white;"/>
                         <field name="fee_type" style="background-color:#fc8f47;"/>
                         <field name="currency_id" invisible="1"/>
                         <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
@@ -29,8 +29,8 @@
                         <field name="non_tax"/>
                         <field name="collection_id" invisible="1"/>
                         <field name="remarks"/>
-                        <field name="cgst_amount"/>
-                        <field name="sgst_amount"/>
+                        <field name="cgst_amount" invisible="1"/>
+                        <field name="sgst_amount" invisible="1"/>
                         <field name="tax" widget="monetary"/>
 
                         <field name="branch" invisible="payment_mode != 'Cash'" required="payment_mode == 'Cash'"/>

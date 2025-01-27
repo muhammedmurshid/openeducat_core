@@ -116,7 +116,7 @@ class OpStudent(models.Model):
     discount = fields.Float(string="Discount")
     total_payable_tax = fields.Float(string="Total Payable (Inc. Tax)")
     paid_amount = fields.Float(string="Paid (Inc. Tax)")
-    due_amount = fields.Float(string="Due Amount (Inc. Tax)")
+    due_amount = fields.Float(string="Due Amount (Inc. Tax)", compute="_compute_due_amount", store=1)
     payment_ids = fields.One2many('fee.payment.history', 'payment_id', string="Payment History")
 
     _sql_constraints = [(
@@ -125,15 +125,15 @@ class OpStudent(models.Model):
         'Registration Number must be unique per student!'
     )]
 
-    @api.onchange('batch_id', 'discount', 'total_payable_tax', 'paid_amount', )
-    def _onchange_batch_fee(self):
-        if self.batch_id:
-            self.batch_fee = self.batch_id.total_lump_sum_fee
-            if self.discount == 0:
-                self.total_payable_tax = self.batch_id.total_lump_sum_fee
-            else:
-                self.total_payable_tax = self.batch_id.total_lump_sum_fee - self.discount
-            self.due_amount = self.total_payable_tax - self.paid_amount
+    # @api.onchange('batch_id', 'discount', 'total_payable_tax', 'paid_amount', )
+    # def _onchange_batch_fee(self):
+    #     if self.batch_id:
+    #         self.batch_fee = self.batch_id.total_lump_sum_fee
+    #         if self.discount == 0:
+    #             self.total_payable_tax = self.batch_id.total_lump_sum_fee
+    #         else:
+    #             self.total_payable_tax = self.batch_id.total_lump_sum_fee - self.discount
+    #         self.due_amount = self.total_payable_tax - self.paid_amount
 
     # @api.onchange('first_name', 'middle_name', 'last_name')
     # def _onchange_name(self):
@@ -144,6 +144,30 @@ class OpStudent(models.Model):
     #     else:
     #         self.name = str(self.first_name) + " " + str(
     #             self.middle_name) + " " + str(self.last_name)
+
+    @api.depends('paid_amount','total_payable_tax')
+    def _compute_due_amount(self):
+        for i in self:
+            i.due_amount = i.total_payable_tax - i.paid_amount
+
+    @api.onchange('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
+    def _onchange_batch_fee(self):
+        print('jjjjj')
+        if self.fee_type:
+            if self.fee_type == 'lump_sum_fee':
+                self.batch_fee = self.batch_id.total_lump_sum_fee
+            if self.fee_type == 'installment':
+                self.batch_fee = self.batch_id.total_installment_fee
+
+        if self.batch_fee != 0:
+            print('kkkl')
+            if self.discount == 0:
+                self.total_payable_tax = self.batch_fee
+            else:
+                self.total_payable_tax = self.batch_fee - self.discount
+        # if self.total_payable_tax !=0 :
+        #     print('bbcvbvb')
+        #     self.due_amount = self.total_payable_tax - self.paid_amount
 
     @api.constrains('birth_date')
     def _check_birthdate(self):
@@ -341,6 +365,10 @@ class FeeCollectionWizard(models.TransientModel):
                                     self.collection_id.paid_amount = self.amount_inc_tax
                                 else:
                                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+                            if self.fee_type == 'Other Fee':
+                                if self.fee_name != 'Admission Fee':
+                                    self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+
                         else:
                             raise ValidationError(_(
                                 "Invalid Wallet Amount!"))

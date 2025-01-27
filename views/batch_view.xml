@@ -23,6 +23,26 @@
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
                 <form string="Batch">
+                    <style>
+                        .alignment-row {
+                        display: flex;
+                        justify-content: flex-start; /* Align items from the start */
+                        align-items: center; /* Vertically center items */
+                        margin-bottom: 8px; /* Add spacing between rows */
+                        }
+
+                        .alignment-row label {
+                        width: 150px; /* Set a fixed width for labels */
+                        text-align: right; /* Right-align the label text */
+                        margin-right: 10px; /* Add spacing between the label and field */
+                        }
+
+                        .alignment-row field {
+                        flex: 1; /* Ensure fields take up remaining space */
+                        text-align: left; /* Left-align the field values */
+                        }
+
+                    </style>
                     <header>
                         <field name="state" widget="statusbar"/>
                         <button name="act_confirm_batch" type="object" string="Confirm" invisible="state != 'draft'"
@@ -42,7 +62,7 @@
                                 <field name="start_date"/>
                                 <field name="batch_type"/>
                                 <field name="course_id"/>
-<!--                                <field name="branch_id"/>-->
+                                <!--                                <field name="branch_id"/>-->
                                 <field name="max_no_of_students"/>
                                 <field name="initiated_id" string="Coordinator"/>
                             </group>
@@ -51,7 +71,7 @@
                                 <field name="end_date"/>
                                 <field name="remaining_days"/>
                                 <field name="class_type"/>
-<!--                                <field name="batch_type"/>-->
+                                <!--                                <field name="batch_type"/>-->
                                 <field name="total_no_of_students" style="background-color:#89d674; width:40px;"/>
                                 <field name="currency_id" invisible="1"/>
 
@@ -63,6 +83,7 @@
                                     <group name="lump_sump" string="Lump Sum Fee">
                                         <field name="lump_fee_excluding_tax" placeholder="lump sum fee excluding tax"
                                                widget="monetary"/>
+                                        <field name="tax" widget="monetary"/>
                                         <field name="lump_fee_including_tax" placeholder="lump sum fee including tax"
                                                widget="monetary"/>
                                         <field name="total_lump_sum_fee" widget="monetary"
@@ -74,7 +95,8 @@
                                         <field name="tax_amount_lump" widget="monetary"/>
                                         <field name="amount_inc_lump" widget="monetary"/>
                                         <field name="payment_date_lump"/>
-                                        <field name="difference_in_fee_lump" style="background-color:#e33b5a" widget="monetary"/>
+                                        <field name="difference_in_fee_lump" style="background-color:#e33b5a"
+                                               widget="monetary"/>
                                     </group>
                                 </group>
                                 <group name="installment" string="Installment">
@@ -90,6 +112,23 @@
 
                                         </tree>
                                     </field>
+                                    <group class="oe_subtotal_footer" colspan="2" name="total_installment">
+                                        <field name="inst_amount_exc" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                        <field name="inst_amount_tax" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                        <field name="inst_amount_inc" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+
+                                        <field name="total_installment_fee" class="oe_subtotal_footer_separator"
+                                               widget='monetary' options="{'currency_field': 'currency_id'}" style="background-color: #d3ecf2;"/>
+
+<!--                                        <h3>-->
+<!--                                            <field name="total_installment_fee" widget="monetary"-->
+<!--                                                   options="{'currency_field': 'currency_id'}"/>-->
+<!--                                        </h3>-->
+                                    </group>
+
                                 </group>
 
                             </page>

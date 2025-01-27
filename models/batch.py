@@ -49,6 +49,7 @@ class OpBatch(models.Model):
     fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('loan', 'Loan'), ('installment', 'Installment')],
                                 string="Fee Type", default="lump_sum_fee", required=1)
     lump_fee_excluding_tax = fields.Float(string="Excluding Tax")
+    tax = fields.Float(string="Tax")
     lump_fee_including_tax = fields.Float(string="Including Tax")
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
@@ -87,7 +88,43 @@ class OpBatch(models.Model):
     @api.depends('lump_fee_including_tax','lump_fee_excluding_tax')
     def _compute_total_lump_sum_fee(self):
         for i in self:
-            i.total_lump_sum_fee = i.lump_fee_including_tax
+            if i.lump_fee_excluding_tax != 0:
+                i.tax = i.lump_fee_excluding_tax * 18 / 100
+            i.lump_fee_including_tax = i.lump_fee_excluding_tax + i.tax
+            i.total_lump_sum_fee = i.lump_fee_excluding_tax + i.tax
+
+    inst_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_installment", store=1)
+    inst_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_installment", store=1)
+    inst_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_installment", store=1,)
+    total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1)
+
+    # @api.onchange('inst_amount_exc','inst_amount_tax')
+    # def _onchange_total_installment_amount(self):
+    #     self.inst_amount_inc = self.inst_amount_exc + self.inst_amount_tax
+
+    @api.depends('inst_amount_exc','inst_amount_tax','inst_amount_inc')
+    def _compute_total_installment_fee(self):
+        for rec in self:
+            if rec.inst_amount_inc != 0:
+                rec.total_installment_fee = rec.inst_amount_inc
+
+    @api.depends('installment_ids','installment_ids.amount_exc_installment','installment_ids.tax_amount','installment_ids.amount_inc_installment')
+    def _compute_total_amount_installment(self):
+        for i in self:
+            if i.installment_ids:
+                total = 0
+                total_inc = 0
+                for amt in self.installment_ids:
+                    total += amt.amount_exc_installment
+                    total_inc += amt.amount_inc_installment
+                i.inst_amount_exc = total
+                if total !=0:
+                    i.inst_amount_tax = total * 18 /100
+                i.inst_amount_inc = total_inc
+            else:
+                i.inst_amount_exc = 0
+                i.inst_amount_inc = 0
+
 
     def act_confirm_batch(self):
         self.state = 'batch_approval'
@@ -189,5 +226,7 @@ class InstallmentPayment(models.Model):
     @api.depends('amount_exc_installment','tax_amount')
     def _compute_amount_inc_installment(self):
         for i in self:
+            if i.amount_exc_installment != 0:
+                i.tax_amount = i.amount_exc_installment * 18 / 100
             if i.tax_amount != 0:
                 i.amount_inc_installment = i.amount_exc_installment + i.tax_amount

@@ -67,7 +67,7 @@
                     <!--                        font-family: "FontAwesome";-->
                     <!--                        }-->
                     <!--                    </style>-->
-<!--                    <field name="title" optional="show"/>-->
+                    <!--                    <field name="title" optional="show"/>-->
                     <field name="name"/>
                     <field name="gender" optional="hide"/>
                     <field name="birth_date" optional="hide"/>
@@ -105,6 +105,68 @@
                         font-size: 14px;
                         text-align: center;
                         }
+                        .card {
+                        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+                        transition: 0.3s;
+                        width: 20%;
+                        background-color: #283880;
+                        color: white; /* Set font color to white */
+                        text-align: center; /* Center the text within the card */
+                        }
+                        .due_card {
+                        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+                        transition: 0.3s;
+                        width: 20%;
+                        background-color: #d97038;
+                        color: white; /* Set font color to white */
+                        text-align: center; /* Center the text within the card */
+                        }
+
+                        .container {
+                        padding: 2px 16px;
+                        display: flex; /* Use flexbox for alignment */
+                        justify-content: space-between; /* Space out items horizontally */
+                        align-items: center; /* Align items vertically in the center */
+                        }
+                        .container h4 {
+                        margin: 0; /* Remove any default margin */
+                        font-size: 16px; /* Adjust font size if needed */
+                        width: 100%; /* Ensure full width for alignment */
+                        }
+                        .admission-fee-container {
+                        display: flex;
+                        align-items: center; /* Vertically center the field and the checkmark */
+                        gap: 5px; /* Add spacing between the field and the checkmark */
+                        }
+
+                        .checkmark {
+                        display: inline-block;
+                        position: relative;
+                        width: 12px; /* Width of the checkmark */
+                        height: 12px; /* Height of the checkmark */
+                        transform: rotate(45deg); /* Rotate to form the checkmark shape */
+                        margin-left: 5px; /* Add some space from the field */
+                        }
+
+                        .checkmark_stem {
+                        position: absolute;
+                        width: 2px; /* Thickness of the checkmark stem */
+                        height: 9px; /* Length of the checkmark stem */
+                        background-color: green; /* Checkmark color */
+                        left: 5px; /* Position the stem */
+                        top: 0;
+                        }
+
+                        .checkmark_kick {
+                        position: absolute;
+                        width: 6px; /* Length of the checkmark kick */
+                        height: 2px; /* Thickness of the checkmark kick */
+                        background-color: green; /* Checkmark color */
+                        left: 0;
+                        top: 6px;
+                        }
+
+
                     </style>
                     <header>
                         <button type="object" name="create_student_user"
@@ -133,32 +195,64 @@
                             </div>
                             <div class="mb16 col-8 col-lg-10 px-0">
                                 <div class="row">
-<!--                                    <h2 class="col-12 col-lg-2">-->
-<!--                                        <field name="title" placeholder="Title"/>-->
-<!--                                    </h2>-->
+                                    <!--                                    <h2 class="col-12 col-lg-2">-->
+                                    <!--                                        <field name="title" placeholder="Title"/>-->
+                                    <!--                                    </h2>-->
                                     <h2 class="col-12 col-lg-10">
-<!--                                        <field name="name" placeholder="Name" required="1" invisible="1"/>-->
+                                        <!--                                        <field name="name" placeholder="Name" required="1" invisible="1"/>-->
                                         <table>
                                             <tr>
                                                 <td style="padding-right:10px;">
                                                     <field name="name" required="1" placeholder="Student Name"/>
                                                 </td>
-<!--                                                <td style="padding-right:10px;">-->
-<!--                                                    <field name="middle_name" placeholder="Middle Name"/>-->
-<!--                                                </td>-->
-<!--                                                <td style="padding-right:10px;">-->
-<!--                                                    <field name="last_name" required="1" placeholder="Last Name"/>-->
-<!--                                                </td>-->
+                                                <!--                                                <td style="padding-right:10px;">-->
+                                                <!--                                                    <field name="middle_name" placeholder="Middle Name"/>-->
+                                                <!--                                                </td>-->
+                                                <!--                                                <td style="padding-right:10px;">-->
+                                                <!--                                                    <field name="last_name" required="1" placeholder="Last Name"/>-->
+                                                <!--                                                </td>-->
                                             </tr>
+
                                         </table>
 
                                     </h2>
                                 </div>
-                                <field name="mobile" placeholder="Mobile Number"/>
-                                <field name="email" required="1" placeholder="Email Address"/>
+                                <group>
+                                    <group>
+                                        <field name="mobile" placeholder="Mobile Number"/>
+                                        <field name="email" required="1" placeholder="Email Address"/>
+                                    </group>
+                                    <div class="card">
+                                        <div class="container">
+                                            <h4>
+                                                <b style="color:white;" align="center">Wallet Balance
+                                                    <field name="wallet_balance"/>
+                                                </b>
+
+                                            </h4>
+
+                                            <!--                                            <field name="wallet_balance" readonly="1"/>-->
+                                        </div>
+                                    </div>
+                                    <div class="due_card">
+                                        <div class="container">
+                                            <h4>
+                                                <b style="color:white;" align="center">Payment Dues
+                                                    <field name="due_amount"/>
+                                                </b>
+
+                                            </h4>
+
+                                            <!--                                            <field name="wallet_balance" readonly="1"/>-->
+                                        </div>
+                                    </div>
+                                </group>
+
+
                             </div>
 
                         </div>
+
                         <notebook colspan="4">
                             <page name="personal_information" string="Personal Information">
                                 <group name="personal_detail">
@@ -218,13 +312,30 @@
                                         <!--                                        <field name="course_id"/>-->
                                     </group>
                                     <group string="Admission Fee">
-                                        <field name="admission_fee" widget="monetary"/>
+                                        <div class="admission-fee-container">
+                                            <field name="admission_fee" widget="monetary"/>
+                                            <span class="checkmark">
+                                                <div class="checkmark_stem"></div>
+                                                <div class="checkmark_kick"></div>
+                                            </span>
+                                        </div>
                                     </group>
                                     <group>
-                                        <field name="wallet_balance" style="background-color:#1739fc; width:40px; color:white;"/>
+                                        <!--                                        <field name="wallet_balance"-->
+                                        <!--                                               style="background-color:#1739fc; width:40px; color:white;"/>-->
                                         <field name="fee_type"/>
                                     </group>
-                                    <group string="Lump Sum Fee Details" name="fee_details" invisible="fee_type != 'lump_sum_fee'">
+                                    <group string="Lump Sum Fee Details" name="fee_details"
+                                           invisible="fee_type != 'lump_sum_fee'">
+
+                                        <field name="batch_fee" widget="monetary"/>
+                                        <field name="discount" widget="monetary"/>
+                                        <field name="total_payable_tax" widget="monetary"/>
+                                        <field name="paid_amount" widget="monetary"/>
+                                        <field name="due_amount" widget="monetary"/>
+                                    </group>
+                                    <group string="Installment Fee Details" name="inst_fee_details"
+                                           invisible="fee_type != 'installment'">
 
                                         <field name="batch_fee" widget="monetary"/>
                                         <field name="discount" widget="monetary"/>
@@ -244,7 +355,7 @@
                                         <field name="currency_id" invisible="1"/>
                                         <field name="date"/>
                                         <field name="payment_mode"/>
-<!--                                        <field name="payment_type"/>-->
+                                        <!--                                        <field name="payment_type"/>-->
                                         <field name="fee_type"/>
                                         <field name="fee_name" string="Payment Type"/>
                                         <field name="branch"/>
@@ -253,10 +364,10 @@
                                         <field name="reference_no"/>
                                         <field name="amount_exc_tax" widget="monetary"/>
                                         <field name="tax_amount" widget="monetary"/>
-<!--                                        <field name="cgst_amount" invisible="1"/>-->
-<!--                                        <field name="sgst_amount" invisible="1"/>-->
+                                        <!--                                        <field name="cgst_amount" invisible="1"/>-->
+                                        <!--                                        <field name="sgst_amount" invisible="1"/>-->
                                         <field name="amount_inc_tax" widget="monetary"/>
-<!--                                        <field name="amount_in_words" invisible="1"/>-->
+                                        <!--                                        <field name="amount_in_words" invisible="1"/>-->
                                         <button name="act_print_invoice" type="object" class="fa fa-download"/>
                                     </tree>
                                 </field>
