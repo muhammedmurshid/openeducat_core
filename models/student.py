@@ -112,12 +112,17 @@ class OpStudent(models.Model):
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course")
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
-    batch_fee = fields.Float(string="Batch Fee")
-    discount = fields.Float(string="Discount")
-    total_payable_tax = fields.Float(string="Total Payable (Inc. Tax)")
-    paid_amount = fields.Float(string="Paid (Inc. Tax)")
+    batch_fee = fields.Float(string="Batch Fee", compute="_compute_batch_fee", store=1)
+    discount = fields.Float(string="Discount", compute="_compute_batch_fee", store=1)
+    total_payable_tax = fields.Float(string="Total Payable (Inc. Tax)", compute="_compute_batch_fee", store=1)
+    paid_amount = fields.Float(string="Paid (Inc. Tax)", compute="_compute_batch_fee", store=1)
     due_amount = fields.Float(string="Due Amount (Inc. Tax)", compute="_compute_due_amount", store=1)
     payment_ids = fields.One2many('fee.payment.history', 'payment_id', string="Payment History")
+    parent_name = fields.Char(string="Parent Name")
+    parent_whatsapp = fields.Char(string="Parent Whatsapp")
+    parent_email = fields.Char(string="Parent Email")
+    father_name = fields.Char(string="Father Name")
+    
 
     _sql_constraints = [(
         'unique_gr_no',
@@ -150,8 +155,8 @@ class OpStudent(models.Model):
         for i in self:
             i.due_amount = i.total_payable_tax - i.paid_amount
 
-    @api.onchange('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
-    def _onchange_batch_fee(self):
+    @api.depends('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
+    def _compute_batch_fee(self):
         print('jjjjj')
         if self.fee_type:
             if self.fee_type == 'lump_sum_fee':
@@ -165,9 +170,6 @@ class OpStudent(models.Model):
                 self.total_payable_tax = self.batch_fee
             else:
                 self.total_payable_tax = self.batch_fee - self.discount
-        # if self.total_payable_tax !=0 :
-        #     print('bbcvbvb')
-        #     self.due_amount = self.total_payable_tax - self.paid_amount
 
     @api.constrains('birth_date')
     def _check_birthdate(self):
@@ -217,19 +219,35 @@ class OpStudent(models.Model):
 
     def act_allocate_to_batch(self):
         if self.batch_id:
-            batch = self.env['op.batch'].sudo().search([('id', '=', self.batch_id.id)])
-            batch.sudo().write({
-                'student_ids': [
-                    (0, 0, {'student_id': self.id, 'student_name': self.id}),  # Add valid data
-                ]
-            })
-            self.state = 'batch_allocated'
-            print(batch, 'batch')
+            if self.fee_type:
+                batch = self.env['op.batch'].sudo().search([('id', '=', self.batch_id.id)])
+                batch.sudo().write({
+                    'student_ids': [
+                        (0, 0, {'student_id': self.id, 'student_name': self.id, 'date_of_admission': self.admission_date,
+                                'mobile': self.mobile}),  # Add valid data
+                    ]
+                })
+                self.state = 'batch_allocated'
+                print(batch, 'batch')
+            else:
+                raise ValidationError("Kindly assign a fee type to this student.")
         else:
             raise ValidationError("Kindly assign a batch to this student.")
 
     def act_drop_student(self):
         self.state = 'stoped'
+
+    def act_change_fee_plan(self):
+        print('k')
+        return {'type': 'ir.actions.act_window',
+                'name': _('Change Plan'),
+                'res_model': 'change.payment.plan',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_student_id': self.id,
+                            'default_fee_type': self.fee_type,
+                            'default_batch_id': self.batch_id.id}, }
 
     admission_fee = fields.Float(string="Admission Fee")
     fee_type = fields.Selection(
@@ -373,8 +391,8 @@ class FeeCollectionWizard(models.TransientModel):
                             raise ValidationError(_(
                                 "Invalid Wallet Amount!"))
                     else:
-                        if self.collection_id.wallet_balance >= self.amount_exc_tax:
-                            self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_exc_tax
+                        if self.collection_id.wallet_balance >= self.amount_inc_tax:
+                            self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_inc_tax
                             student.sudo().write({
                                 'payment_ids': [
                                     (0, 0, {
@@ -395,9 +413,9 @@ class FeeCollectionWizard(models.TransientModel):
                             })
                             if self.other_fee:
                                 if self.other_fee == 'Admission Fee':
-                                    self.collection_id.admission_fee = self.amount_inc_tax
+                                    self.collection_id.admission_fee = self.collection_id.admission_fee + self.amount_inc_tax
                             if self.fee_type == 'Batch Fee':
-                                self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_exc_tax
+                                self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
                         else:
                             raise UserError('Invalid Wallet Amount.')
         else:

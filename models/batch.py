@@ -181,8 +181,11 @@ class OpBatch(models.Model):
             'template': '/openeducat_core/static/xls/op_batch.xls'
         }]
 
+    def action_done_batch(self):
+        self.state = 'completed'
+
     def allocate_students(self):
-        new_students = self.env['op.student'].search([('batch_id', '=', self.id)])
+        new_students = self.env['op.student'].search([('batch_id', '=', self.id),('state', '!=', 'stoped')])
 
         for record in self:
             existing_students = record.student_ids.mapped('student_id')  # Get existing student_ids
@@ -191,7 +194,9 @@ class OpBatch(models.Model):
             for student in new_students:
                 if student.id not in existing_students:  # Check if the student is already in the One2many field
                     print(student.name, 'student')
-                    record.student_ids = [(0, 0, {'student_id': student.id, 'student_name': student.id})]
+                    student.state = 'batch_allocated'
+                    record.student_ids = [(0, 0, {'student_id': student.id, 'student_name': student.id,
+                                                  'mobile': student.mobile, 'date_of_admission': student.admission_date})]
 
 
 class StudentList(models.Model):
@@ -204,6 +209,7 @@ class StudentList(models.Model):
     course_fee = fields.Integer(string="Course Fee")
     total_paid = fields.Integer(string="Total Paid", compute="_compute_total_paid_amount", store=1)
     batch_id = fields.Many2one('op.batch', ondelete="cascade")
+    mobile = fields.Char(string="Mobile")
 
     @api.depends('course_fee', 'admission_fee')
     def _compute_total_paid_amount(self):

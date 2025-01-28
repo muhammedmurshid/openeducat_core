@@ -41,6 +41,8 @@
                         flex: 1; /* Ensure fields take up remaining space */
                         text-align: left; /* Left-align the field values */
                         }
+                        .done_button {
+                        background-color: #31a839;}
 
                     </style>
                     <header>
@@ -48,8 +50,9 @@
                         <button name="act_confirm_batch" type="object" string="Confirm" invisible="state != 'draft'"
                                 class="oe_highlight"/>
                         <button name="allocate_students" type="object" string="Allocate Students"
-                                invisible="state != 'in_progress'"
+                                invisible="state != 'completed'"
                                 class="oe_highlight"/>
+                        <button name="action_done_batch" type="object" string="Done" invisible="state in ['draft','up_coming','completed']" class="done_button"/>
                     </header>
                     <sheet>
                         <field name="active" invisible="1"/>
@@ -135,12 +138,13 @@
                             <page string="Students">
                                 <field name="student_ids">
                                     <tree string="Students" editable="bottom">
-                                        <field name="student_id"/>
+<!--                                        <field name="student_id"/>-->
                                         <field name="student_name"/>
+                                        <field name="mobile"/>
                                         <field name="date_of_admission"/>
-                                        <field name="admission_fee"/>
-                                        <field name="course_fee"/>
-                                        <field name="total_paid"/>
+<!--                                        <field name="admission_fee"/>-->
+<!--                                        <field name="course_fee"/>-->
+<!--                                        <field name="total_paid"/>-->
 
                                     </tree>
                                 </field>

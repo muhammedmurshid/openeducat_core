@@ -165,6 +165,10 @@
                         left: 0;
                         top: 6px;
                         }
+                        .change_plan_button {
+                        background-color: #c99f6f; /* Checkmark color */
+
+                        }
 
 
                     </style>
@@ -321,9 +325,18 @@
                                         </div>
                                     </group>
                                     <group>
+                                        <label for="fee_type"/>
+                                        <div class="o_row">
+                                            <field name="fee_type"/>
+                                            <button name="act_change_fee_plan" string="Change Plan" type="object"
+                                                    icon="fa-reply" class="change_plan_button"
+                                                    groups="openeducat_core.group_op_back_office_accounts"/>
+                                        </div>
                                         <!--                                        <field name="wallet_balance"-->
                                         <!--                                               style="background-color:#1739fc; width:40px; color:white;"/>-->
-                                        <field name="fee_type"/>
+                                        <!--                                        <field name="fee_type" readonly="state != 'confirm'"/>-->
+                                        <!--                                        <button name="act_change_fee_plan" string="Change Plan" type="object"-->
+                                        <!--                                                icon="fa-reply"/>-->
                                     </group>
                                     <group string="Lump Sum Fee Details" name="fee_details"
                                            invisible="fee_type != 'lump_sum_fee'">
@@ -412,6 +425,39 @@
                 </search>
             </field>
         </record>
+
+        <record id="changing_payment_plan_wizard_view" model="ir.ui.view">
+            <field name="name">changing.payment.view.form</field>
+            <field name="model">change.payment.plan</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <form string="Payment Plan">
+                    <group>
+                        <field name="student_id" invisible="1"/>
+                        <field name="fee_type"/>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="batch_id"/>
+                        </group>
+                        <group string="Lump Sum Plan" invisible="fee_type != 'lump_sum_fee'">
+                            <field name="total_amount"/>
+                        </group>
+                        <group string="Installment Plan" invisible="fee_type != 'installment'">
+                            <field name="total_amount"/>
+                        </group>
+                    </group>
+<!--                    <group>-->
+<!--                        <field name="message"/>-->
+<!--                    </group>-->
+                    <footer>
+                        <button name="act_change_fee_type" string="Change" type="object" class="oe_highlight"/>
+                        <button name="cancel" string="Cancel" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
 
         <record model="ir.actions.act_window" id="act_open_op_student_view">
             <field name="name">Students</field>
