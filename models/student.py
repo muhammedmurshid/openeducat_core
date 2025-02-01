@@ -122,7 +122,10 @@ class OpStudent(models.Model):
     parent_whatsapp = fields.Char(string="Parent Whatsapp")
     parent_email = fields.Char(string="Parent Email")
     father_name = fields.Char(string="Father Name")
-    
+    father_number = fields.Char(string="Father Number")
+    mother_name = fields.Char(string="Mother Name")
+    mother_number = fields.Char(string="Mother Number")
+
 
     _sql_constraints = [(
         'unique_gr_no',

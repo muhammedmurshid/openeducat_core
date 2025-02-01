@@ -296,6 +296,15 @@
                                         <field name="partner_id" placeholder="Partner" required="0"/>
                                         <!--                                        <field name="branch_id"/>-->
                                     </group>
+                                    <group string="Family Details">
+                                        <field name="parent_name"/>
+                                        <field name="parent_whatsapp"/>
+                                        <field name="parent_email"/>
+                                        <field name="father_name"/>
+                                        <field name="father_number"/>
+                                        <field name="mother_name"/>
+                                        <field name="mother_number"/>
+                                    </group>
                                     <separator string="miscellaneous" colspan="2"/>
                                     <group colspan="3">
                                         <field name="gr_no"/>

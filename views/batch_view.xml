@@ -83,6 +83,12 @@
                         <notebook>
                             <page string="Fee Types">
                                 <group>
+                                    <group name="admission_fee" string="Admission Fee Details">
+                                        <field name="adm_exc_fee"/>
+                                        <field name="adm_tax" invisible="1"/>
+                                        <field name="adm_inc_fee"/>
+                                        <field name="admission_fee" widget="monetary" required="1" style="background-color:#d3ecf2"/>
+                                    </group>
                                     <group name="lump_sump" string="Lump Sum Fee">
                                         <field name="lump_fee_excluding_tax" placeholder="lump sum fee excluding tax"
                                                widget="monetary"/>

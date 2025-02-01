@@ -30,18 +30,23 @@ class OpBatch(models.Model):
     _description = "OpenEduCat Batch"
 
     code = fields.Char('Code', size=16, required=True)
-    name = fields.Char('Name', size=32, required=True)
+    name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
     end_date = fields.Date('End Date', required=True)
     course_id = fields.Many2one('op.course', 'Course', required=True)
     active = fields.Boolean(default=True)
+
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
     remaining_days = fields.Integer(string="Remaining Days", compute="_compute_remaining_days", store=1)
     # branch_id = fields.Many2one('op.branch', string="Branch")
-    admission_fee = fields.Integer(string="Admission Fee")
+    admission_fee = fields.Float(string="Admission Fee", compute="_compute_adm_total_fee", store=1)
+    adm_tax = fields.Float(string="Tax")
+    adm_exc_fee = fields.Float(string="Admission Fee (Exc Fee)")
+    adm_inc_fee = fields.Float(string="Admission Fee (Inc Fee)")
+
     course_fee = fields.Integer(string="Course Fee")
     student_ids = fields.One2many('logic.student.list', 'batch_id', )
     initiated_id = fields.Many2one('res.users', string="Initiated By")
@@ -50,6 +55,7 @@ class OpBatch(models.Model):
                                 string="Fee Type", default="lump_sum_fee", required=1)
     lump_fee_excluding_tax = fields.Float(string="Excluding Tax")
     tax = fields.Float(string="Tax")
+
     lump_fee_including_tax = fields.Float(string="Including Tax")
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
@@ -70,12 +76,23 @@ class OpBatch(models.Model):
     difference_in_fee_lump = fields.Float(string="Difference in fee", compute='_compute_amount_inc_lump', store=1)
     installment_ids = fields.One2many('payment.installment.type', 'installment_id')
     max_no_of_students = fields.Integer(string="Max no.of Students")
+
     @api.depends('student_ids')
     def _compute_total_students(self):
         for record in self:
             record.total_no_of_students = len(record.student_ids)
 
     total_no_of_students = fields.Integer(string="No. of Students", compute="_compute_total_students", store=True)
+
+    @api.depends('adm_exc_fee','adm_inc_fee')
+    def _compute_adm_total_fee(self):
+        for i in self:
+            if i.adm_exc_fee != 0:
+                i.adm_tax = i.adm_exc_fee * 18 /100
+                i.adm_inc_fee = i.adm_exc_fee + i.adm_tax
+            if i.adm_inc_fee != 0:
+                i.admission_fee = i.adm_inc_fee
+
 
     @api.depends('amount_exc_lump','tax_amount_lump','amount_inc_lump','total_lump_sum_fee')
     def _compute_amount_inc_lump(self):
