@@ -69,17 +69,21 @@
                     <!--                    </style>-->
                     <!--                    <field name="title" optional="show"/>-->
                     <field name="name"/>
-                    <field name="gender" optional="hide"/>
-                    <field name="birth_date" optional="hide"/>
-                    <field name="gr_no" optional="hide"/>
-                    <field name="mobile" optional="hide"/>
-                    <field name="email" optional="hide"/>
-                    <field name="blood_group"/>
+<!--                    <field name="gender" optional="hide"/>-->
+<!--                    <field name="birth_date" optional="hide"/>-->
+<!--                    <field name="gr_no" optional="hide"/>-->
+                    <field name="mobile"/>
+                    <field name="email"/>
+                    <field name="batch_id"/>
+<!--                    <field name="branch"/>-->
+<!--                    <field name="blood_group"/>-->
                     <field name="emergency_contact"/>
-                    <field name="nationality"/>
-                    <field name="lang"/>
+<!--                    <field name="nationality"/>-->
+<!--                    <field name="lang" options="hide"/>-->
                     <button name="act_add_amount_to_wallet" type="object"
                             icon="fa-credit-card"/>
+                    <field name="state" widget="badge" decoration-info="state == 'confirm'"
+                        decoration-success="state == 'batch_allocated'" decoration-danger="state == 'stoped'"/>
                 </tree>
             </field>
         </record>
