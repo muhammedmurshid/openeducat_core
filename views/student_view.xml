@@ -266,7 +266,7 @@
                                 <group name="personal_detail">
                                     <group>
                                         <field name="gender" required="1"/>
-                                        <field name="birth_date" required="1"/>
+                                        <field name="birth_date"/>
                                         <label for="type"/>
                                         <div name="div_type">
                                             <field class="oe_inline" name="type"/>

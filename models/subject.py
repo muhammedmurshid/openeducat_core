@@ -29,11 +29,13 @@ class OpSubject(models.Model):
 
     name = fields.Char('Name', size=128, required=True)
     code = fields.Char('Code', size=256, required=True)
-    grade_weightage = fields.Float('Grade Weightage')
+    # grade_weightage = fields.Float('Grade Weightage')
     type = fields.Selection(
         [('theory', 'Theory'), ('practical', 'Practical'),
          ('both', 'Both'), ('other', 'Other')],
         'Type', default="theory", required=True)
+    standard_hour = fields.Float(string="Standard Hour")
+
     subject_type = fields.Selection(
         [('compulsory', 'Compulsory'), ('elective', 'Elective')],
         'Subject Type', default="compulsory", required=True)
@@ -42,6 +44,7 @@ class OpSubject(models.Model):
         default=lambda self:
         self.env.user.dept_id and self.env.user.dept_id.id or False)
     active = fields.Boolean(default=True)
+    group = fields.Many2one('op.group', string="Group")
 
     _sql_constraints = [
         ('unique_subject_code',

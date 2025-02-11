@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_op_group_tree" model="ir.ui.view">
+            <field name="name">op.group.tree</field>
+            <field name="model">op.group</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <tree string="Batch">
+                    <field name="name"/>
+                    <field name="code"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_op_group_form" model="ir.ui.view">
+            <field name="name">op.group.form</field>
+            <field name="model">op.group</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <form string="Batch">
+
+<!--                    <header>-->
+<!--                        <field name="state" widget="statusbar"/>-->
+<!--                        <button name="act_confirm_batch" type="object" string="Confirm" invisible="state != 'draft'"-->
+<!--                                class="oe_highlight"/>-->
+<!--                        <button name="allocate_students" type="object" string="Allocate Students"-->
+<!--                                invisible="state != 'completed'"-->
+<!--                                class="oe_highlight"/>-->
+<!--                        <button name="action_done_batch" type="object" string="Done"-->
+<!--                                invisible="state in ['draft','up_coming','completed']" class="done_button"/>-->
+<!--                    </header>-->
+                    <sheet>
+<!--                        <field name="active" invisible="1"/>-->
+<!--                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger"-->
+<!--                                invisible="active == True"/>-->
+                        <group>
+                            <group name="main">
+                                <field name="name"/>
+                                <field name="code"/>
+<!--                                <field name="academic_year"/>-->
+<!--                                <field name="department_id"/>-->
+<!--                                <field name="start_date"/>-->
+<!--                                <field name="batch_type"/>-->
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

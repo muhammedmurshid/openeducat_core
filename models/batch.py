@@ -21,7 +21,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-from datetime import date
+from datetime import date,datetime, timedelta
 
 
 class OpBatch(models.Model):
@@ -33,10 +33,9 @@ class OpBatch(models.Model):
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
-    end_date = fields.Date('End Date', required=True)
-    course_id = fields.Many2one('op.course', 'Course', required=True)
+    end_date = fields.Date('End Date', required=True, compute="_compute_end_date", store=1)
     active = fields.Boolean(default=True)
-
+    department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
@@ -151,6 +150,16 @@ class OpBatch(models.Model):
         ('unique_batch_code',
          'unique(code)', 'Code should be unique per batch!')]
 
+    total_duration = fields.Integer(string="Duration")
+
+    @api.depends('start_date', 'total_duration')
+    def _compute_end_date(self):
+        for record in self:
+            if record.start_date and record.total_duration:
+                record.end_date = record.start_date + timedelta(days=record.total_duration)
+            else:
+                record.end_date = False
+
     @api.depends('start_date', 'end_date')
     def _compute_remaining_days(self):
         for record in self:
@@ -176,6 +185,26 @@ class OpBatch(models.Model):
             if start_date > end_date:
                 raise ValidationError(
                     _("End Date cannot be set before Start Date."))
+
+    @api.onchange('department_id')
+    def _onchange_branch(self):
+        if self.department_id:
+            print(f"department_id ID: {self.department_id.id}")
+            domain = [('department_id', '=', self.department_id.id)]
+            print(f"Domain applied: {domain}")
+            return {
+                'domain': {
+                    'course_id': domain,
+                }
+            }
+        else:
+            print("No branch selected")
+            return {
+                'domain': {
+                    'course_id': [],
+                }
+            }
+    course_id = fields.Many2one('op.course', 'Course', required=True, domain="[('department_id', '=', department_id)]")
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):

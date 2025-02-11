@@ -52,7 +52,8 @@
                         <button name="allocate_students" type="object" string="Allocate Students"
                                 invisible="state != 'completed'"
                                 class="oe_highlight"/>
-                        <button name="action_done_batch" type="object" string="Done" invisible="state in ['draft','up_coming','completed']" class="done_button"/>
+                        <button name="action_done_batch" type="object" string="Done"
+                                invisible="state in ['draft','up_coming','completed']" class="done_button"/>
                     </header>
                     <sheet>
                         <field name="active" invisible="1"/>
@@ -62,12 +63,14 @@
                             <group name="main">
                                 <field name="name"/>
                                 <field name="academic_year"/>
+                                <field name="department_id"/>
                                 <field name="start_date"/>
+                                <field name="total_duration" string="Total Duration (Days)"/>
                                 <field name="batch_type"/>
-                                <field name="course_id"/>
+
                                 <!--                                <field name="branch_id"/>-->
                                 <field name="max_no_of_students"/>
-                                <field name="initiated_id" string="Coordinator"/>
+
                             </group>
                             <group>
                                 <field name="code"/>
@@ -77,7 +80,8 @@
                                 <!--                                <field name="batch_type"/>-->
                                 <field name="total_no_of_students" style="background-color:#89d674; width:40px;"/>
                                 <field name="currency_id" invisible="1"/>
-
+                                <field name="course_id" options="{'no_create': True}"/>
+                                <field name="initiated_id" string="Coordinator"/>
                             </group>
                         </group>
                         <notebook>
@@ -87,7 +91,8 @@
                                         <field name="adm_exc_fee"/>
                                         <field name="adm_tax" invisible="1"/>
                                         <field name="adm_inc_fee"/>
-                                        <field name="admission_fee" widget="monetary" required="1" style="background-color:#d3ecf2"/>
+                                        <field name="admission_fee" widget="monetary" required="1"
+                                               style="background-color:#d3ecf2"/>
                                     </group>
                                     <group name="lump_sump" string="Lump Sum Fee">
                                         <field name="lump_fee_excluding_tax" placeholder="lump sum fee excluding tax"
@@ -130,12 +135,13 @@
                                                options="{'currency_field': 'currency_id'}"/>
 
                                         <field name="total_installment_fee" class="oe_subtotal_footer_separator"
-                                               widget='monetary' options="{'currency_field': 'currency_id'}" style="background-color: #d3ecf2;"/>
+                                               widget='monetary' options="{'currency_field': 'currency_id'}"
+                                               style="background-color: #d3ecf2;"/>
 
-<!--                                        <h3>-->
-<!--                                            <field name="total_installment_fee" widget="monetary"-->
-<!--                                                   options="{'currency_field': 'currency_id'}"/>-->
-<!--                                        </h3>-->
+                                        <!--                                        <h3>-->
+                                        <!--                                            <field name="total_installment_fee" widget="monetary"-->
+                                        <!--                                                   options="{'currency_field': 'currency_id'}"/>-->
+                                        <!--                                        </h3>-->
                                     </group>
 
                                 </group>
@@ -144,13 +150,13 @@
                             <page string="Students">
                                 <field name="student_ids">
                                     <tree string="Students" editable="bottom">
-<!--                                        <field name="student_id"/>-->
+                                        <!--                                        <field name="student_id"/>-->
                                         <field name="student_name"/>
                                         <field name="mobile"/>
                                         <field name="date_of_admission"/>
-<!--                                        <field name="admission_fee"/>-->
-<!--                                        <field name="course_fee"/>-->
-<!--                                        <field name="total_paid"/>-->
+                                        <!--                                        <field name="admission_fee"/>-->
+                                        <!--                                        <field name="course_fee"/>-->
+                                        <!--                                        <field name="total_paid"/>-->
 
                                     </tree>
                                 </field>

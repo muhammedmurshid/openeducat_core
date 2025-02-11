@@ -10,8 +10,10 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="type"/>
+                    <field name="standard_hour"/>
                     <field name="subject_type"/>
-                    <field name="grade_weightage"/>
+                    <field name="group"/>
+<!--                    <field name="grade_weightage"/>-->
                     <field name="department_id" groups="openeducat_core.group_multi_department"/>
                 </tree>
             </field>
@@ -37,7 +39,9 @@
                             </group>
                             <group>
                                 <field name="code"/>
-                                <field name="grade_weightage"/>
+                                <field name="standard_hour" required="1"/>
+<!--                                <field name="grade_weightage"/>-->
+                                <field name="group"/>
                             </group>
                         </group>
                     </sheet>
