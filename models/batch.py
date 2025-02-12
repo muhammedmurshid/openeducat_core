@@ -33,7 +33,7 @@ class OpBatch(models.Model):
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
-    end_date = fields.Date('End Date')
+    end_date = fields.Date('End Date', store=1)
     active = fields.Boolean(default=True)
     department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
