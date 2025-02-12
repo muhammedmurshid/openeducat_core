@@ -33,7 +33,7 @@ class OpBatch(models.Model):
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
-    end_date = fields.Date('End Date', required=True, compute="_compute_end_date", store=1)
+    end_date = fields.Date('End Date')
     active = fields.Boolean(default=True)
     department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
@@ -152,8 +152,8 @@ class OpBatch(models.Model):
 
     total_duration = fields.Integer(string="Duration")
 
-    @api.depends('start_date', 'total_duration')
-    def _compute_end_date(self):
+    @api.onchange('start_date', 'total_duration')
+    def _onchange_end_date(self):
         for record in self:
             if record.start_date and record.total_duration:
                 record.end_date = record.start_date + timedelta(days=record.total_duration)
@@ -180,11 +180,12 @@ class OpBatch(models.Model):
     @api.constrains('start_date', 'end_date')
     def check_dates(self):
         for record in self:
-            start_date = fields.Date.from_string(record.start_date)
-            end_date = fields.Date.from_string(record.end_date)
-            if start_date > end_date:
-                raise ValidationError(
-                    _("End Date cannot be set before Start Date."))
+            if record.start_date and record.end_date:
+                start_date = fields.Date.from_string(record.start_date)
+                end_date = fields.Date.from_string(record.end_date)
+                if start_date > end_date:
+                    raise ValidationError(
+                        _("End Date cannot be set before Start Date."))
 
     @api.onchange('department_id')
     def _onchange_branch(self):
