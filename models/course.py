@@ -53,9 +53,9 @@ class OpCourse(models.Model):
     # course_fee = fields.Float(string="Course Fee", related="related_product_id.list_price")
     # product_added = fields.Boolean(string="Product Added")
 
-    _sql_constraints = [
-        ('unique_course_code',
-         'unique(code)', 'Code should be unique per course!')]
+    # _sql_constraints = [
+    #     ('unique_course_code',
+    #      'unique(code)', 'Code should be unique per course!')]
 
     @api.constrains('parent_id')
     def _check_parent_id_recursion(self):
