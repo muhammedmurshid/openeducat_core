@@ -12,6 +12,7 @@
                     <field name="evaluation_type"/>
 <!--                    <field name="parent_id"/>-->
                     <field name="department_id"/>
+                    <field name="create_uid" string="Created By"/>
                     <field name="min_unit_load" optional="hide"/>
                     <field name="max_unit_load" optional="hide"/>
                     <field name="subject_ids" widget="many2many_tags"/>

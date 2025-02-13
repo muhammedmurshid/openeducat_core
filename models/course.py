@@ -21,6 +21,8 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from datetime import date, datetime, time
+
 
 
 class OpCourse(models.Model):
@@ -29,7 +31,7 @@ class OpCourse(models.Model):
     _description = "OpenEduCat Course"
 
     name = fields.Char('Name', required=True)
-    code = fields.Char('Code', required=True)
+    code = fields.Char(string="Code", required=True, copy=False, readonly=False, default="New")
     parent_id = fields.Many2one('op.course', 'Parent Course')
     evaluation_type = fields.Selection(
         [('normal', 'Normal'), ('GPA', 'GPA'),
@@ -69,6 +71,26 @@ class OpCourse(models.Model):
             'label': _('Import Template for Courses'),
             'template': '/openeducat_core/static/xls/op_course.xls'
         }]
+
+    @api.model
+    def create(self, vals):
+        # Get the current year
+        current_year = datetime.today().year
+
+        # Find the latest code in the same year
+        last_course = self.search([('code', 'like', f'{current_year}/%')], order='id desc', limit=1)
+
+        if last_course and last_course.code:
+            # Extract the last number and increment
+            last_number = int(last_course.code.split('/')[1])  # Get "01" as integer
+            new_number = str(last_number + 1).zfill(2)  # Ensure 2-digit format
+        else:
+            new_number = "01"  # Start from 01 if no records exist
+
+        # Generate new course code
+        vals['code'] = f"{current_year}/{new_number}"
+
+        return super(OpCourse, self).create(vals)
 
     def act_create_product(self):
         return {'type': 'ir.actions.act_window',
