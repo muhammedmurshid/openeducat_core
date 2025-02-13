@@ -10,6 +10,7 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="type"/>
+                    <field name="mode_of_study"/>
                     <field name="standard_hour"/>
                     <field name="subject_type"/>
                     <field name="group"/>
@@ -34,6 +35,7 @@
                             <group>
                                 <field name="name"/>
                                 <field name="type"/>
+                                <field name="mode_of_study"/>
                                 <field name="subject_type"/>
                                 <field name="department_id" groups="openeducat_core.group_multi_department"/>
                             </group>

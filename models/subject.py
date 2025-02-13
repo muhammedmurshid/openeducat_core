@@ -45,6 +45,8 @@ class OpSubject(models.Model):
         self.env.user.dept_id and self.env.user.dept_id.id or False)
     active = fields.Boolean(default=True)
     group = fields.Many2one('op.group', string="Group")
+    mode_of_study = fields.Selection([('online', 'Online'), ('offline', 'Offline'), ('nil', 'Nil')],
+                                     string="Mode of Study", default="offline")
 
     _sql_constraints = [
         ('unique_subject_code',
