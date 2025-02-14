@@ -112,7 +112,7 @@ class OpBatch(models.Model):
     inst_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_installment", store=1)
     inst_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_installment", store=1)
     inst_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_installment", store=1,)
-    total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1)
+    total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1, readonly=0)
 
     # @api.onchange('inst_amount_exc','inst_amount_tax')
     # def _onchange_total_installment_amount(self):
