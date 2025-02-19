@@ -29,7 +29,7 @@ class OpBatch(models.Model):
     _inherit = "mail.thread"
     _description = "OpenEduCat Batch"
 
-    code = fields.Char('Code', size=16, required=True)
+    code = fields.Char('Batch ID No.', size=16, required=True)
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
@@ -59,7 +59,7 @@ class OpBatch(models.Model):
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
         default=lambda self: self.env.user.company_id.currency_id.id)
-    academic_year = fields.Selection([('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year")
+    academic_year = fields.Selection([('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year", required=1)
 
     total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1)
     batch_type = fields.Selection(

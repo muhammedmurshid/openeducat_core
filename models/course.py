@@ -31,7 +31,7 @@ class OpCourse(models.Model):
     _description = "OpenEduCat Course"
 
     name = fields.Char('Name', required=True)
-    code = fields.Char(string="Code", required=True, copy=False, readonly=False, default="New")
+    code = fields.Char(string="Course ID No.", required=True, copy=False, readonly=False, default="New")
     parent_id = fields.Many2one('op.course', 'Parent Course')
     evaluation_type = fields.Selection(
         [('normal', 'Normal'), ('GPA', 'GPA'),
