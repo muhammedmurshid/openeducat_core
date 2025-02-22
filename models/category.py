@@ -19,7 +19,8 @@
 #
 ###############################################################################
 
-from odoo import models, fields
+from odoo import models, fields, api, _
+from datetime import date, datetime, time
 
 
 class OpCategory(models.Model):
@@ -27,8 +28,31 @@ class OpCategory(models.Model):
     _description = "OpenEduCat Category"
 
     name = fields.Char('Name', size=256, required=True)
-    code = fields.Char('Code', size=16, required=True)
+    # code = fields.Char('Code', size=16, required=True)
+    type = fields.Selection([("regular", "Regular"), ("crash", "Crash")], string="Type")
+    code = fields.Char(string="Category ID No.", required=True, copy=False, readonly=False, default="New")
+
 
     _sql_constraints = [
         ('unique_category_code',
          'unique(code)', 'Code should be unique per category!')]
+
+    @api.model
+    def create(self, vals):
+        # Get the current year
+        current_year = datetime.today().year
+
+        # Find the latest code in the same year
+        last_course = self.search([('code', 'like', f'{current_year}/%')], order='id desc', limit=1)
+
+        if last_course and last_course.code:
+            # Extract the last number and increment
+            last_number = int(last_course.code.split('/')[1])  # Get "01" as integer
+            new_number = str(last_number + 1).zfill(2)  # Ensure 2-digit format
+        else:
+            new_number = "01"  # Start from 01 if no records exist
+
+        # Generate new course code
+        vals['code'] = f"{current_year}/{new_number}"
+
+        return super(OpCategory, self).create(vals)

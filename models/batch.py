@@ -75,6 +75,8 @@ class OpBatch(models.Model):
     difference_in_fee_lump = fields.Float(string="Difference in fee", compute='_compute_amount_inc_lump', store=1)
     installment_ids = fields.One2many('payment.installment.type', 'installment_id')
     max_no_of_students = fields.Integer(string="Max no.of Students")
+    compo_ids = fields.One2many('payment.group.compo', 'compo_id')
+
 
     @api.depends('student_ids')
     def _compute_total_students(self):
@@ -114,15 +116,45 @@ class OpBatch(models.Model):
     inst_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_installment", store=1,)
     total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1, readonly=0)
 
+    compo_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_compo", store=1)
+    compo_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_compo", store=1)
+    compo_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_compo", store=1, )
+    compo_total_fee = fields.Float(string="Total Fee", compute="_compute_total_compo_fee", store=1,
+                                         readonly=0)
+
     # @api.onchange('inst_amount_exc','inst_amount_tax')
     # def _onchange_total_installment_amount(self):
     #     self.inst_amount_inc = self.inst_amount_exc + self.inst_amount_tax
+
+    @api.depends('compo_ids', 'compo_ids.amount_exc_compo', 'compo_ids.tax_amount_compo',
+                 'compo_ids.amount_inc_compo')
+    def _compute_total_amount_compo(self):
+        for i in self:
+            if i.compo_ids:
+                total = 0
+                total_inc = 0
+                for amt in self.compo_ids:
+                    total += amt.amount_exc_compo
+                    total_inc += amt.amount_inc_compo
+                i.compo_amount_exc = total
+                if total != 0:
+                    i.compo_amount_tax = total * 18 / 100
+                i.compo_amount_inc = total_inc
+            else:
+                i.compo_amount_exc = 0
+                i.compo_amount_inc = 0
 
     @api.depends('inst_amount_exc','inst_amount_tax','inst_amount_inc')
     def _compute_total_installment_fee(self):
         for rec in self:
             if rec.inst_amount_inc != 0:
                 rec.total_installment_fee = rec.inst_amount_inc
+
+    @api.depends('compo_amount_exc', 'compo_amount_tax', 'compo_amount_inc')
+    def _compute_total_compo_fee(self):
+        for rec in self:
+            if rec.compo_amount_inc != 0:
+                rec.compo_total_fee = rec.compo_amount_inc
 
     @api.depends('installment_ids','installment_ids.amount_exc_installment','installment_ids.tax_amount','installment_ids.amount_inc_installment')
     def _compute_total_amount_installment(self):
@@ -283,3 +315,20 @@ class InstallmentPayment(models.Model):
                 i.tax_amount = i.amount_exc_installment * 18 / 100
             if i.tax_amount != 0:
                 i.amount_inc_installment = i.amount_exc_installment + i.tax_amount
+
+class GroupCompoPayment(models.Model):
+    _name = 'payment.group.compo'
+
+    term = fields.Char(string="Term")
+    amount_exc_compo = fields.Float(string="Amount(Excluding Tax)")
+    tax_amount_compo = fields.Float(string="Tax Amount")
+    amount_inc_compo = fields.Float(string="Amount(Including Tax)", compute='_compute_amount_inc_compo', store=1)
+    compo_id = fields.Many2one('op.batch', string="Compo")
+
+    @api.depends('amount_exc_compo', 'tax_amount_compo')
+    def _compute_amount_inc_compo(self):
+        for i in self:
+            if i.amount_exc_compo != 0:
+                i.tax_amount_compo = i.amount_exc_compo * 18 / 100
+            if i.tax_amount_compo != 0:
+                i.amount_inc_compo = i.amount_exc_compo + i.tax_amount_compo

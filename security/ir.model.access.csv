@@ -39,3 +39,4 @@ access_fee_payment_history,access_fee_payment_history,model_fee_payment_history,
 access_fee_changing_plan,access_fee_changing_plan,model_change_payment_plan,,1,1,1,1
 
 access_for_op_group_internal,access_for_op_group_internal,model_op_group,,1,1,1,1
+access_for_group_compo,access_for_group_compo,model_payment_group_compo,,1,1,1,1

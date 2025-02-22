@@ -104,16 +104,43 @@
                                         <field name="total_lump_sum_fee" widget="monetary"
                                                style="background-color:#d3ecf2"/>
                                     </group>
-                                    <group string="Lump sum Payment Plan - Offer Price" name="plan_lump_offer">
-                                        <field name="term"/>
-                                        <field name="amount_exc_lump" widget="monetary"/>
-                                        <field name="tax_amount_lump" widget="monetary"/>
-                                        <field name="amount_inc_lump" widget="monetary"/>
-                                        <field name="payment_date_lump"/>
-                                        <field name="difference_in_fee_lump" style="background-color:#e33b5a"
-                                               widget="monetary"/>
+                                    <!--                                    <group string="Lump sum Payment Plan - Offer Price" name="plan_lump_offer">-->
+                                    <!--                                        <field name="term"/>-->
+                                    <!--                                        <field name="amount_exc_lump" widget="monetary"/>-->
+                                    <!--                                        <field name="tax_amount_lump" widget="monetary"/>-->
+                                    <!--                                        <field name="amount_inc_lump" widget="monetary"/>-->
+                                    <!--                                        <field name="payment_date_lump"/>-->
+                                    <!--                                        <field name="difference_in_fee_lump" style="background-color:#e33b5a"-->
+                                    <!--                                               widget="monetary"/>-->
+                                    <!--                                    </group>-->
+
+                                </group>
+                                <group name="group_compo" string="Group Compo Fee Details">
+
+                                    <field name="compo_ids" string="">
+                                        <tree editable="bottom">
+
+                                            <field name="term" string="Paper"/>
+                                            <field name="amount_exc_compo"/>
+                                            <field name="tax_amount_compo"/>
+                                            <field name="amount_inc_compo"/>
+
+                                        </tree>
+                                    </field>
+                                    <group class="oe_subtotal_footer" colspan="2" name="total_compo">
+                                        <field name="compo_amount_exc" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                        <field name="compo_amount_tax" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                        <field name="compo_amount_inc" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+
+                                        <field name="compo_total_fee" class="oe_subtotal_footer_separator"
+                                               widget='monetary' options="{'currency_field': 'currency_id'}"
+                                               style="background-color: #d3ecf2;"/>
                                     </group>
                                 </group>
+
                                 <group name="installment" string="Installment">
                                     <field name="installment_ids">
                                         <tree editable="bottom">

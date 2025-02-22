@@ -9,6 +9,7 @@
                 <tree string="Category">
                     <field name="name"/>
                     <field name="code"/>
+<!--                    <field name="type"/>-->
                 </tree>
             </field>
         </record>
@@ -22,8 +23,14 @@
                     <header/>
                     <sheet>
                         <group>
+                            <group>
                                 <field name="name"/>
+<!--                                <field name="type"/>-->
+                            </group>
+                            <group>
                                 <field name="code"/>
+
+                            </group>
                         </group>
                     </sheet>
                 </form>
@@ -37,6 +44,7 @@
             <field name="arch" type="xml">
                 <search string="Category">
                     <field name="name"/>
+<!--                    <field name="type"/>-->
                     <field name="code"/>
                     <newline/>
                     <group expand="0" string="Group By...">
@@ -44,6 +52,42 @@
                         <filter name="group_by_code" string="Code" domain="[]" context="{'group_by':'code'}"/>
                     </group>
                 </search>
+            </field>
+        </record>
+        <record id="kanban_view_category" model="ir.ui.view">
+            <field name="name">Category Kanban</field>
+            <field name="model">op.category</field>
+            <field name="arch" type="xml">
+                <kanban class="o_res_partner_kanban">
+                    <field name="id"/>
+                    <field name="type"/> <!-- Make sure type is included here -->
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click o_res_partner_kanban">
+                                <a type="open">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <!-- Left side -->
+                                        <div class="oe_kanban_details" style="flex: 1;">
+                                            <h4>
+                                                <field name="name"/>
+                                            </h4>
+<!--                                            <ul>-->
+<!--                                                <li t-if="record.code.raw_value">-->
+
+<!--                                                    <field name="type"/>-->
+<!--                                                </li>-->
+<!--                                            </ul>-->
+                                        </div>
+                                        <!-- Right side with type field -->
+                                        <div style="margin-left: 15px; padding: 10px; text-align: right;">
+                                            <field name="code"/>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
             </field>
         </record>
 

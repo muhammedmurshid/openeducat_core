@@ -20,6 +20,7 @@
 ###############################################################################
 
 from odoo import models, fields, api
+from datetime import date, datetime, time
 
 
 class OpDepartment(models.Model):
@@ -27,11 +28,34 @@ class OpDepartment(models.Model):
     _description = "OpenEduCat Department"
 
     name = fields.Char('Name', required=True)
-    code = fields.Char('Code', required=True)
+    # code = fields.Char('Code', required=True)
+    code = fields.Char(string="Department ID No.", required=True, copy=False, readonly=False, default="New")
+    category_id = fields.Many2one('op.category', string="Category")
+    type = fields.Selection([("regular", "Regular"), ("crash", "Crash")], string="Type")
     parent_id = fields.Many2one('op.department', 'Parent Department')
 
-    @api.model_create_multi
+    # @api.model_create_multi
+    # def create(self, vals):
+    #     department = super(OpDepartment, self).create(vals)
+    #     self.env.user.write({'department_ids': [(4, department.id)]})
+    #     return department
+
+    @api.model
     def create(self, vals):
-        department = super(OpDepartment, self).create(vals)
-        self.env.user.write({'department_ids': [(4, department.id)]})
-        return department
+        # Get the current year
+        current_year = datetime.today().year
+
+        # Find the latest code in the same year
+        last_course = self.search([('code', 'like', f'{current_year}/%')], order='id desc', limit=1)
+
+        if last_course and last_course.code:
+            # Extract the last number and increment
+            last_number = int(last_course.code.split('/')[1])  # Get "01" as integer
+            new_number = str(last_number + 1).zfill(2)  # Ensure 2-digit format
+        else:
+            new_number = "01"  # Start from 01 if no records exist
+
+        # Generate new course code
+        vals['code'] = f"{current_year}/{new_number}"
+
+        return super(OpDepartment, self).create(vals)
