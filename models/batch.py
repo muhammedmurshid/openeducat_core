@@ -29,7 +29,7 @@ class OpBatch(models.Model):
     _inherit = "mail.thread"
     _description = "OpenEduCat Batch"
 
-    code = fields.Char('Batch ID No.', size=16, required=True)
+    code = fields.Char('Batch ID No.', required=True, copy=False, readonly=False, default="New")
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
@@ -76,6 +76,33 @@ class OpBatch(models.Model):
     installment_ids = fields.One2many('payment.installment.type', 'installment_id')
     max_no_of_students = fields.Integer(string="Max no.of Students")
     compo_ids = fields.One2many('payment.group.compo', 'compo_id')
+
+    @api.model
+    def create(self, vals):
+        # Get the current year
+        current_year = datetime.today().year
+
+        # Find the latest code in the same year
+        last_batch = self.search([('code', 'like', f'{current_year}/%')], order='id desc', limit=1)
+
+        if last_batch and last_batch.code:
+            # Extract the last number and increment
+            last_number = int(last_batch.code.split('/')[1])  # Get "01" as integer
+            new_number = str(last_number + 1).zfill(2)  # Ensure 2-digit format
+        else:
+            new_number = "01"  # Start from 01 if no records exist
+
+        # Generate new course code
+        vals['code'] = f"{current_year}/{new_number}"
+
+        return super(OpBatch, self).create(vals)
+
+    active_badge = fields.Char(string="Status", compute="_compute_active_badge")
+
+    @api.depends('active')
+    def _compute_active_badge(self):
+        for record in self:
+            record.active_badge = "Active" if record.active else ""
 
 
     @api.depends('student_ids')
