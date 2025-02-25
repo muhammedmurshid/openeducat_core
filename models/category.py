@@ -26,6 +26,7 @@ from datetime import date, datetime, time
 class OpCategory(models.Model):
     _name = "op.category"
     _description = "OpenEduCat Category"
+    _order = 'id desc'
 
     name = fields.Char('Name', size=256, required=True)
     # code = fields.Char('Code', size=16, required=True)

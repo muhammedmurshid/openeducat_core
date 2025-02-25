@@ -28,6 +28,7 @@ class OpBatch(models.Model):
     _name = "op.batch"
     _inherit = "mail.thread"
     _description = "OpenEduCat Batch"
+    _order = 'id desc'
 
     code = fields.Char('Batch ID No.', required=True, copy=False, readonly=False, default="New")
     name = fields.Char('Name', required=True)
@@ -39,7 +40,7 @@ class OpBatch(models.Model):
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
-    remaining_days = fields.Integer(string="Remaining Days", compute="_compute_remaining_days", store=1)
+    remaining_days = fields.Integer(string="Days to End Batch", compute="_compute_remaining_days", store=1)
     # branch_id = fields.Many2one('op.branch', string="Branch")
     admission_fee = fields.Float(string="Admission Fee", compute="_compute_adm_total_fee", store=1)
     adm_tax = fields.Float(string="Tax")
@@ -63,7 +64,7 @@ class OpBatch(models.Model):
 
     total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1)
     batch_type = fields.Selection(
-        [('present_batch', 'Present Batch'), ('future_batch', 'Future Batch'), ],
+        [('present_batch', 'Running Batch'), ('future_batch', 'Future Batch'), ('ended_batch', 'Ended Batch') ],
         string="Type", default='present_batch', tracking=True)
 
     #lump sum plan offer
@@ -219,22 +220,35 @@ class OpBatch(models.Model):
             else:
                 record.end_date = False
 
+    days_to_batch_start = fields.Integer(string="Days to Strat Batch", compute="_compute_remaining_days", store=1)
+
     @api.depends('start_date', 'end_date')
     def _compute_remaining_days(self):
         for record in self:
             if record.start_date:
                 today = date.today()
                 if record.start_date <= today:
+                    print('current batch')
+                    elapsed_days = (today - record.start_date).days
+                    record.days_to_batch_start = elapsed_days
+
+                else:
+                    record.days_to_batch_start = 0
                     if record.end_date:
+                        print('end')
                         end_date = record.end_date
+                        print(end_date, 'date end', today)
                         # Compute remaining days
-                        remaining_days = (end_date - today).days
+                        remaining_days = (record.end_date - today).days
+                        print(remaining_days, 'days')
+                        # record.remaining_days = remaining_days
                         # Ensure no negative remaining days
                         record.remaining_days = max(remaining_days, 0)
                     else:
                         record.remaining_days = 0
-                else:
-                    record.remaining_days = 0
+                    print('future batch')
+
+                    # record.remaining_days = 0
 
     @api.constrains('start_date', 'end_date')
     def check_dates(self):

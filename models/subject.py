@@ -26,6 +26,7 @@ class OpSubject(models.Model):
     _name = "op.subject"
     _inherit = "mail.thread"
     _description = "Subject"
+    _order = 'id desc'
 
     name = fields.Char('Name', size=128, required=True)
     code = fields.Char('Code', size=256, required=True)

@@ -26,6 +26,7 @@ from datetime import date, datetime, time
 class OpDepartment(models.Model):
     _name = "op.department"
     _description = "OpenEduCat Department"
+    _order = 'id desc'
 
     name = fields.Char('Name', required=True)
     # code = fields.Char('Code', required=True)

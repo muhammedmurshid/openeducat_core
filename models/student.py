@@ -18,10 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from os import unlink
 
 from odoo import models, fields, api, _, tools
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
+
+from odoo.tools.populate import compute
+
 
 class OpStudentCourse(models.Model):
     _name = "op.student.course"
@@ -71,6 +75,7 @@ class OpStudent(models.Model):
     _description = "Student"
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _inherits = {"res.partner": "partner_id"}
+    _order = 'id desc'
 
     # first_name = fields.Char('First Name', translate=True)
     # middle_name = fields.Char('Middle Name', translate=True)
@@ -110,7 +115,7 @@ class OpStudent(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch", required=1)
     fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", required=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
-    course_id = fields.Many2one('op.course', string="Course")
+    course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
     batch_fee = fields.Float(string="Batch Fee", compute="_compute_batch_fee", store=1)
     discount = fields.Float(string="Discount", compute="_compute_batch_fee", store=1)
@@ -126,12 +131,76 @@ class OpStudent(models.Model):
     mother_name = fields.Char(string="Mother Name")
     mother_number = fields.Char(string="Mother Number")
 
+    @api.model
+    def create(self, vals):
+        print(vals, 'values')
+        student = super(OpStudent, self).create(vals)
+        if student.batch_id:
+            student.batch_id.total_no_of_students += 1
+            student.batch_id.sudo().write({
+                'student_ids': [(0, 0, {
+                    'student_id': student.id,
+                    'student_name': student.id,
+                    'mobile': student.mobile,
+                    'date_of_admission': student.admission_date
+                })]
+            })
+        return student
+
+    def write(self, vals):
+        for student in self:
+            old_batch = student.batch_id
+            res = super(OpStudent, self).write(vals)
+            new_batch = self.batch_id if 'batch_id' in vals else old_batch
+            if old_batch and old_batch != new_batch:
+                old_batch.total_no_of_students -= 1
+                for i in old_batch.student_ids:
+                    if i.student_name.id == self.id:
+                        print('remove')
+                        student_to_remove = old_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
+                        print(student_to_remove, 'remove name')
+                        old_batch.sudo().write({'student_ids': [(3, student_to_remove.id)]})
+                    # unlink(old_batch.student_ids.student_name.id)
+            if new_batch and new_batch != old_batch:
+                print('hiiiiii')
+                new_batch.total_no_of_students += 1
+                # Check if the student already exists in `student_ids` before adding
+                existing_student = new_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
+                if not existing_student:
+                    new_batch.sudo().write({
+                        'student_ids': [(0, 0, {
+                            'student_id': student.id,
+                            'student_name': student.id,
+                            'mobile': student.mobile,
+                            'date_of_admission': student.admission_date,
+                        })]
+                    })
+
+
+            return res
+
+    def unlink(self):
+        for student in self:
+            if student.batch_id:
+                student.batch_id.total_no_of_students -= 1
+                student_to_remove = student.batch_id.student_ids.filtered(lambda s: s.student_name.id == student.id)
+                print(student_to_remove, 'remove name')
+                student.batch_id.sudo().write({'student_ids': [(3, student_to_remove.id)]})
+        return super(OpStudent, self).unlink()
+
 
     _sql_constraints = [(
         'unique_gr_no',
         'unique(gr_no)',
         'Registration Number must be unique per student!'
     )]
+
+    @api.depends('batch_id')
+    def _compute_course_id(self):
+        for rec in self:
+            if rec.batch_id:
+                rec.course_id = rec.batch_id.course_id.id
+                rec.branch_id = rec.batch_id.branch.id
 
     # @api.onchange('batch_id', 'discount', 'total_payable_tax', 'paid_amount', )
     # def _onchange_batch_fee(self):
@@ -302,6 +371,7 @@ class FeeCollectionWizard(models.TransientModel):
     tax_id = fields.Many2one('account.tax', string="Tax")
     non_tax = fields.Boolean(string="Non Taxable")
     batch_id = fields.Many2one('op.batch', string="Batch")
+
 
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")

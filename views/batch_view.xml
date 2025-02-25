@@ -10,14 +10,19 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="course_id"/>
+                    <field name="total_no_of_students"
+                                       string="Students Enrolled Now"/>
                     <field name="start_date"/>
                     <field name="end_date"/>
+<!--                    <field name="days_to_batch_start"/>-->
+<!--                    <field name="remaining_days"/>-->
+
                     <field name="create_uid" string="Created By"/>
                     <field name="batch_type" widget="badge" decoration-warning="batch_type == 'present_batch'" decoration-info="batch_type == 'future_batch'"/>
                     <!--                    <field name="active" widget="badge"/>-->
                     <field name="active_badge" widget="badge" string="Status"
                            decoration-success="active_badge == 'Active'"/>
-                    <field name="state" widget="badge" string="Batch Status"/>
+                    <field name="state" widget="badge" string="Batch Approvals"/>
                 </tree>
             </field>
         </record>
@@ -80,6 +85,7 @@
                             <group>
                                 <field name="code"/>
                                 <field name="end_date"/>
+                                <field name="days_to_batch_start"/>
                                 <field name="remaining_days"/>
                                 <field name="class_type"/>
                                 <!--                                <field name="batch_type"/>-->

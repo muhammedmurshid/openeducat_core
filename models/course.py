@@ -29,6 +29,7 @@ class OpCourse(models.Model):
     _name = "op.course"
     _inherit = "mail.thread"
     _description = "OpenEduCat Course"
+    _order = 'id desc'
 
     name = fields.Char('Name', required=True)
     code = fields.Char(string="Course ID No.", required=True, copy=False, readonly=False, default="New")
