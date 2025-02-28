@@ -36,6 +36,26 @@
             <field name="sequence">20</field>
         </record>
 
+        <record id="group_op_admission_team" model="res.groups">
+            <field name="name">Admission Team</field>
+            <field name="category_id" ref="module_category_openeducat"/>
+
+        </record>
+
+        <record id="group_op_accounts" model="res.groups">
+            <field name="name">Accounts</field>
+            <field name="category_id" ref="module_category_openeducat"/>
+        </record>
+
+        <record id="group_op_admin" model="res.groups">
+            <field name="name">Super Admin</field>
+            <field name="category_id" ref="module_category_openeducat"/>
+        </record>
+
+        <record id="group_op_admission_manager" model="res.groups">
+            <field name="name">Admission Manager</field>
+            <field name="category_id" ref="module_category_openeducat"/>
+        </record>
 
         <record id="group_op_faculty" model="res.groups">
             <field name="name">Faculty</field>
