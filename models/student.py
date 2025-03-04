@@ -466,6 +466,11 @@ class FeeCollectionWizard(models.TransientModel):
                 'fee_collected_by': self.env.user.id,
                 'lead_id': self.collection_id.lead_id.id
             })
+            last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
+            if self.other_fee == 'Admission Fee':
+                self.collection_id.lead_id.admission_amount = self.collection_id.lead_id.admission_amount + self.amount_inc_tax
+                self.collection_id.lead_id.receipt_no = last_report.invoice_number
+                self.collection_id.lead_id.date_of_receipt = date.today()
         if self.fee_type == 'Batch Fee':
             report = self.env['invoice.reports'].sudo().create({
                 'name': self.collection_id.name,
