@@ -23,6 +23,8 @@ from os import unlink
 from odoo import models, fields, api, _, tools
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
+from datetime import date,datetime
+import re
 
 from odoo.tools.populate import compute
 
@@ -103,7 +105,7 @@ class OpStudent(models.Model):
     partner_id = fields.Many2one('res.partner', 'Partner',
                                  required=True, ondelete="cascade")
     user_id = fields.Many2one('res.users', 'User', ondelete="cascade")
-    gr_no = fields.Char("Registration Number", size=20)
+    gr_no = fields.Char("Registration Number", copy=False, readonly=False)
     category_id = fields.Many2one('op.category', 'Category')
     course_detail_ids = fields.One2many('op.student.course', 'student_id',
                                         'Course Details',
@@ -133,8 +135,25 @@ class OpStudent(models.Model):
 
     @api.model
     def create(self, vals):
-        print(vals, 'values')
+        if vals.get('gr_no') in [False, "New"]:  # Generate only if not set manually
+            current_year = datetime.today().year
+            prefix = f"L{current_year}/"
+
+            # Find the last record with the same year pattern
+            last_batch = self.search([('gr_no', 'like', prefix + '%')], order='gr_no desc', limit=1)
+            if last_batch and last_batch.gr_no:
+                match = re.search(r"/(\d+)$", last_batch.gr_no)
+                last_number = int(match.group(1)) if match else 0
+            else:
+                last_number = 0
+
+            new_number = last_number + 1
+            vals['gr_no'] = f"{prefix}{new_number}"
+            print(vals['gr_no'], 'Generated GR No')  # Debugging output
+
+            # Now create the student record with updated vals
         student = super(OpStudent, self).create(vals)
+
         if student.batch_id:
             student.batch_id.total_no_of_students += 1
             student.batch_id.sudo().write({
@@ -145,6 +164,7 @@ class OpStudent(models.Model):
                     'date_of_admission': student.admission_date
                 })]
             })
+
         return student
 
     def write(self, vals):
@@ -189,11 +209,11 @@ class OpStudent(models.Model):
         return super(OpStudent, self).unlink()
 
 
-    _sql_constraints = [(
-        'unique_gr_no',
-        'unique(gr_no)',
-        'Registration Number must be unique per student!'
-    )]
+    # _sql_constraints = [(
+    #     'unique_gr_no',
+    #     'unique(gr_no)',
+    #     'Registration Number must be unique per student!'
+    # )]
 
     @api.depends('batch_id')
     def _compute_course_id(self):
@@ -267,6 +287,13 @@ class OpStudent(models.Model):
         print('hi', fee.amount)
         self.wallet_balance = fee.amount
         fee.state = 'done'
+        # report = self.env['invoice.reports'].sudo().create({
+        #     'lead_id': self.lead_id.id,
+        #     'name': fee.name,
+        #     'branch': self.branch_id.name,
+        #     'date': date.today(),
+        #
+        # })
 
     @api.model
     def get_import_templates(self):
@@ -418,6 +445,39 @@ class FeeCollectionWizard(models.TransientModel):
 
     def act_submit(self):
         print('hhi')
+        if self.fee_type == 'Ancillary Fee(Non Taxable)':
+            report = self.env['invoice.reports'].sudo().create({
+                'name': self.collection_id.name,
+                'branch': self.collection_id.branch_id.name,
+                'date': date.today(),
+                'fee_type': self.fee_name,
+                'reference_no': self.cheque_no,
+                'amount_inc_tax': self.amount_inc_tax,
+                'fee_collected_by': self.env.user.id,
+                'lead_id': self.collection_id.lead_id.id
+            })
+        if self.fee_type == 'Other Fee':
+            report = self.env['invoice.reports'].sudo().create({
+                'name': self.collection_id.name,
+                'branch': self.collection_id.branch_id.name,
+                'date': date.today(),
+                'fee_type': self.other_fee,
+                'reference_no': self.cheque_no,
+                'amount_inc_tax': self.amount_inc_tax,
+                'fee_collected_by': self.env.user.id,
+                'lead_id': self.collection_id.lead_id.id
+            })
+        if self.fee_type == 'Batch Fee':
+            report = self.env['invoice.reports'].sudo().create({
+                'name': self.collection_id.name,
+                'branch': self.collection_id.branch_id.name,
+                'date': date.today(),
+                'fee_type': 'Batch Fee',
+                'reference_no': self.cheque_no,
+                'amount_inc_tax': self.amount_inc_tax,
+                'fee_collected_by': self.env.user.id,
+                'lead_id': self.collection_id.lead_id.id
+            })
         if self.payment_mode == 'Wallet':
             if self.collection_id.wallet_balance == 0:
                 raise UserError("Student Wallet Amount is 0")
@@ -449,17 +509,23 @@ class FeeCollectionWizard(models.TransientModel):
                                     }),
                                 ]
                             })
+
                             if self.other_fee:
                                 if self.other_fee == 'Admission Fee':
                                     self.collection_id.admission_fee = self.amount_inc_tax
+
                             if self.fee_type == 'Batch Fee':
                                 if self.collection_id.paid_amount == 0:
                                     self.collection_id.paid_amount = self.amount_inc_tax
+
                                 else:
                                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+
                             if self.fee_type == 'Other Fee':
                                 if self.fee_name != 'Admission Fee':
                                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+                                    print('ooo')
+
 
                         else:
                             raise ValidationError(_(
@@ -467,6 +533,7 @@ class FeeCollectionWizard(models.TransientModel):
                     else:
                         if self.collection_id.wallet_balance >= self.amount_inc_tax:
                             self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_inc_tax
+
                             student.sudo().write({
                                 'payment_ids': [
                                     (0, 0, {
@@ -485,11 +552,14 @@ class FeeCollectionWizard(models.TransientModel):
                                     }),
                                 ]
                             })
+
                             if self.other_fee:
                                 if self.other_fee == 'Admission Fee':
                                     self.collection_id.admission_fee = self.collection_id.admission_fee + self.amount_inc_tax
+
                             if self.fee_type == 'Batch Fee':
                                 self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+
                         else:
                             raise UserError('Invalid Wallet Amount.')
         else:
@@ -515,11 +585,15 @@ class FeeCollectionWizard(models.TransientModel):
                         }),
                     ]
                 })
+
                 if self.other_fee:
                     if self.other_fee == 'Admission Fee':
                         self.collection_id.admission_fee = self.amount_inc_tax
+
+
                 if self.fee_type == 'Batch Fee':
                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_exc_tax
+
 
     @api.onchange('payment_mode')
     def _onchange_payment_mode(self):
