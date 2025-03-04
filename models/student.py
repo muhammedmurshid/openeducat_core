@@ -105,7 +105,7 @@ class OpStudent(models.Model):
     partner_id = fields.Many2one('res.partner', 'Partner',
                                  required=True, ondelete="cascade")
     user_id = fields.Many2one('res.users', 'User', ondelete="cascade")
-    gr_no = fields.Char("Registration Number", copy=False, readonly=False)
+    gr_no = fields.Char("Registration Number", copy=False, readonly=0)
     category_id = fields.Many2one('op.category', 'Category')
     course_detail_ids = fields.One2many('op.student.course', 'student_id',
                                         'Course Details',
@@ -135,23 +135,22 @@ class OpStudent(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('gr_no') in [False, "New"]:  # Generate only if not set manually
-            current_year = datetime.today().year
-            prefix = f"L{current_year}/"
+        # if vals.get('gr_no') in [False, "New"]:
+            # current_year = datetime.today().year
+            # prefix = f"L{current_year}/"
+            #
+            # # Find the last record with the same year pattern
+            # last_batch = self.search([('gr_no', 'like', prefix + '%')], order='gr_no desc', limit=1)
+            # if last_batch and last_batch.gr_no:
+            #     match = re.search(r"/(\d+)$", last_batch.gr_no)
+            #     last_number = int(match.group(1)) if match else 0
+            # else:
+            #     last_number = 0
+            #
+            # new_number = last_number + 1
+            # vals['gr_no'] = f"{prefix}{new_number}"
+            # print(vals['gr_no'], 'Generated GR No')  # Debugging output
 
-            # Find the last record with the same year pattern
-            last_batch = self.search([('gr_no', 'like', prefix + '%')], order='gr_no desc', limit=1)
-            if last_batch and last_batch.gr_no:
-                match = re.search(r"/(\d+)$", last_batch.gr_no)
-                last_number = int(match.group(1)) if match else 0
-            else:
-                last_number = 0
-
-            new_number = last_number + 1
-            vals['gr_no'] = f"{prefix}{new_number}"
-            print(vals['gr_no'], 'Generated GR No')  # Debugging output
-
-            # Now create the student record with updated vals
         student = super(OpStudent, self).create(vals)
 
         if student.batch_id:

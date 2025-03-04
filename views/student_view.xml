@@ -227,6 +227,7 @@
                                 </div>
                                 <group>
                                     <group>
+                                        <field name="gr_no" string="Reg No"/>
                                         <field name="mobile" placeholder="Mobile Number"/>
                                         <field name="email" required="1" placeholder="Email Address"/>
                                     </group>
