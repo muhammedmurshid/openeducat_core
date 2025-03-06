@@ -332,10 +332,11 @@
                                     <group string="Admission Fee">
                                         <div class="admission-fee-container">
                                             <field name="admission_fee" widget="monetary"/>
-                                            <span class="checkmark">
-                                                <div class="checkmark_stem"></div>
-                                                <div class="checkmark_kick"></div>
-                                            </span>
+<!--                                            <span class="checkmark">-->
+<!--                                                <div class="checkmark_stem"></div>-->
+<!--                                                <div class="checkmark_kick"></div>-->
+<!--                                            </span>-->
+                                            <field name="admission_fee_paid" readonly="1"/>
                                         </div>
                                     </group>
                                     <group>

@@ -20,7 +20,7 @@
 ###############################################################################
 from os import unlink
 
-from odoo import models, fields, api, _, tools
+from odoo import models, fields, api, _, tools, exceptions
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 from datetime import date,datetime
@@ -132,6 +132,7 @@ class OpStudent(models.Model):
     father_number = fields.Char(string="Father Number")
     mother_name = fields.Char(string="Mother Name")
     mother_number = fields.Char(string="Mother Number")
+    admission_fee_paid = fields.Boolean(string="Paid Admission Fee")
 
     @api.model
     def create(self, vals):
@@ -402,8 +403,12 @@ class FeeCollectionWizard(models.TransientModel):
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")
 
-    @api.onchange('fee_type')
+    @api.onchange('fee_type','other_fee')
     def _onchange_fee_types(self):
+        if self.fee_type == 'Other Fee':
+            if self.other_fee == 'Admission Fee':
+                self.amount_inc_tax = self.collection_id.batch_id.adm_inc_fee
+                self.amount_exc_tax = self.collection_id.batch_id.adm_exc_fee
         if self.fee_type == 'Ancillary Fee(Non Taxable)':
             self.other_fee = False
             self.batch_id = False
@@ -414,6 +419,7 @@ class FeeCollectionWizard(models.TransientModel):
             self.batch_id = self.collection_id.batch_id.id
             self.fee_name = False
             self.other_fee = False
+
 
 
     @api.onchange('tax_id','amount_exc_tax','tax','non_tax')
@@ -442,162 +448,274 @@ class FeeCollectionWizard(models.TransientModel):
         #     self.tax = self.amount_inc_tax - self.amount_exc_tax
 
 
+    # def act_submit(self):
+    #     print('hhi')
+    #
+    #     if self.fee_type == 'Other Fee' and self.other_fee == 'Admission Fee':
+    #         if self.collection_id.admission_fee_paid == False:
+    #             if self.amount_inc_tax != self.collection_id.batch_id.adm_inc_fee:
+    #                 raise exceptions.ValidationError("Invalid amount. Please enter the correct admission fee.")
+    #             else:
+    #                 report = self.env['invoice.reports'].sudo().create({
+    #                     'name': self.collection_id.name,
+    #                     'branch': self.collection_id.branch_id.name,
+    #                     'date': date.today(),
+    #                     'fee_type': self.fee_name,
+    #                     'reference_no': self.cheque_no,
+    #                     'amount_inc_tax': self.amount_inc_tax,
+    #                     'fee_collected_by': self.env.user.id,
+    #                     'lead_id': self.collection_id.lead_id.id
+    #                 })
+    #                 last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
+    #                 self.collection_id.lead_id.admission_amount = self.collection_id.lead_id.admission_amount + self.amount_inc_tax
+    #                 self.collection_id.lead_id.receipt_no = last_report.invoice_number
+    #                 self.collection_id.lead_id.date_of_receipt = date.today()
+    #                 self.collection_id.admission_fee_paid = True
+    #                 self.collection_id.admission_fee = self.amount_inc_tax
+    #         else:
+    #             raise exceptions.UserError("Admission fee has already been paid!")
+    #     else:
+    #
+    #         if self.fee_type == 'Ancillary Fee(Non Taxable)':
+    #             report = self.env['invoice.reports'].sudo().create({
+    #                 'name': self.collection_id.name,
+    #                 'branch': self.collection_id.branch_id.name,
+    #                 'date': date.today(),
+    #                 'fee_type': self.fee_name,
+    #                 'reference_no': self.cheque_no,
+    #                 'amount_inc_tax': self.amount_inc_tax,
+    #                 'fee_collected_by': self.env.user.id,
+    #                 'lead_id': self.collection_id.lead_id.id
+    #             })
+    #         if self.fee_type == 'Other Fee':
+    #
+    #             report = self.env['invoice.reports'].sudo().create({
+    #                 'name': self.collection_id.name,
+    #                 'branch': self.collection_id.branch_id.name,
+    #                 'date': date.today(),
+    #                 'fee_type': self.other_fee,
+    #                 'reference_no': self.cheque_no,
+    #                 'amount_inc_tax': self.amount_inc_tax,
+    #                 'fee_collected_by': self.env.user.id,
+    #                 'lead_id': self.collection_id.lead_id.id
+    #             })
+    #
+    #         if self.fee_type == 'Batch Fee':
+    #             report = self.env['invoice.reports'].sudo().create({
+    #                 'name': self.collection_id.name,
+    #                 'branch': self.collection_id.branch_id.name,
+    #                 'date': date.today(),
+    #                 'fee_type': 'Batch Fee',
+    #                 'reference_no': self.cheque_no,
+    #                 'amount_inc_tax': self.amount_inc_tax,
+    #                 'fee_collected_by': self.env.user.id,
+    #                 'lead_id': self.collection_id.lead_id.id
+    #             })
+    #         if self.payment_mode == 'Wallet':
+    #             if self.collection_id.wallet_balance == 0:
+    #                 raise UserError("Student Wallet Amount is 0")
+    #             else:
+    #                 student = self.env['op.student'].browse(self.collection_id.id)
+    #
+    #                 # Ensure the record exists and the `collection_id` is correctly set
+    #                 if student:
+    #
+    #                     if self.amount_inc_tax != 0:
+    #                         if self.collection_id.wallet_balance >= self.amount_inc_tax:
+    #
+    #                             self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_inc_tax
+    #                             student.sudo().write({
+    #                                 'payment_ids': [
+    #                                     (0, 0, {
+    #                                         'sl_no': 1,
+    #                                         'date': fields.Datetime.now(),
+    #                                         'payment_mode': self.payment_mode,
+    #                                         'fee_type': self.fee_type,  # Adjust field name if necessary
+    #                                         'amount_exc_tax': self.amount_exc_tax,
+    #                                         'amount_inc_tax': self.amount_inc_tax,
+    #                                         'cheque_no': self.cheque_no,
+    #                                         'branch': self.branch,
+    #                                         'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+    #                                         'tax_amount': self.tax,
+    #                                         'cgst_amount': self.cgst_amount,
+    #                                         'sgst_amount': self.sgst_amount
+    #                                     }),
+    #                                 ]
+    #                             })
+    #
+    #                             if self.other_fee:
+    #                                 if self.other_fee == 'Admission Fee':
+    #                                     self.collection_id.admission_fee = self.amount_inc_tax
+    #
+    #                             if self.fee_type == 'Batch Fee':
+    #                                 if self.collection_id.paid_amount == 0:
+    #                                     self.collection_id.paid_amount = self.amount_inc_tax
+    #
+    #                                 else:
+    #                                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+    #
+    #                             if self.fee_type == 'Other Fee':
+    #                                 if self.fee_name != 'Admission Fee':
+    #                                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+    #                                     print('ooo')
+    #
+    #
+    #                         else:
+    #                             raise ValidationError(_(
+    #                                 "Invalid Wallet Amount!"))
+    #                     else:
+    #                         if self.collection_id.wallet_balance >= self.amount_inc_tax:
+    #                             self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_inc_tax
+    #
+    #                             student.sudo().write({
+    #                                 'payment_ids': [
+    #                                     (0, 0, {
+    #                                         'sl_no': 1,
+    #                                         'date': fields.Datetime.now(),
+    #                                         'payment_mode': self.payment_mode,
+    #                                         'fee_type': self.fee_type,  # Adjust field name if necessary
+    #                                         'amount_exc_tax': self.amount_exc_tax,
+    #                                         'amount_inc_tax': self.amount_inc_tax,
+    #                                         'cheque_no': self.cheque_no,
+    #                                         'branch': self.branch,
+    #                                         'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+    #                                         'tax_amount': self.tax,
+    #                                         'cgst_amount': self.cgst_amount,
+    #                                         'sgst_amount': self.sgst_amount
+    #                                     }),
+    #                                 ]
+    #                             })
+    #
+    #                             if self.other_fee:
+    #                                 if self.other_fee == 'Admission Fee':
+    #                                     self.collection_id.admission_fee = self.collection_id.admission_fee + self.amount_inc_tax
+    #
+    #                             if self.fee_type == 'Batch Fee':
+    #                                 self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
+    #
+    #                         else:
+    #                             raise UserError('Invalid Wallet Amount.')
+    #         else:
+    #             student = self.env['op.student'].browse(self.collection_id.id)
+    #
+    #             # Ensure the record exists and the `collection_id` is correctly set
+    #             if student:
+    #                 student.sudo().write({
+    #                     'payment_ids': [
+    #                         (0, 0, {
+    #                             'sl_no': 1,
+    #                             'date': fields.Datetime.now(),
+    #                             'payment_mode': self.payment_mode,
+    #                             'fee_type': self.fee_type,  # Adjust field name if necessary
+    #                             'amount_exc_tax': self.amount_exc_tax,
+    #                             'amount_inc_tax': self.amount_inc_tax,
+    #                             'cheque_no': self.cheque_no,
+    #                             'branch': self.branch,
+    #                             'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+    #                             'tax_amount': self.tax,
+    #                             'cgst_amount': self.cgst_amount,
+    #                             'sgst_amount': self.sgst_amount,
+    #                         }),
+    #                     ]
+    #                 })
+    #
+    #                 if self.other_fee:
+    #                     if self.other_fee == 'Admission Fee':
+    #                         self.collection_id.admission_fee = self.amount_inc_tax
+    #
+    #
+    #                 if self.fee_type == 'Batch Fee':
+    #                     self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_exc_tax
+
     def act_submit(self):
         print('hhi')
-        if self.fee_type == 'Ancillary Fee(Non Taxable)':
-            report = self.env['invoice.reports'].sudo().create({
-                'name': self.collection_id.name,
-                'branch': self.collection_id.branch_id.name,
-                'date': date.today(),
-                'fee_type': self.fee_name,
-                'reference_no': self.cheque_no,
-                'amount_inc_tax': self.amount_inc_tax,
-                'fee_collected_by': self.env.user.id,
-                'lead_id': self.collection_id.lead_id.id
-            })
-        if self.fee_type == 'Other Fee':
-            report = self.env['invoice.reports'].sudo().create({
-                'name': self.collection_id.name,
-                'branch': self.collection_id.branch_id.name,
-                'date': date.today(),
-                'fee_type': self.other_fee,
-                'reference_no': self.cheque_no,
-                'amount_inc_tax': self.amount_inc_tax,
-                'fee_collected_by': self.env.user.id,
-                'lead_id': self.collection_id.lead_id.id
-            })
-            last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
-            if self.other_fee == 'Admission Fee':
-                self.collection_id.lead_id.admission_amount = self.collection_id.lead_id.admission_amount + self.amount_inc_tax
-                self.collection_id.lead_id.receipt_no = last_report.invoice_number
-                self.collection_id.lead_id.date_of_receipt = date.today()
-        if self.fee_type == 'Batch Fee':
-            report = self.env['invoice.reports'].sudo().create({
-                'name': self.collection_id.name,
-                'branch': self.collection_id.branch_id.name,
-                'date': date.today(),
-                'fee_type': 'Batch Fee',
-                'reference_no': self.cheque_no,
-                'amount_inc_tax': self.amount_inc_tax,
-                'fee_collected_by': self.env.user.id,
-                'lead_id': self.collection_id.lead_id.id
-            })
+
+        if self.fee_type == 'Other Fee' and self.other_fee == 'Admission Fee':
+            if self.collection_id.admission_fee_paid:
+                raise UserError("Admission fee has already been paid!")
+
+            if self.amount_inc_tax != self.collection_id.batch_id.adm_inc_fee:
+                raise ValidationError("Invalid amount. Please enter the correct admission fee.")
+
+            report = self.create_invoice_report(self.other_fee)
+            self.update_admission_fee(report)
+
+        else:
+            report = self.create_invoice_report(self.fee_name if self.fee_type != 'Other Fee' else self.other_fee)
+            self.handle_wallet_payment()
+            self.update_student_payment()
+
+        # 🛑 Ensure payment record is created only once
+        self.create_payment_record()
+
+    def create_invoice_report(self, fee_type):
+        return self.env['invoice.reports'].sudo().create({
+            'name': self.collection_id.name,
+            'branch': self.collection_id.branch_id.name,
+            'date': date.today(),
+            'fee_type': fee_type,
+            'reference_no': self.cheque_no,
+            'amount_inc_tax': self.amount_inc_tax,
+            'fee_collected_by': self.env.user.id,
+            'lead_id': self.collection_id.lead_id.id,
+            'payment_mode': self.payment_mode,
+            'cheque_no': self.cheque_no,
+            'batch': self.collection_id.batch_id.name,
+            'student_id': self.collection_id.id,
+            'cgst_amount': self.cgst_amount,
+            'sgst_amount': self.sgst_amount,
+        })
+
+    def update_admission_fee(self, report):
+        last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
+        lead = self.collection_id.lead_id
+
+        lead.admission_amount += self.amount_inc_tax
+        lead.receipt_no = last_report.invoice_number
+        lead.date_of_receipt = date.today()
+        lead.report = last_report.id
+        self.collection_id.admission_fee_paid = True
+        self.collection_id.admission_fee = self.amount_inc_tax
+
+    def handle_wallet_payment(self):
         if self.payment_mode == 'Wallet':
             if self.collection_id.wallet_balance == 0:
                 raise UserError("Student Wallet Amount is 0")
-            else:
-                student = self.env['op.student'].browse(self.collection_id.id)
 
-                # Ensure the record exists and the `collection_id` is correctly set
-                if student:
+            if self.collection_id.wallet_balance < self.amount_inc_tax:
+                raise ValidationError("Invalid Wallet Amount!")
 
-                    if self.amount_inc_tax != 0:
-                        if self.collection_id.wallet_balance >= self.amount_inc_tax:
+            self.collection_id.wallet_balance -= self.amount_inc_tax
+            if self.other_fee == 'Admission Fee':
+                self.collection_id.admission_fee += self.amount_inc_tax
 
-                            self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_inc_tax
-                            student.sudo().write({
-                                'payment_ids': [
-                                    (0, 0, {
-                                        'sl_no': 1,
-                                        'date': fields.Datetime.now(),
-                                        'payment_mode': self.payment_mode,
-                                        'fee_type': self.fee_type,  # Adjust field name if necessary
-                                        'amount_exc_tax': self.amount_exc_tax,
-                                        'amount_inc_tax': self.amount_inc_tax,
-                                        'cheque_no': self.cheque_no,
-                                        'branch': self.branch,
-                                        'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
-                                        'tax_amount': self.tax,
-                                        'cgst_amount': self.cgst_amount,
-                                        'sgst_amount': self.sgst_amount
-                                    }),
-                                ]
-                            })
+    def update_student_payment(self):
+        if self.other_fee == 'Admission Fee':
+            self.collection_id.admission_fee = self.amount_inc_tax
+        if self.fee_type == 'Batch Fee':
+            self.collection_id.paid_amount += self.amount_inc_tax
 
-                            if self.other_fee:
-                                if self.other_fee == 'Admission Fee':
-                                    self.collection_id.admission_fee = self.amount_inc_tax
+    def create_payment_record(self):
+        student = self.env['op.student'].browse(self.collection_id.id)
+        if student:
+            student.sudo().write({'payment_ids': [(0, 0, self.get_payment_data())]})
 
-                            if self.fee_type == 'Batch Fee':
-                                if self.collection_id.paid_amount == 0:
-                                    self.collection_id.paid_amount = self.amount_inc_tax
-
-                                else:
-                                    self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
-
-                            if self.fee_type == 'Other Fee':
-                                if self.fee_name != 'Admission Fee':
-                                    self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
-                                    print('ooo')
-
-
-                        else:
-                            raise ValidationError(_(
-                                "Invalid Wallet Amount!"))
-                    else:
-                        if self.collection_id.wallet_balance >= self.amount_inc_tax:
-                            self.collection_id.wallet_balance = self.collection_id.wallet_balance - self.amount_inc_tax
-
-                            student.sudo().write({
-                                'payment_ids': [
-                                    (0, 0, {
-                                        'sl_no': 1,
-                                        'date': fields.Datetime.now(),
-                                        'payment_mode': self.payment_mode,
-                                        'fee_type': self.fee_type,  # Adjust field name if necessary
-                                        'amount_exc_tax': self.amount_exc_tax,
-                                        'amount_inc_tax': self.amount_inc_tax,
-                                        'cheque_no': self.cheque_no,
-                                        'branch': self.branch,
-                                        'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
-                                        'tax_amount': self.tax,
-                                        'cgst_amount': self.cgst_amount,
-                                        'sgst_amount': self.sgst_amount
-                                    }),
-                                ]
-                            })
-
-                            if self.other_fee:
-                                if self.other_fee == 'Admission Fee':
-                                    self.collection_id.admission_fee = self.collection_id.admission_fee + self.amount_inc_tax
-
-                            if self.fee_type == 'Batch Fee':
-                                self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_inc_tax
-
-                        else:
-                            raise UserError('Invalid Wallet Amount.')
-        else:
-            student = self.env['op.student'].browse(self.collection_id.id)
-
-            # Ensure the record exists and the `collection_id` is correctly set
-            if student:
-                student.sudo().write({
-                    'payment_ids': [
-                        (0, 0, {
-                            'sl_no': 1,
-                            'date': fields.Datetime.now(),
-                            'payment_mode': self.payment_mode,
-                            'fee_type': self.fee_type,  # Adjust field name if necessary
-                            'amount_exc_tax': self.amount_exc_tax,
-                            'amount_inc_tax': self.amount_inc_tax,
-                            'cheque_no': self.cheque_no,
-                            'branch': self.branch,
-                            'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
-                            'tax_amount': self.tax,
-                            'cgst_amount': self.cgst_amount,
-                            'sgst_amount': self.sgst_amount,
-                        }),
-                    ]
-                })
-
-                if self.other_fee:
-                    if self.other_fee == 'Admission Fee':
-                        self.collection_id.admission_fee = self.amount_inc_tax
-
-
-                if self.fee_type == 'Batch Fee':
-                    self.collection_id.paid_amount = self.collection_id.paid_amount + self.amount_exc_tax
-
+    def get_payment_data(self):
+        last_sl_no = len(self.collection_id.payment_ids) + 1
+        return {
+            'sl_no': last_sl_no,
+            'date': fields.Datetime.now(),
+            'payment_mode': self.payment_mode,
+            'fee_type': self.fee_type,
+            'amount_exc_tax': self.amount_exc_tax,
+            'amount_inc_tax': self.amount_inc_tax,
+            'cheque_no': self.cheque_no,
+            'branch': self.branch,
+            'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+            'tax_amount': self.tax,
+            'cgst_amount': self.cgst_amount,
+            'sgst_amount': self.sgst_amount
+        }
 
     @api.onchange('payment_mode')
     def _onchange_payment_mode(self):
@@ -630,6 +748,7 @@ class PaymentHistoryFeeCollection(models.Model):
         string="Currency",
         default=lambda self: self.env.company.currency_id.id
     )
+
     branch = fields.Selection(
         [('Corporate Office & City Campus', 'Corporate Office & City Campus'), ('Cochin Campus', 'Cochin Campus'),
          ('Calicut Campus', 'Calicut Campus'), ('Trivandrum Campus', 'Trivandrum Campus'),
@@ -657,7 +776,9 @@ class PaymentHistoryFeeCollection(models.Model):
     @api.depends('amount_inc_tax')
     def _compute_amount_in_words(self):
         print('workssssss')
-        self.amount_in_words = num2words(self.amount_inc_tax, lang='en').upper()
+        for i in self:
+
+            i.amount_in_words = num2words(i.amount_inc_tax, lang='en').upper()
         # print(f"Amount in words: {amount_in_words}")
 
     def act_print_invoice(self):
