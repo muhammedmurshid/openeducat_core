@@ -287,6 +287,7 @@ class OpStudent(models.Model):
         print('hi', fee.amount)
         self.wallet_balance = fee.amount
         fee.state = 'done'
+        fee.student_id = self.id
         # report = self.env['invoice.reports'].sudo().create({
         #     'lead_id': self.lead_id.id,
         #     'name': fee.name,
