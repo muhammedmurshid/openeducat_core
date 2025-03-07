@@ -96,17 +96,28 @@
                 <form string="Student">
                     <style>
                         .btn-collect_fee {
-                        background-color: #12cc4d;
-                        width: 120px;
-                        height: 40px;
+                        background-color: #5f874a;
+                        width: 100px;
+                        height: 35px;
                         font-size: 14px;
+                        color: white;
                         text-align: center;
                         }
-                        .btn-drop {
-                        background-color: red;
-                        width: 120px;
-                        height: 40px;
+                        .btn-create-student {
+                        background-color: #3d4d87;
+                        width: 150px;
+                        height: 35px;
                         font-size: 14px;
+                        color: white;
+                        text-align: center;
+                        border-radius: 2px;
+                        }
+                        .btn-drop {
+                        background-color: #bf3d4c;
+                        width: 80px;
+                        height: 35px;
+                        font-size: 14px;
+                        color: white;
                         text-align: center;
                         }
                         .card {
@@ -179,7 +190,7 @@
                     <header>
                         <button type="object" name="create_student_user"
                                 string="Create Student User"
-                                class="oe_highlight"
+                                class="btn-create-student"
                                 groups="openeducat_core.group_op_back_office_admin"
                                 invisible="user_id != False"/>
                         <button name="act_allocate_to_batch" type="object" string="Allocate to Batch"
