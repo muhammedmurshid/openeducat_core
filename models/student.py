@@ -318,6 +318,24 @@ class OpStudent(models.Model):
                 })
                 record.user_id = user_id
 
+    def get_current_wallet_collection(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Wallet Collections',
+            'view_mode': 'tree,form',
+            'res_model': 'fee.quick.pay',
+            'domain': [('student_id', '=', self.id)],
+            'context': "{'create': False}"
+        }
+
+    def compute_count(self):
+        for record in self:
+            record.wallet_smart_count = self.env['fee.quick.pay'].sudo().search_count(
+                [('student_id', '=', self.id)])
+
+    wallet_smart_count = fields.Integer(compute='compute_count')
+
     def act_allocate_to_batch(self):
         if self.batch_id:
             if self.fee_type:

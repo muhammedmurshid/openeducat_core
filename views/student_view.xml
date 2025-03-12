@@ -70,21 +70,21 @@
                     <!--                    <field name="title" optional="show"/>-->
                     <field name="gr_no" string="Reg No"/>
                     <field name="name"/>
-<!--                    <field name="gender" optional="hide"/>-->
-<!--                    <field name="birth_date" optional="hide"/>-->
-<!--                    <field name="gr_no" optional="hide"/>-->
+                    <!--                    <field name="gender" optional="hide"/>-->
+                    <!--                    <field name="birth_date" optional="hide"/>-->
+                    <!--                    <field name="gr_no" optional="hide"/>-->
                     <field name="mobile"/>
                     <field name="email"/>
                     <field name="batch_id"/>
-<!--                    <field name="branch"/>-->
-<!--                    <field name="blood_group"/>-->
+                    <!--                    <field name="branch"/>-->
+                    <!--                    <field name="blood_group"/>-->
                     <field name="emergency_contact"/>
-<!--                    <field name="nationality"/>-->
-<!--                    <field name="lang" options="hide"/>-->
+                    <!--                    <field name="nationality"/>-->
+                    <!--                    <field name="lang" options="hide"/>-->
                     <button name="act_add_amount_to_wallet" type="object"
                             icon="fa-credit-card" string="Add to Wallet"/>
                     <field name="state" widget="badge" decoration-info="state == 'confirm'"
-                        decoration-success="state == 'batch_allocated'" decoration-danger="state == 'stoped'"/>
+                           decoration-success="state == 'batch_allocated'" decoration-danger="state == 'stoped'"/>
                 </tree>
             </field>
         </record>
@@ -203,6 +203,11 @@
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
+                        <div name="button_box" position="inside">
+                            <button class="oe_stat_button" type="object" name="get_current_wallet_collection" icon="fa-book">
+                                <field string="Wallet Collections" name="wallet_smart_count" widget="statinfo"/>
+                            </button>
+                        </div>
                         <div name="button_box" class="oe_button_box">
                         </div>
                         <field name="active" invisible="1"/>
@@ -344,10 +349,10 @@
                                     <group string="Admission Fee">
                                         <div class="admission-fee-container">
                                             <field name="admission_fee" widget="monetary"/>
-<!--                                            <span class="checkmark">-->
-<!--                                                <div class="checkmark_stem"></div>-->
-<!--                                                <div class="checkmark_kick"></div>-->
-<!--                                            </span>-->
+                                            <!--                                            <span class="checkmark">-->
+                                            <!--                                                <div class="checkmark_stem"></div>-->
+                                            <!--                                                <div class="checkmark_kick"></div>-->
+                                            <!--                                            </span>-->
                                             <field name="admission_fee_paid" readonly="1"/>
                                         </div>
                                     </group>
@@ -409,8 +414,10 @@
                                         <field name="amount_inc_tax" widget="monetary"/>
                                         <field name="total_amount" widget="monetary"/>
                                         <!--                                        <field name="amount_in_words" invisible="1"/>-->
-                                        <button name="act_print_invoice" type="object" class="fa fa-download" invisible="tax_amount == 0"/>
-                                        <button name="act_print_invoice_non_taxable" type="object" class="fa fa-download" invisible="tax_amount != 0"/>
+                                        <button name="act_print_invoice" type="object" class="fa fa-download"
+                                                invisible="tax_amount == 0"/>
+                                        <button name="act_print_invoice_non_taxable" type="object"
+                                                class="fa fa-download" invisible="tax_amount != 0"/>
                                     </tree>
                                 </field>
                                 <!--                                        <field name="admission_fee"/>-->
@@ -476,9 +483,9 @@
                             <field name="total_amount"/>
                         </group>
                     </group>
-<!--                    <group>-->
-<!--                        <field name="message"/>-->
-<!--                    </group>-->
+                    <!--                    <group>-->
+                    <!--                        <field name="message"/>-->
+                    <!--                    </group>-->
                     <footer>
                         <button name="act_change_fee_type" string="Change" type="object" class="oe_highlight"/>
                         <button name="cancel" string="Cancel" special="cancel"/>
