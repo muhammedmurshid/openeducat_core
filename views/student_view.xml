@@ -68,6 +68,7 @@
                     <!--                        }-->
                     <!--                    </style>-->
                     <!--                    <field name="title" optional="show"/>-->
+                    <field name="gr_no" string="Reg No"/>
                     <field name="name"/>
 <!--                    <field name="gender" optional="hide"/>-->
 <!--                    <field name="birth_date" optional="hide"/>-->
@@ -81,7 +82,7 @@
 <!--                    <field name="nationality"/>-->
 <!--                    <field name="lang" options="hide"/>-->
                     <button name="act_add_amount_to_wallet" type="object"
-                            icon="fa-credit-card"/>
+                            icon="fa-credit-card" string="Add to Wallet"/>
                     <field name="state" widget="badge" decoration-info="state == 'confirm'"
                         decoration-success="state == 'batch_allocated'" decoration-danger="state == 'stoped'"/>
                 </tree>
@@ -391,7 +392,7 @@
                                     <tree editable="bottom">
 
                                         <field name="sl_no"/>
-                                        <field name="currency_id" invisible="1"/>
+                                        <field name="currency_id" optional="hide"/>
                                         <field name="date"/>
                                         <field name="payment_mode"/>
                                         <!--                                        <field name="payment_type"/>-->
@@ -406,8 +407,10 @@
                                         <!--                                        <field name="cgst_amount" invisible="1"/>-->
                                         <!--                                        <field name="sgst_amount" invisible="1"/>-->
                                         <field name="amount_inc_tax" widget="monetary"/>
+                                        <field name="total_amount" widget="monetary"/>
                                         <!--                                        <field name="amount_in_words" invisible="1"/>-->
-                                        <button name="act_print_invoice" type="object" class="fa fa-download"/>
+                                        <button name="act_print_invoice" type="object" class="fa fa-download" invisible="tax_amount == 0"/>
+                                        <button name="act_print_invoice_non_taxable" type="object" class="fa fa-download" invisible="tax_amount != 0"/>
                                     </tree>
                                 </field>
                                 <!--                                        <field name="admission_fee"/>-->

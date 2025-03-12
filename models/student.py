@@ -399,20 +399,23 @@ class FeeCollectionWizard(models.TransientModel):
     tax_id = fields.Many2one('account.tax', string="Tax")
     non_tax = fields.Boolean(string="Non Taxable")
     batch_id = fields.Many2one('op.batch', string="Batch")
-
-
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")
+    total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=1)
 
-    @api.onchange('fee_type','other_fee')
+    @api.onchange('fee_type','other_fee','amount_exc_tax')
     def _onchange_fee_types(self):
         if self.fee_type == 'Other Fee':
             if self.other_fee == 'Admission Fee':
                 self.amount_inc_tax = self.collection_id.batch_id.adm_inc_fee
                 self.amount_exc_tax = self.collection_id.batch_id.adm_exc_fee
         if self.fee_type == 'Ancillary Fee(Non Taxable)':
+            print('anc')
+            # self.amount_inc_tax = self.amount_exc_tax
+            self.tax = 0
             self.other_fee = False
             self.batch_id = False
+
         elif self.fee_type == 'Other Fee':
             self.fee_name = False
             self.batch_id = False
@@ -422,32 +425,91 @@ class FeeCollectionWizard(models.TransientModel):
             self.other_fee = False
 
 
-
-    @api.onchange('tax_id','amount_exc_tax','tax','non_tax')
+    @api.onchange('amount_inc_tax')
     def _onchange_amount_tax(self):
-        if self.non_tax == 0:
-            if self.amount_exc_tax:
-                tax_amount = 0
-                tax = self.env['account.tax'].sudo().search([('name', '=', 'GST')])
-                self.tax_id = tax.id
-                print(tax.amount, 'amt')
+        tax = self.env['account.tax'].sudo().search([('name', '=', 'GST')], limit=1)
+        if self.fee_type != 'Ancillary Fee(Non Taxable)':
+            if self.amount_inc_tax > 0 and tax:
+                tax_amount = 0  # Default tax percentage
                 if tax.amount_type == 'group':
-                    for i in tax.children_tax_ids:
-                        tax_amount += i.amount
-                        print(i.name, 'jjjjj')
-                self.tax = self.amount_exc_tax * tax_amount / 100
+                    tax_amount += sum(t.amount for t in tax.children_tax_ids)
+                print(tax_amount, 'tax')
+                self.tax_id = tax.id
+                print('tax_amt', self.amount_inc_tax * tax_amount / 100)
+                current_tax = self.amount_inc_tax * tax_amount / 100
+                # Reverse calculation to get amount_exc_tax
+                self.amount_exc_tax = self.amount_inc_tax - current_tax
+                self.tax = self.amount_inc_tax * tax_amount / 100
 
-        elif self.non_tax == 1:
-            self.tax_id = False
-            self.tax = 0
+                # Split tax into CGST and SGST
+                self.cgst_amount = self.tax / 2
+                self.sgst_amount = self.tax / 2
+            else:
+                # self.amount_exc_tax = 0
+                self.tax = 0
+                self.cgst_amount = 0
+                self.sgst_amount = 0
+        # else:
+        #     self.amount_inc_tax = self.amount_exc_tax
 
-        self.amount_inc_tax = self.amount_exc_tax + self.tax
-        if self.tax != 0:
-            self.cgst_amount = self.tax / 2
-            self.sgst_amount = self.tax / 2
+
+    @api.depends('amount_exc_tax','amount_inc_tax','fee_type')
+    def _compute_total_amount(self):
+        for rec in self:
+            if rec.fee_type == 'Ancillary Fee(Non Taxable)':
+                rec.total_amount = rec.amount_exc_tax
+            else:
+                rec.total_amount = rec.amount_inc_tax
+    # @api.onchange('tax_id','amount_exc_tax','tax','non_tax','fee_type')
+    # def _onchange_amount_tax(self):
+    #     if self.fee_type != 'Ancillary Fee(Non Taxable)':
+    #         if self.amount_exc_tax:
+    #             tax_amount = 0
+    #             tax = self.env['account.tax'].sudo().search([('name', '=', 'GST')])
+    #             self.tax_id = tax.id
+    #             print(tax.amount, 'amt')
+    #             if tax.amount_type == 'group':
+    #                 for i in tax.children_tax_ids:
+    #                     tax_amount += i.amount
+    #                     print(i.name, 'jjjjj')
+    #             self.tax = self.amount_exc_tax * tax_amount / 100
+    #
+    #     elif self.non_tax == 1:
+    #         self.tax_id = False
+    #         self.tax = 0
+    #
+    #     self.amount_inc_tax = self.amount_exc_tax + self.tax
+    #     if self.tax != 0:
+    #         self.cgst_amount = self.tax / 2
+    #         self.sgst_amount = self.tax / 2
         # if self.amount_inc_tax and self.amount_exc_tax:
         #     self.tax = self.amount_inc_tax - self.amount_exc_tax
-
+    # @api.onchange('amount_exc_tax', 'tax_id', 'non_tax', 'fee_type')
+    # def _onchange_amount_tax(self):
+    #     """Calculate tax and update amount_inc_tax"""
+    #     if self.fee_type != 'Ancillary Fee(Non Taxable)':
+    #         if self.amount_exc_tax:
+    #             tax_amount = 18  # Default tax percentage
+    #
+    #             tax = self.env['account.tax'].sudo().search([('name', '=', 'GST')], limit=1)
+    #             if tax:
+    #                 self.tax_id = tax.id
+    #                 if tax.amount_type == 'group':
+    #                     tax_amount = sum(t.amount for t in tax.children_tax_ids)
+    #
+    #             self.tax = self.amount_exc_tax * tax_amount / 100
+    #
+    #     elif self.non_tax:
+    #         self.tax_id = False
+    #         self.tax = 0
+    #
+    #     self.amount_inc_tax = self.amount_exc_tax + self.tax
+    #     if self.tax > 0:
+    #         self.cgst_amount = self.tax / 2
+    #         self.sgst_amount = self.tax / 2
+    #     else:
+    #         self.cgst_amount = 0
+    #         self.sgst_amount = 0
 
     # def act_submit(self):
     #     print('hhi')
@@ -650,11 +712,18 @@ class FeeCollectionWizard(models.TransientModel):
         self.create_payment_record()
 
     def create_invoice_report(self, fee_type):
+        print(self.amount_exc_tax, 'rrrr')
+        if self.amount_exc_tax != 0:
+            exc_tax = self.amount_exc_tax
+            print(exc_tax, 'ancill')
+        else:
+            exc_tax = self.amount_inc_tax - self.tax
+            print(exc_tax, 'withot')
         return self.env['invoice.reports'].sudo().create({
             'name': self.collection_id.name,
             'branch': self.collection_id.branch_id.name,
             'date': date.today(),
-            'fee_type': fee_type,
+            'fee_type': self.fee_type,
             'reference_no': self.cheque_no,
             'amount_inc_tax': self.amount_inc_tax,
             'fee_collected_by': self.env.user.id,
@@ -665,7 +734,12 @@ class FeeCollectionWizard(models.TransientModel):
             'student_id': self.collection_id.id,
             'cgst_amount': self.cgst_amount,
             'sgst_amount': self.sgst_amount,
+            'fee_name': self.other_fee or self.fee_name or 'Batch Fee',
+            'tax': self.tax,
+            'amount_exc_tax': exc_tax
+
         })
+
 
     def update_admission_fee(self, report):
         last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
@@ -683,10 +757,10 @@ class FeeCollectionWizard(models.TransientModel):
             if self.collection_id.wallet_balance == 0:
                 raise UserError("Student Wallet Amount is 0")
 
-            if self.collection_id.wallet_balance < self.amount_inc_tax:
+            if self.collection_id.wallet_balance < self.total_amount:
                 raise ValidationError("Invalid Wallet Amount!")
 
-            self.collection_id.wallet_balance -= self.amount_inc_tax
+            self.collection_id.wallet_balance -= self.total_amount
             if self.other_fee == 'Admission Fee':
                 self.collection_id.admission_fee += self.amount_inc_tax
 
@@ -703,19 +777,26 @@ class FeeCollectionWizard(models.TransientModel):
 
     def get_payment_data(self):
         last_sl_no = len(self.collection_id.payment_ids) + 1
+        last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
+        if self.amount_exc_tax != 0:
+            exc_tax = self.amount_exc_tax
+        else:
+            exc_tax = self.amount_inc_tax - self.tax
         return {
             'sl_no': last_sl_no,
             'date': fields.Datetime.now(),
             'payment_mode': self.payment_mode,
             'fee_type': self.fee_type,
-            'amount_exc_tax': self.amount_exc_tax,
+            'amount_exc_tax': exc_tax,
             'amount_inc_tax': self.amount_inc_tax,
             'cheque_no': self.cheque_no,
             'branch': self.branch,
             'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
             'tax_amount': self.tax,
             'cgst_amount': self.cgst_amount,
-            'sgst_amount': self.sgst_amount
+            'sgst_amount': self.sgst_amount,
+            'total_amount': self.total_amount,
+            'invoice_no': last_report.invoice_number,
         }
 
     @api.onchange('payment_mode')
@@ -749,7 +830,7 @@ class PaymentHistoryFeeCollection(models.Model):
         string="Currency",
         default=lambda self: self.env.company.currency_id.id
     )
-
+    total_amount = fields.Float(string="Paid Amount")
     branch = fields.Selection(
         [('Corporate Office & City Campus', 'Corporate Office & City Campus'), ('Cochin Campus', 'Cochin Campus'),
          ('Calicut Campus', 'Calicut Campus'), ('Trivandrum Campus', 'Trivandrum Campus'),
@@ -758,6 +839,8 @@ class PaymentHistoryFeeCollection(models.Model):
     cheque_no = fields.Char(string="Cheque No/Reference No")
     tax_amount = fields.Float(string="Tax")
     amount_in_words = fields.Char(string="Amount in Words", compute="_compute_amount_in_words", store=1)
+    amount_in_words_non_tax = fields.Char(string="Amount in Words", compute="_compute_amount_in_words_non_tax", store=1)
+
     # @api.depends('amount_inc_tax', 'currency_id')
     # def _compute_amount_in_words(self):
     #     for record in self:
@@ -782,6 +865,12 @@ class PaymentHistoryFeeCollection(models.Model):
             i.amount_in_words = num2words(i.amount_inc_tax, lang='en').upper()
         # print(f"Amount in words: {amount_in_words}")
 
+    @api.depends('total_amount')
+    def _compute_amount_in_words_non_tax(self):
+        print('workssssss')
+        for i in self:
+            i.amount_in_words_non_tax = num2words(i.total_amount, lang='en').upper()
+
     def act_print_invoice(self):
         # print('hi')
         # print(self.env.context)
@@ -792,3 +881,7 @@ class PaymentHistoryFeeCollection(models.Model):
 
         return self.env.ref('logic_base_17.action_report_students_payment_history').report_action(self)
 
+
+    def act_print_invoice_non_taxable(self):
+
+        return self.env.ref('logic_base_17.action_report_students_payment_history_non_taxable').report_action(self)
