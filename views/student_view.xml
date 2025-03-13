@@ -54,6 +54,7 @@
             </field>
         </record>
 
+
         <record id="view_op_student_tree" model="ir.ui.view">
             <field name="name">op.student.tree</field>
             <field name="model">op.student</field>
@@ -69,6 +70,7 @@
                     <!--                    </style>-->
                     <!--                    <field name="title" optional="show"/>-->
                     <field name="gr_no" string="Reg No"/>
+                    <!--                    <field name="admission_date"/>-->
                     <field name="name"/>
                     <!--                    <field name="gender" optional="hide"/>-->
                     <!--                    <field name="birth_date" optional="hide"/>-->
@@ -204,7 +206,8 @@
                     </header>
                     <sheet>
                         <div name="button_box" position="inside">
-                            <button class="oe_stat_button" type="object" name="get_current_wallet_collection" icon="fa-book">
+                            <button class="oe_stat_button" type="object" name="get_current_wallet_collection"
+                                    icon="fa-book">
                                 <field string="Wallet Collections" name="wallet_smart_count" widget="statinfo"/>
                             </button>
                         </div>
@@ -449,6 +452,8 @@
                     <field name="name"/>
                     <field name="blood_group"/>
                     <newline/>
+                    <filter string="Wallet Not Empty" name="wallet_not_empty" domain="[('wallet_balance', '!=', 0)]"/>
+                    <filter string="Wallet Empty" name="wallet_empty" domain="[('wallet_balance', '=', 0)]"/>
                     <group expand="0" string="Group By...">
                         <filter name="blood_group" string="Blood Group"
                                 domain="[]" context="{'group_by':'blood_group'}"/>
