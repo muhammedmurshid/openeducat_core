@@ -288,6 +288,9 @@ class OpStudent(models.Model):
         self.wallet_balance = fee.amount
         fee.state = 'done'
         fee.student_id = self.id
+        fee.assigned_by = self.env.user.id
+        fee.assigned_date = fields.Datetime.now()
+
         # report = self.env['invoice.reports'].sudo().create({
         #     'lead_id': self.lead_id.id,
         #     'name': fee.name,
@@ -381,7 +384,7 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_collection_id': self.id,
-                            'default_wallet_amount': self.wallet_balance, }, }
+                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type }, }
 
 
 class FeeCollectionWizard(models.TransientModel):
@@ -420,6 +423,8 @@ class FeeCollectionWizard(models.TransientModel):
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")
     total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=1)
+    fee_plan = fields.Char(string="Fee Plan")
+    choose_payment_installment_plan = fields.Selection([('1st Installment','1st Installment'), ('2nd Installment','2nd Installment'), ('3rd Installment','3rd Installment')], string="Choose Installment Plan")
 
     @api.onchange('fee_type','other_fee','amount_exc_tax')
     def _onchange_fee_types(self):
@@ -442,6 +447,26 @@ class FeeCollectionWizard(models.TransientModel):
             self.fee_name = False
             self.other_fee = False
 
+    @api.onchange('fee_plan','choose_payment_installment_plan')
+    def _onchange_batch_fee_plan(self):
+        if self.fee_plan != 'installment':
+            self.choose_payment_installment_plan = False
+            if self.fee_type != 'Ancillary Fee(Non Taxable)':
+                self.amount_inc_tax = self.collection_id.due_amount
+        else:
+            if self.choose_payment_installment_plan == '1st Installment':
+                self.amount_inc_tax = self.batch_id.installment_ids[0].amount_inc_installment if len(
+                    self.batch_id.installment_ids) > 0 else 0
+
+            elif self.choose_payment_installment_plan == '2nd Installment':
+                self.amount_inc_tax = self.batch_id.installment_ids[1].amount_inc_installment if len(
+                    self.batch_id.installment_ids) > 1 else 0
+
+            elif self.choose_payment_installment_plan == '3rd Installment':
+                self.amount_inc_tax = self.batch_id.installment_ids[2].amount_inc_installment if len(
+                    self.batch_id.installment_ids) > 2 else 0
+            else:
+                self.amount_inc_tax = 0
 
     @api.onchange('amount_inc_tax')
     def _onchange_amount_tax(self):
@@ -449,15 +474,13 @@ class FeeCollectionWizard(models.TransientModel):
         if self.fee_type != 'Ancillary Fee(Non Taxable)':
             if self.amount_inc_tax > 0 and tax:
                 tax_amount = 0  # Default tax percentage
-                if tax.amount_type == 'group':
-                    tax_amount += sum(t.amount for t in tax.children_tax_ids)
-                print(tax_amount, 'tax')
-                self.tax_id = tax.id
-                print('tax_amt', self.amount_inc_tax * tax_amount / 100)
-                current_tax = self.amount_inc_tax * tax_amount / 100
+                # print(tax_amount, 'tax')
+                # self.tax_id = tax.id
+                print('tax_amt', self.amount_inc_tax * 18 / 118)
+                current_tax = self.amount_inc_tax * 18 / 118
                 # Reverse calculation to get amount_exc_tax
                 self.amount_exc_tax = self.amount_inc_tax - current_tax
-                self.tax = self.amount_inc_tax * tax_amount / 100
+                self.tax = self.amount_inc_tax * 18 / 118
 
                 # Split tax into CGST and SGST
                 self.cgst_amount = self.tax / 2
@@ -752,7 +775,7 @@ class FeeCollectionWizard(models.TransientModel):
             'student_id': self.collection_id.id,
             'cgst_amount': self.cgst_amount,
             'sgst_amount': self.sgst_amount,
-            'fee_name': self.other_fee or self.fee_name or 'Batch Fee',
+            'fee_name': self.other_fee or self.fee_name or self.choose_payment_installment_plan or 'Lump sum Fee',
             'tax': self.tax,
             'amount_exc_tax': exc_tax
 
@@ -809,7 +832,7 @@ class FeeCollectionWizard(models.TransientModel):
             'amount_inc_tax': self.amount_inc_tax,
             'cheque_no': self.cheque_no,
             'branch': self.branch,
-            'fee_name': self.fee_name or self.other_fee or 'Batch Fee',
+            'fee_name': self.fee_name or self.other_fee or self.choose_payment_installment_plan or 'Lump sum Fee',
             'tax_amount': self.tax,
             'cgst_amount': self.cgst_amount,
             'sgst_amount': self.sgst_amount,
@@ -890,12 +913,6 @@ class PaymentHistoryFeeCollection(models.Model):
             i.amount_in_words_non_tax = num2words(i.total_amount, lang='en').upper()
 
     def act_print_invoice(self):
-        # print('hi')
-        # print(self.env.context)
-        # data = {
-        #     'model_id': self.id,
-        #     'form': self.env.context
-        # }
 
         return self.env.ref('logic_base_17.action_report_students_payment_history').report_action(self)
 
