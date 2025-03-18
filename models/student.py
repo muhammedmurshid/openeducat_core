@@ -286,6 +286,7 @@ class OpStudent(models.Model):
         fee = self.env['fee.quick.pay'].browse(active_id)
         print('hi', fee.amount)
         self.wallet_balance = fee.amount
+        fee.receipt_no = fee._generate_receipt_number()
         fee.state = 'done'
         fee.student_id = self.id
         fee.assigned_by = self.env.user.id
