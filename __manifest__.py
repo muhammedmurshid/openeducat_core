@@ -61,7 +61,8 @@
         'menu/student_menu.xml',
         'views/product_details.xml',
         'views/fee_collection.xml',
-        'views/group.xml'
+        'views/group.xml',
+        'views/receipt_wizard.xml'
     ],
     'demo': [
         'demo/homepage_template.xml',

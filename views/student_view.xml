@@ -100,7 +100,7 @@
                     <style>
                         .btn-collect_fee {
                         background-color: #5f874a;
-                        width: 100px;
+                        width: 120px;
                         height: 35px;
                         font-size: 14px;
                         color: white;
@@ -123,6 +123,14 @@
                         color: white;
                         text-align: center;
                         }
+                        .btn-create-receipt {
+                        background-color: #3f5b6e;
+                        width: 120px;
+                        height: 35px;
+                        font-size: 14px;
+                        color: white;
+                        text-align: center;
+                        }
                         .card {
                         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
                         transition: 0.3s;
@@ -135,7 +143,15 @@
                         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
                         transition: 0.3s;
                         width: 20%;
-                        background-color: #d97038;
+                        background-color: #b8453d;
+                        color: white; /* Set font color to white */
+                        text-align: center; /* Center the text within the card */
+                        }
+                        .due_card_negative {
+                        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+                        transition: 0.3s;
+                        width: 20%;
+                        background-color: #6a8f53;
                         color: white; /* Set font color to white */
                         text-align: center; /* Center the text within the card */
                         }
@@ -187,6 +203,10 @@
                         background-color: #c99f6f; /* Checkmark color */
 
                         }
+                        .o_form_group {
+                        margin-bottom: 0 !important; /* Remove default margin */
+                        padding-bottom: 0 !important; /* Remove default padding */
+                        }
 
 
                     </style>
@@ -195,16 +215,20 @@
                                 string="Create Student User"
                                 class="btn-create-student"
                                 groups="openeducat_core.group_op_back_office_admin"
-                                invisible="user_id != False"/>
+                                invisible="user_id != False or state == 'stoped'"/>
                         <button name="act_allocate_to_batch" type="object" string="Allocate to Batch"
                                 class="oe_highlight" invisible="state != 'confirm'"/>
+
+                        <button name="act_create_receipt" string="Create Receipt" type="object" invisible="state == 'stoped'" class="btn-create-receipt"/>
+                        <button name="act_collect_fee" string="Create Invoice" type="object" class="btn-collect_fee"
+                                invisible="state == 'stoped'"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
-                        <button name="act_collect_fee" string="Collect Fee" type="object" class="btn-collect_fee"
-                                invisible="state == 'stoped'"/>
+
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
+                        <widget name="web_ribbon" title="Stoped " bg_color="text-bg-danger" invisible="state != 'stoped'" />
                         <div name="button_box" position="inside">
                             <button class="oe_stat_button" type="object" name="get_current_wallet_collection"
                                     icon="fa-book">
@@ -251,7 +275,7 @@
                                         <field name="mobile" placeholder="Mobile Number"/>
                                         <field name="email" required="1" placeholder="Email Address"/>
                                     </group>
-                                    <div class="card">
+                                    <div class="card" invisible="state == 'stoped'">
                                         <div class="container">
                                             <h4>
                                                 <b style="color:white;" align="center">Wallet Balance
@@ -263,7 +287,19 @@
                                             <!--                                            <field name="wallet_balance" readonly="1"/>-->
                                         </div>
                                     </div>
-                                    <div class="due_card">
+                                    <div class="due_card_negative" invisible="state == 'stoped' or due_amount >= 0">
+                                        <div class="container">
+                                            <h4>
+                                                <b style="color:white;" align="center">Payment Dues
+                                                    <field name="due_amount"/>
+                                                </b>
+
+                                            </h4>
+
+                                            <!--                                            <field name="wallet_balance" readonly="1"/>-->
+                                        </div>
+                                    </div>
+                                    <div class="due_card" invisible="state == 'stoped' or due_amount &lt;= 0">
                                         <div class="container">
                                             <h4>
                                                 <b style="color:white;" align="center">Payment Dues
@@ -283,6 +319,53 @@
                         </div>
 
                         <notebook colspan="4">
+                            <page name="payment_history" string="Payment History">
+
+
+                                <field name="payment_ids">
+                                    <tree editable="bottom">
+
+                                        <field name="sl_no"/>
+                                        <field name="currency_id" optional="hide"/>
+                                        <field name="date" options="{'format': 'dd/MM/yyyy'}"/>
+                                        <field name="payment_mode" optional="hide"/>
+                                        <!--                                        <field name="payment_type"/>-->
+                                        <field name="fee_type" optional="1"/>
+                                        <field name="voucher_no"/>
+                                        <field name="voucher_name"/>
+                                        <field name="fee_name" string="Fee Name"/>
+                                        <field name="type"/>
+                                        <field name="branch"/>
+                                        <field name="cheque_no" string="Cheque No./Reference No."/>
+                                        <field name="invoice_no" optional="hide"/>
+                                        <field name="debit_amount"/>
+                                        <field name="credit_amount"/>
+                                        <field name="balance"/>
+                                        <field name="balance_type" string="" widget="badge"/>
+
+                                        <!--                                        <field name="reference_no"/>-->
+                                        <field name="amount_exc_tax" widget="monetary" optional="hide"/>
+                                        <field name="tax_amount" widget="monetary" optional="hide"/>
+                                        <!--                                        <field name="cgst_amount" invisible="1"/>-->
+                                        <!--                                        <field name="sgst_amount" invisible="1"/>-->
+                                        <field name="amount_inc_tax" widget="monetary" optional="hide"/>
+                                        <field name="total_amount" widget="monetary" optional="hide"/>
+                                        <!--                                        <field name="amount_in_words" invisible="1"/>-->
+                                        <button name="act_print_invoice" type="object" class="fa fa-download"
+                                                invisible="type != 'invoice'" string=" Invoice"/>
+                                        <button name="act_print_invoice_non_taxable" type="object"
+                                                class="fa fa-download" invisible="type != 'receipt'" string=" Receipt"/>
+                                    </tree>
+                                </field>
+                                <!--                                        <field name="admission_fee"/>-->
+                                <!--                                        <field name="batch_fee"/>-->
+                                <!--                                        <field name="fee_type"/>-->
+                                <!--                                        <field name="batch_id"/>-->
+                                <!--                                        <field name="branch_id"/>-->
+                                <!--                                        <field name="course_id"/>-->
+
+
+                            </page>
                             <page name="personal_information" string="Personal Information">
                                 <group name="personal_detail">
                                     <group>
@@ -342,6 +425,7 @@
                                     <group>
                                         <field name="batch_id" style="background-color:#89d674;"/>
                                         <field name="course_id"/>
+                                        <field name="admission_fee" widget="monetary"/>
 
 
                                         <!--                                        <field name="fee_type"/>-->
@@ -349,89 +433,62 @@
                                         <!--                                        <field name="branch_id"/>-->
                                         <!--                                        <field name="course_id"/>-->
                                     </group>
-                                    <group string="Admission Fee">
-                                        <div class="admission-fee-container">
-                                            <field name="admission_fee" widget="monetary"/>
-                                            <!--                                            <span class="checkmark">-->
-                                            <!--                                                <div class="checkmark_stem"></div>-->
-                                            <!--                                                <div class="checkmark_kick"></div>-->
-                                            <!--                                            </span>-->
-                                            <field name="admission_fee_paid" readonly="1"/>
+                                    <!--                                    <group string="Admission Fee">-->
+                                    <!--                                        <div class="admission-fee-container">-->
+
+                                    <!--                                            &lt;!&ndash;                                            <span class="checkmark">&ndash;&gt;-->
+                                    <!--                                            &lt;!&ndash;                                                <div class="checkmark_stem"></div>&ndash;&gt;-->
+                                    <!--                                            &lt;!&ndash;                                                <div class="checkmark_kick"></div>&ndash;&gt;-->
+                                    <!--                                            &lt;!&ndash;                                            </span>&ndash;&gt;-->
+                                    <!--                                            <field name="admission_fee_paid" readonly="1"/>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </group>-->
+
+                                    <group name="closing_balance" style="background-color:#d5dbd6">
+                                        <field name="closing_balance" widget="monetary"/>
+                                        <field name="credit_balance_erp" widget="monetary"/>
+
+                                        <div style="text-align: center; margin-top: 10px; margin-left:300px">
+                                            <button name="act_add_closing_balance" string="Submit" type="object"
+                                                    class="oe_highlight"/>
                                         </div>
                                     </group>
-                                    <group>
-                                        <label for="fee_type"/>
-                                        <div class="o_row">
-                                            <field name="fee_type"/>
-                                            <button name="act_change_fee_plan" string="Change Plan" type="object"
-                                                    icon="fa-reply" class="change_plan_button"
-                                                    groups="openeducat_core.group_op_back_office_accounts"/>
-                                        </div>
-                                        <!--                                        <field name="wallet_balance"-->
-                                        <!--                                               style="background-color:#1739fc; width:40px; color:white;"/>-->
-                                        <!--                                        <field name="fee_type" readonly="state != 'confirm'"/>-->
-                                        <!--                                        <button name="act_change_fee_plan" string="Change Plan" type="object"-->
-                                        <!--                                                icon="fa-reply"/>-->
-                                    </group>
-                                    <group string="Lump Sum Fee Details" name="fee_details"
-                                           invisible="fee_type != 'lump_sum_fee'">
 
-                                        <field name="batch_fee" widget="monetary"/>
-                                        <field name="discount" widget="monetary"/>
-                                        <field name="total_payable_tax" widget="monetary"/>
-                                        <field name="paid_amount" widget="monetary"/>
-                                        <field name="due_amount" widget="monetary"/>
-                                    </group>
-                                    <group string="Installment Fee Details" name="inst_fee_details"
-                                           invisible="fee_type != 'installment'">
 
-                                        <field name="batch_fee" widget="monetary"/>
-                                        <field name="discount" widget="monetary"/>
-                                        <field name="total_payable_tax" widget="monetary"/>
-                                        <field name="paid_amount" widget="monetary"/>
-                                        <field name="due_amount" widget="monetary"/>
-                                    </group>
+                                    <div class="o_inner_group">
+                                        <group style="background-color:#ede9dd">
+                                            <label for="fee_type"/>
+                                            <div class="o_row">
+                                                <field name="fee_type"/>
+                                                <button name="act_change_fee_plan" string="Change Plan" type="object"
+                                                        icon="fa-reply" class="change_plan_button"
+                                                        groups="openeducat_core.group_op_back_office_accounts"/>
+                                            </div>
+                                        </group>
+
+
+                                        <group string="Lump Sum Fee Details" name="fee_details"
+                                               invisible="fee_type != 'lump_sum_fee'" style="background-color:#ede9dd">
+
+                                            <field name="batch_fee" widget="monetary"/>
+                                            <field name="discount" widget="monetary"/>
+                                            <field name="total_payable_tax" widget="monetary"/>
+                                            <field name="paid_amount" widget="monetary"/>
+                                            <field name="due_amount" widget="monetary"/>
+                                        </group>
+                                        <group string="Installment Fee Details" name="inst_fee_details"
+                                               invisible="fee_type != 'installment'" style="background-color:#ede9dd">
+
+                                            <field name="batch_fee" widget="monetary"/>
+                                            <field name="discount" widget="monetary"/>
+                                            <field name="total_payable_tax" widget="monetary"/>
+                                            <field name="paid_amount" widget="monetary"/>
+                                            <field name="due_amount" widget="monetary"/>
+                                        </group>
+                                    </div>
                                 </group>
                             </page>
-                            <page name="payment_history" string="Payment History">
 
-
-                                <field name="payment_ids">
-                                    <tree editable="bottom">
-
-                                        <field name="sl_no"/>
-                                        <field name="currency_id" optional="hide"/>
-                                        <field name="date"/>
-                                        <field name="payment_mode"/>
-                                        <!--                                        <field name="payment_type"/>-->
-                                        <field name="fee_type"/>
-                                        <field name="fee_name" string="Payment Type"/>
-                                        <field name="branch"/>
-                                        <field name="cheque_no"/>
-                                        <field name="invoice_no"/>
-                                        <field name="reference_no"/>
-                                        <field name="amount_exc_tax" widget="monetary"/>
-                                        <field name="tax_amount" widget="monetary"/>
-                                        <!--                                        <field name="cgst_amount" invisible="1"/>-->
-                                        <!--                                        <field name="sgst_amount" invisible="1"/>-->
-                                        <field name="amount_inc_tax" widget="monetary"/>
-                                        <field name="total_amount" widget="monetary"/>
-                                        <!--                                        <field name="amount_in_words" invisible="1"/>-->
-                                        <button name="act_print_invoice" type="object" class="fa fa-download"
-                                                invisible="tax_amount == 0"/>
-                                        <button name="act_print_invoice_non_taxable" type="object"
-                                                class="fa fa-download" invisible="tax_amount != 0"/>
-                                    </tree>
-                                </field>
-                                <!--                                        <field name="admission_fee"/>-->
-                                <!--                                        <field name="batch_fee"/>-->
-                                <!--                                        <field name="fee_type"/>-->
-                                <!--                                        <field name="batch_id"/>-->
-                                <!--                                        <field name="branch_id"/>-->
-                                <!--                                        <field name="course_id"/>-->
-
-
-                            </page>
                         </notebook>
                     </sheet>
                     <div class="oe_chatter">

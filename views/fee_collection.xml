@@ -6,7 +6,7 @@
         <field name="model">fee.collection.wizard</field>
         <field name="priority" eval="8"/>
         <field name="arch" type="xml">
-            <form string="Fee Collection">
+            <form string="Create Invoice">
                 <group>
                     <group>
                         <field name="wallet_amount" style="background-color:#283880; color:white;" invisible="payment_mode != 'Wallet'"/>
@@ -18,7 +18,8 @@
                         <field name="amount_exc_tax" widget="monetary" readonly="fee_type != 'Ancillary Fee(Non Taxable)'"/>
                         <field name="tax_id" string="Tax id" invisible="1"/>
                         <field name="amount_inc_tax" widget="monetary" invisible="fee_type == 'Ancillary Fee(Non Taxable)'"/>
-                        <field name="payment_mode"/>
+                        <field name="payment_mode" invisible="1"/>
+                        <field name="place_of_supply"/>
                     </group>
                     <group>
                         <field name="choose_payment_installment_plan" invisible="fee_plan != 'installment' or fee_type != 'Batch Fee' " style="background-color: #dae0db"/>
@@ -27,13 +28,16 @@
                         <field name="remarks"/>
                         <field name="fee_plan" invisible="1"/>
 
-                        <field name="cgst_amount" invisible="1"/>
-                        <field name="sgst_amount" invisible="1"/>
+
                         <field name="branch" invisible="payment_mode != 'Cash'" required="payment_mode == 'Cash'"/>
-                        <field name="cheque_no" invisible="payment_mode == 'Cash'" required="payment_mode != 'Cash'"/>
+<!--                        <field name="cheque_no" invisible="payment_mode == 'Cash'" required="payment_mode != 'Cash'"/>-->
                     </group>
                     <group class="oe_subtotal_footer" colspan="2" name="total_amount_fee">
+                        <field name="amount_exc_tax" string="Taxable Amount" widget="monetary"/>
                         <field name="tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="cgst_amount" widget="monetary" options="{'currency_field': 'currency_id'}" invisible="place_of_supply != 'KL'"/>
+                        <field name="sgst_amount" widget="monetary" options="{'currency_field': 'currency_id'}" invisible="place_of_supply != 'KL'"/>
+                        <field name="igst_amount" invisible="place_of_supply == 'KL'"/>
                         <field name="total_amount" widget="monetary" class="oe_subtotal_footer_separator"
                                options="{'currency_field': 'currency_id'}" style="background-color:#bff2c9"/>
                     </group>
