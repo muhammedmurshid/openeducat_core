@@ -37,3 +37,4 @@ from . import op_academic_year
 from . import change_plan
 from . import groups
 from . import receipt_creation
+from . import drop_wizard

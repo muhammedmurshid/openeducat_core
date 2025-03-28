@@ -155,6 +155,17 @@
                         color: white; /* Set font color to white */
                         text-align: center; /* Center the text within the card */
                         }
+                        .dropped_date {
+                        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+                        transition: 0.3s;
+                        width: 20%;
+                        background-color: #db2f23;
+                        color: white; /* Set font color to white */
+                        text-align: center; /* Center the text within the card */
+                        position: absolute;
+                        right: 100px; /* Align to right edge */
+
+                        }
 
                         .container {
                         padding: 2px 16px;
@@ -219,7 +230,8 @@
                         <button name="act_allocate_to_batch" type="object" string="Allocate to Batch"
                                 class="oe_highlight" invisible="state != 'confirm'"/>
 
-                        <button name="act_create_receipt" string="Create Receipt" type="object" invisible="state == 'stoped'" class="btn-create-receipt"/>
+                        <button name="act_create_receipt" string="Create Receipt" type="object"
+                                invisible="state == 'stoped'" class="btn-create-receipt"/>
                         <button name="act_collect_fee" string="Create Invoice" type="object" class="btn-collect_fee"
                                 invisible="state == 'stoped'"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
@@ -228,7 +240,11 @@
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
-                        <widget name="web_ribbon" title="Stoped " bg_color="text-bg-danger" invisible="state != 'stoped'" />
+                        <!--                        <widget name="web_ribbon"-->
+                        <!--                                title="%(rec.ribbon_title)"-->
+                        <!--                                bg_color="text-bg-danger"-->
+                        <!--                                invisible="state != 'stoped'"/>-->
+
                         <div name="button_box" position="inside">
                             <button class="oe_stat_button" type="object" name="get_current_wallet_collection"
                                     icon="fa-book">
@@ -240,6 +256,11 @@
                         <field name="active" invisible="1"/>
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
                                 invisible="active == True"/>
+                        <widget name="web_ribbon"
+                                title="Dropped"
+                                bg_color="bg-danger"
+                                invisible="state != 'stoped'"/>
+
                         <div style="width:100%;" class="row align-items-center">
                             <div class="col-4 col-lg-2" style="text-align-last: center;">
                                 <field name="image_1920" widget="image" class="oe_left oe_avatar"
@@ -257,18 +278,13 @@
                                                 <td style="padding-right:10px;">
                                                     <field name="name" required="1" placeholder="Student Name"/>
                                                 </td>
-                                                <!--                                                <td style="padding-right:10px;">-->
-                                                <!--                                                    <field name="middle_name" placeholder="Middle Name"/>-->
-                                                <!--                                                </td>-->
-                                                <!--                                                <td style="padding-right:10px;">-->
-                                                <!--                                                    <field name="last_name" required="1" placeholder="Last Name"/>-->
-                                                <!--                                                </td>-->
                                             </tr>
 
                                         </table>
 
                                     </h2>
                                 </div>
+
                                 <group>
                                     <group>
                                         <field name="gr_no" string="Reg No"/>
@@ -280,6 +296,18 @@
                                             <h4>
                                                 <b style="color:white;" align="center">Wallet Balance
                                                     <field name="wallet_balance"/>
+                                                </b>
+
+                                            </h4>
+
+                                            <!--                                            <field name="wallet_balance" readonly="1"/>-->
+                                        </div>
+                                    </div>
+                                    <div class="dropped_date" invisible="state != 'stoped'">
+                                        <div class="container">
+                                            <h4>
+                                                <b style="color:white;" align="center">DROPPED DATE
+                                                    <field name="drop_date"/>
                                                 </b>
 
                                             </h4>
@@ -299,6 +327,7 @@
                                             <!--                                            <field name="wallet_balance" readonly="1"/>-->
                                         </div>
                                     </div>
+
                                     <div class="due_card" invisible="state == 'stoped' or due_amount &lt;= 0">
                                         <div class="container">
                                             <h4>
@@ -311,11 +340,9 @@
                                             <!--                                            <field name="wallet_balance" readonly="1"/>-->
                                         </div>
                                     </div>
+
                                 </group>
-
-
                             </div>
-
                         </div>
 
                         <notebook colspan="4">
@@ -324,7 +351,6 @@
 
                                 <field name="payment_ids">
                                     <tree editable="bottom">
-
                                         <field name="sl_no"/>
                                         <field name="currency_id" optional="hide"/>
                                         <field name="date" options="{'format': 'dd/MM/yyyy'}"/>
@@ -342,7 +368,6 @@
                                         <field name="credit_amount"/>
                                         <field name="balance"/>
                                         <field name="balance_type" string="" widget="badge"/>
-
                                         <!--                                        <field name="reference_no"/>-->
                                         <field name="amount_exc_tax" widget="monetary" optional="hide"/>
                                         <field name="tax_amount" widget="monetary" optional="hide"/>
@@ -363,8 +388,6 @@
                                 <!--                                        <field name="batch_id"/>-->
                                 <!--                                        <field name="branch_id"/>-->
                                 <!--                                        <field name="course_id"/>-->
-
-
                             </page>
                             <page name="personal_information" string="Personal Information">
                                 <group name="personal_detail">
@@ -404,6 +427,7 @@
                                         <field name="partner_id" placeholder="Partner" required="0"/>
                                         <!--                                        <field name="branch_id"/>-->
                                     </group>
+
                                     <group string="Family Details">
                                         <field name="parent_name"/>
                                         <field name="parent_whatsapp"/>
@@ -412,6 +436,10 @@
                                         <field name="father_number"/>
                                         <field name="mother_name"/>
                                         <field name="mother_number"/>
+                                    </group>
+                                    <group string="Drop Details" invisible="state != 'stoped'">
+                                        <field name="drop_date" style="background-color:#fa7070"/>
+                                        <field name="drop_reason" style="background-color:#fa7070"/>
                                     </group>
                                     <separator string="miscellaneous" colspan="2"/>
                                     <group colspan="3">

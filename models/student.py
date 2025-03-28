@@ -111,7 +111,7 @@ class OpStudent(models.Model):
                                         'Course Details',
                                         tracking=True)
     state = fields.Selection([('confirm', 'Confirm'), ('batch_allocated', 'Batch Allocated'),
-                              ('stoped', 'Stoped')],
+                              ('stoped', 'Droped')],
                              string="Status", default="confirm")
     active = fields.Boolean(default=True)
     batch_id = fields.Many2one('op.batch', string="Batch", required=1)
@@ -380,9 +380,24 @@ class OpStudent(models.Model):
                 raise ValidationError("Kindly assign a fee type to this student.")
         else:
             raise ValidationError("Kindly assign a batch to this student.")
+    drop_reason = fields.Text(string="Drop Reason")
+    drop_date = fields.Date(string="Drop Date")
+    drop_date_title = fields.Char(compute="_compute_drop_date_title")
+
+    def _compute_drop_date_title(self):
+        for record in self:
+            record.drop_date_title = f"Drop Date: {record.drop_date.strftime('%Y-%m-%d')}" if record.drop_date else "No Drop Date"
+
 
     def act_drop_student(self):
-        self.state = 'stoped'
+        return {'type': 'ir.actions.act_window',
+                'name': _('Drop'),
+                'res_model': 'drop.student.wizard',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_student_id': self.id}, }
+
 
     def act_change_fee_plan(self):
         print('k')

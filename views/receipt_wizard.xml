@@ -8,9 +8,9 @@
        <field name="arch" type="xml">
            <form string="Whatsapp Message">
                <group>
-                   <field name="student_id"/>
+                   <field name="student_id" string="Student Name"/>
                    <field name="date" required="1"/>
-                   <field name="student_name" string="Name"/>
+                   <field name="student_name" string="Name" invisible="1"/>
 <!--                   <field name="branch_id"/>-->
                    <field name="branch" />
                    <field name="payment_mode" required="1"/>
