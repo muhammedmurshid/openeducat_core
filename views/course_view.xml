@@ -9,7 +9,7 @@
                 <tree string="Course">
                     <field name="name"/>
                     <field name="code"/>
-                    <field name="evaluation_type"/>
+<!--                    <field name="evaluation_type"/>-->
 <!--                    <field name="parent_id"/>-->
                     <field name="department_id"/>
                     <field name="create_uid" string="Created By"/>
@@ -44,10 +44,11 @@
                         </group>
                         <group class="pt-3">
                             <group name="main">
-                                <field name="evaluation_type"/>
+<!--                                <field name="evaluation_type"/>-->
                                 <field name="min_unit_load"/>
 <!--                                <field name="branch_id"/>-->
-                                <field name="course_type"/>
+<!--                                <field name="course_type"/>-->
+                                <field name="type"/>
                                 <field name="department_id" required="1"/>
                             </group>
                             <group>
@@ -122,14 +123,14 @@
                 <search string="Course">
                     <field name="name"/>
                     <field name="code"/>
-                    <field name="evaluation_type"/>
+<!--                    <field name="evaluation_type"/>-->
                     <field name="parent_id"/>
                     <field name="department_id"/>
                     <newline/>
                     <group expand="0" string="Group By...">
-                        <filter name="group_by_evaluation_type"
-                                string="Evaluation Type" domain="[]"
-                                context="{'group_by':'evaluation_type'}"/>
+<!--                        <filter name="group_by_evaluation_type"-->
+<!--                                string="Evaluation Type" domain="[]"-->
+<!--                                context="{'group_by':'evaluation_type'}"/>-->
                         <filter name="group_by_partner_course"
                                 string="Parent Course" domain="[]"
                                 context="{'group_by':'parent_id'}"/>

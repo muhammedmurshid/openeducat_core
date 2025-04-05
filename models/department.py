@@ -31,7 +31,7 @@ class OpDepartment(models.Model):
     name = fields.Char('Name', required=True)
     # code = fields.Char('Code', required=True)
     code = fields.Char(string="Department ID No.", required=True, copy=False, readonly=False, default="New")
-    category_id = fields.Many2one('op.category', string="Category")
+    category_id = fields.Many2one('op.category', string="Category", required=1)
     type = fields.Selection([("regular", "Regular"), ("crash", "Crash")], string="Type")
     parent_id = fields.Many2one('op.department', 'Parent Department')
 

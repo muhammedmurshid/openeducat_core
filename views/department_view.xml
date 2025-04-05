@@ -70,7 +70,7 @@
                             <group>
                                 <field name="code"/>
 
-                                <field name="type"/>
+<!--                                <field name="type"/>-->
                             </group>
                         </group>
                     </sheet>

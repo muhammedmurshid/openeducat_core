@@ -37,15 +37,16 @@ class OpCourse(models.Model):
     evaluation_type = fields.Selection(
         [('normal', 'Normal'), ('GPA', 'GPA'),
          ('CWA', 'CWA'), ('CCE', 'CCE')],
-        'Evaluation Type', default="normal", required=True)
+        'Evaluation Type', default="normal",)
     subject_ids = fields.Many2many('op.subject', string='Subject(s)')
-    max_unit_load = fields.Float("Maximum Unit Load")
-    min_unit_load = fields.Float("Minimum Unit Load")
+    max_unit_load = fields.Float("Maximum No.of Students")
+    min_unit_load = fields.Float("Minimum No.of Students")
     department_id = fields.Many2one(
         'op.department', 'Department',
         default=lambda self:
         self.env.user.dept_id and self.env.user.dept_id.id or False)
     active = fields.Boolean(default=True)
+    type = fields.Selection([('regular', 'Regular'), ('crash', 'Crash')], string='Type', required=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_type = fields.Selection(
         [('indian', 'Indian'), ('international', 'International'), ('crash', 'Crash'), ('repeaters', 'Repeaters'),
