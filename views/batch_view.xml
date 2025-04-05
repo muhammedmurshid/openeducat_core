@@ -73,7 +73,7 @@
                             <group name="main">
                                 <field name="name"/>
                                 <field name="academic_year"/>
-                                <field name="department_id"/>
+                                <field name="department_id" string="Main Course"/>
                                 <field name="start_date"/>
                                 <field name="total_duration" string="Total Duration (Days)"/>
                                 <field name="batch_type"/>
@@ -127,7 +127,7 @@
                                     <!--                                    </group>-->
 
                                 </group>
-                                <group name="group_compo" string="Group Compo Fee Details">
+                                <group name="group_compo" string="Group Compo Fee Details" invisible="1">
 
                                     <field name="compo_ids" string="">
                                         <tree editable="bottom">

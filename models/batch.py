@@ -216,20 +216,20 @@ class OpBatch(models.Model):
     def _onchange_end_date(self):
         for record in self:
             if record.start_date and record.total_duration:
-                record.end_date = record.start_date + timedelta(days=record.total_duration)
+                record.end_date = record.start_date + timedelta(days=record.total_duration - 1)
             else:
                 record.end_date = False
 
     days_to_batch_start = fields.Integer(string="Days to Strat Batch", compute="_compute_remaining_days", store=1)
 
-    @api.depends('start_date', 'end_date')
+    @api.depends('start_date', 'end_date','total_duration')
     def _compute_remaining_days(self):
         for record in self:
             if record.start_date:
                 today = date.today()
                 if record.start_date <= today:
-                    print('current batch')
                     elapsed_days = (today - record.start_date).days
+                    print(elapsed_days, 'elapsed')
                     record.days_to_batch_start = elapsed_days
 
                 else:

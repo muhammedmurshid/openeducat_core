@@ -6,7 +6,7 @@
             <field name="model">op.department</field>
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
-                <tree string="Department">
+                <tree string="Main Course">
                     <field name="name"/>
                     <field name="code"/>
 <!--                    <field name="parent_id"/>-->
@@ -14,7 +14,7 @@
             </field>
         </record>
         <record id="kanban_view_department" model="ir.ui.view">
-            <field name="name">Department Kanban</field>
+            <field name="name">Main Course Kanban</field>
             <field name="model">op.department</field>
             <field name="arch" type="xml">
                 <kanban class="o_res_partner_kanban">
@@ -34,10 +34,10 @@
 
                                                     <field name="category_id"/>
                                                 </li>
-                                                <li t-if="record.type.raw_value">
+<!--                                                <li t-if="record.type.raw_value">-->
 
-                                                    <field name="type"/>
-                                                </li>
+<!--                                                    <field name="type"/>-->
+<!--                                                </li>-->
                                             </ul>
                                         </div>
                                         <!-- Right side with type field -->
@@ -58,7 +58,7 @@
             <field name="model">op.department</field>
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
-                <form string="Department">
+                <form string="Main Course">
                     <header/>
                     <sheet>
                         <group>
@@ -92,7 +92,7 @@
         </record>
 
         <record model="ir.actions.act_window" id="act_open_op_department_view">
-            <field name="name">Departments</field>
+            <field name="name">Main Course</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">op.department</field>
             <field name="binding_view_types">form</field>

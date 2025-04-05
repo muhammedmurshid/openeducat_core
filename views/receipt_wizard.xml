@@ -14,6 +14,7 @@
 <!--                   <field name="branch_id"/>-->
                    <field name="branch" />
                    <field name="payment_mode" required="1"/>
+                   <field name="reference_no"/>
                    <field name="amount" />
                    <field name="amount_in_words" invisible="1"/>
 

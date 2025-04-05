@@ -14,6 +14,7 @@ class CreateReceiptWizard(models.TransientModel):
     cheque_no = fields.Char(string="Cheque No/Reference No")
     amount = fields.Float(string="Amount")
     payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], string="Payment Mode")
+    reference_no = fields.Char(string="Reference No.")
     # batch_id = fields.Many2one(string="Batch")
     # branch_id = fields.Many2one(string="Branch")
     branch = fields.Selection(
@@ -42,7 +43,8 @@ class CreateReceiptWizard(models.TransientModel):
             'branch': self.branch,
             'payment_mode': self.payment_mode,
             'student_id': self.student_id.id,
-            'batch': self.student_id.batch_id.name
+            'batch': self.student_id.batch_id.name,
+            'reference_no': self.reference_no
 
         })
         voucher = self.env['receipts.report'].sudo().search([], order="id desc", limit=1)

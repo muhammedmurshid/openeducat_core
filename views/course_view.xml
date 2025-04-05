@@ -45,16 +45,16 @@
                         <group class="pt-3">
                             <group name="main">
 <!--                                <field name="evaluation_type"/>-->
-                                <field name="min_unit_load"/>
+<!--                                <field name="min_unit_load"/>-->
 <!--                                <field name="branch_id"/>-->
 <!--                                <field name="course_type"/>-->
                                 <field name="type"/>
-                                <field name="department_id" required="1"/>
+                                <field name="department_id" required="1" string="Main Course"/>
                             </group>
                             <group>
 <!--                                <field name="product_added" invisible="1"/>-->
-                                <field name="parent_id"/>
-                                <field name="max_unit_load"/>
+<!--                                <field name="parent_id"/>-->
+<!--                                <field name="max_unit_load"/>-->
                                 <field name="academic_head_id"/>
 <!--                                <field name="related_product_id"/>-->
 <!--                                <field name="course_fee"/>-->
@@ -148,8 +148,8 @@
                 <pivot string="Course">
                     <field name="name" type="row"/>
                     <field name="parent_id"/>
-                    <field name="max_unit_load"/>
-                    <field name="min_unit_load"/>
+<!--                    <field name="max_unit_load"/>-->
+<!--                    <field name="min_unit_load"/>-->
                 </pivot>
             </field>
         </record>
