@@ -60,3 +60,13 @@ class OpDepartment(models.Model):
         vals['code'] = f"{current_year}/{new_number}"
 
         return super(OpDepartment, self).create(vals)
+
+    def act_create_sub_course(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'op.course',
+            'target': 'new',
+            'context': {'default_department_id': self.id},
+
+        }

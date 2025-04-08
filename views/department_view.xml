@@ -59,7 +59,9 @@
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
                 <form string="Main Course">
-                    <header/>
+                    <header>
+                        <button name="act_create_sub_course" string="Create Sub Course" class="oe_highlight" type="object"/>
+                    </header>
                     <sheet>
                         <group>
                             <group>

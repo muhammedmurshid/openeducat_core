@@ -660,21 +660,22 @@ class FeeCollectionWizard(models.TransientModel):
         lead.admission_amount += self.amount_inc_tax
         lead.receipt_no = last_report.invoice_number
         lead.date_of_receipt = date.today()
+        lead.state = 'qualified'
+        lead.lead_quality = 'admission'
         lead.report = last_report.id
         self.collection_id.admission_fee_paid = True
         self.collection_id.admission_fee = self.amount_inc_tax
 
     def handle_wallet_payment(self):
-        if self.payment_mode == 'Wallet':
-            if self.collection_id.wallet_balance == 0:
-                raise UserError("Student Wallet Amount is 0")
+        if self.collection_id.wallet_balance == 0:
+            raise UserError("Student Wallet Amount is 0")
 
-            if self.collection_id.wallet_balance < self.total_amount:
-                raise ValidationError("Invalid Wallet Amount!")
+        if self.collection_id.wallet_balance < self.total_amount:
+            raise ValidationError("Invalid Wallet Amount!")
 
-            self.collection_id.wallet_balance -= self.total_amount
-            if self.other_fee == 'Admission Fee':
-                self.collection_id.admission_fee += self.amount_inc_tax
+        self.collection_id.wallet_balance -= self.total_amount
+        if self.other_fee == 'Admission Fee':
+            self.collection_id.admission_fee += self.amount_inc_tax
 
     def update_student_payment(self):
         if self.other_fee == 'Admission Fee':

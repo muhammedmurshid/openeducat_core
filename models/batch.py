@@ -22,6 +22,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from datetime import date,datetime, timedelta
+import re
 
 
 class OpBatch(models.Model):
@@ -46,7 +47,6 @@ class OpBatch(models.Model):
     adm_tax = fields.Float(string="Tax")
     adm_exc_fee = fields.Float(string="Admission Fee (Exc Fee)")
     adm_inc_fee = fields.Float(string="Admission Fee (Inc Fee)")
-
     course_fee = fields.Integer(string="Course Fee")
     student_ids = fields.One2many('logic.student.list', 'batch_id', )
     initiated_id = fields.Many2one('res.users', string="Initiated By")
@@ -55,18 +55,15 @@ class OpBatch(models.Model):
                                 string="Fee Type", default="lump_sum_fee", required=1)
     lump_fee_excluding_tax = fields.Float(string="Excluding Tax")
     tax = fields.Float(string="Tax")
-
     lump_fee_including_tax = fields.Float(string="Including Tax")
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
         default=lambda self: self.env.user.company_id.currency_id.id)
     academic_year = fields.Selection([('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year", required=1)
-
     total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1)
     batch_type = fields.Selection(
         [('present_batch', 'Running Batch'), ('future_batch', 'Future Batch'), ('ended_batch', 'Ended Batch') ],
         string="Type", default='present_batch', tracking=True)
-
     #lump sum plan offer
     term = fields.Char(string="Term")
     amount_exc_lump = fields.Float(string="Amount(Excluding Tax)")
@@ -80,20 +77,24 @@ class OpBatch(models.Model):
 
     @api.model
     def create(self, vals):
-        # Get the current year
         current_year = datetime.today().year
+        max_number = 0
 
-        # Find the latest code in the same year
-        last_batch = self.search([('code', 'like', f'{current_year}/%')], order='id desc', limit=1)
+        # Search all records for the current year
+        batches = self.search([('code', 'like', f'{current_year}/%')])
 
-        if last_batch and last_batch.code:
-            # Extract the last number and increment
-            last_number = int(last_batch.code.split('/')[1])  # Get "01" as integer
-            new_number = str(last_number + 1).zfill(2)  # Ensure 2-digit format
-        else:
-            new_number = "01"  # Start from 01 if no records exist
+        for batch in batches:
+            if batch.code:
+                match = re.match(rf"{current_year}/(\d+)", batch.code)
+                if match:
+                    number = int(match.group(1))
+                    if number > max_number:
+                        max_number = number
 
-        # Generate new course code
+        # Increment the highest number found
+        new_number = str(max_number + 1).zfill(2)
+
+        # Assign the new code
         vals['code'] = f"{current_year}/{new_number}"
 
         return super(OpBatch, self).create(vals)
@@ -104,7 +105,6 @@ class OpBatch(models.Model):
     def _compute_active_badge(self):
         for record in self:
             record.active_badge = "Active" if record.active else ""
-
 
     @api.depends('student_ids')
     def _compute_total_students(self):
@@ -143,7 +143,6 @@ class OpBatch(models.Model):
     inst_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_installment", store=1)
     inst_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_installment", store=1,)
     total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1, readonly=0)
-
     compo_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_compo", store=1)
     compo_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_compo", store=1)
     compo_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_compo", store=1, )
