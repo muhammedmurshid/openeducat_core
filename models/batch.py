@@ -75,29 +75,29 @@ class OpBatch(models.Model):
     max_no_of_students = fields.Integer(string="Max no.of Students")
     compo_ids = fields.One2many('payment.group.compo', 'compo_id')
 
-    @api.model
-    def create(self, vals):
-        current_year = datetime.today().year
-        max_number = 0
-
-        # Search all records for the current year
-        batches = self.search([('code', 'like', f'{current_year}/%')])
-
-        for batch in batches:
-            if batch.code:
-                match = re.match(rf"{current_year}/(\d+)", batch.code)
-                if match:
-                    number = int(match.group(1))
-                    if number > max_number:
-                        max_number = number
-
-        # Increment the highest number found
-        new_number = str(max_number + 1).zfill(2)
-
-        # Assign the new code
-        vals['code'] = f"{current_year}/{new_number}"
-
-        return super(OpBatch, self).create(vals)
+    # @api.model
+    # def create(self, vals):
+    #     current_year = datetime.today().year
+    #     max_number = 0
+    #
+    #     # Search all records for the current year
+    #     batches = self.search([('code', 'like', f'{current_year}/%')])
+    #
+    #     for batch in batches:
+    #         if batch.code:
+    #             match = re.match(rf"{current_year}/(\d+)", batch.code)
+    #             if match:
+    #                 number = int(match.group(1))
+    #                 if number > max_number:
+    #                     max_number = number
+    #
+    #     # Increment the highest number found
+    #     new_number = str(max_number + 1).zfill(2)
+    #
+    #     # Assign the new code
+    #     vals['code'] = f"{current_year}/{new_number}"
+    #
+    #     return super(OpBatch, self).create(vals)
 
     active_badge = fields.Char(string="Status", compute="_compute_active_badge")
 
