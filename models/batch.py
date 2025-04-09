@@ -31,7 +31,7 @@ class OpBatch(models.Model):
     _description = "OpenEduCat Batch"
     _order = 'id desc'
 
-    code = fields.Char('Batch ID No.', required=True, copy=False, readonly=False, default="New")
+    code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today())
