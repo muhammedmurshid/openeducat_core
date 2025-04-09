@@ -580,7 +580,6 @@ class FeeCollectionWizard(models.TransientModel):
                 tax_amount = 0  # Default tax percentage
                 # print(tax_amount, 'tax')
                 # self.tax_id = tax.id
-                print('tax_amt', self.amount_inc_tax * 18 / 118)
                 current_tax = self.amount_inc_tax * 18 / 118
                 # Reverse calculation to get amount_exc_tax
                 self.amount_exc_tax = self.amount_inc_tax - current_tax
@@ -610,7 +609,14 @@ class FeeCollectionWizard(models.TransientModel):
 
     def act_submit(self):
         print('hhi')
-        self.handle_wallet_payment()
+
+        # ✅ Check wallet balance first
+        wallet_balance = self.collection_id.wallet_balance
+        if self.wallet_amount < self.total_amount:
+            raise UserError(f"Insufficient wallet balance. Available: {wallet_balance}, Required: {self.total_amount}")
+
+        # ✅ Deduct from wallet
+        self.collection_id.wallet_balance -= self.total_amount
 
         if self.fee_type == 'Other Fee' and self.other_fee == 'Admission Fee':
             if self.collection_id.admission_fee_paid:
@@ -621,10 +627,8 @@ class FeeCollectionWizard(models.TransientModel):
 
             report = self.create_invoice_report(self.other_fee)
             self.update_admission_fee(report)
-
         else:
             report = self.create_invoice_report(self.fee_name if self.fee_type != 'Other Fee' else self.other_fee)
-            self.handle_wallet_payment()
             self.update_student_payment()
 
         self.create_payment_record()
@@ -655,9 +659,7 @@ class FeeCollectionWizard(models.TransientModel):
             'fee_name': self.other_fee or self.fee_name or self.choose_payment_installment_plan or 'Lump sum Fee',
             'tax': self.tax,
             'amount_exc_tax': exc_tax
-
         })
-
 
     def update_admission_fee(self, report):
         last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
@@ -675,25 +677,6 @@ class FeeCollectionWizard(models.TransientModel):
         if self.other_fee == 'Admission Fee':
             lead.admission_fee_paid = True
 
-    def handle_wallet_payment(self):
-        wallet_balance = self.collection_id.wallet_balance
-
-        # Check if wallet has sufficient balance
-        if wallet_balance < self.total_amount:
-            # self.wallet_amount = 0  # Reset wallet amount shown in form
-            raise UserError(f"Insufficient wallet balance. Available: {wallet_balance}, Required: {self.total_amount}")
-
-        # Deduct total amount from wallet
-        self.collection_id.wallet_balance -= self.total_amount
-
-
-        # If it's Admission Fee, also update that field
-        # if self.other_fee == 'Admission Fee':
-        #     self.collection_id.admission_fee += self.amount_inc_tax
-        # if self.fee_type == 'Ancillary Fee(Non Taxable)':
-        #     if self.other_fee != 'Admission Fee':
-        #         self.collection_id.due_amount -= self.total_amount
-
     def update_student_payment(self):
         if self.other_fee == 'Admission Fee':
             self.collection_id.admission_fee = self.amount_inc_tax
@@ -706,21 +689,17 @@ class FeeCollectionWizard(models.TransientModel):
             student.sudo().write({'payment_ids': [(0, 0, self.get_payment_data())]})
 
     def get_payment_data(self):
-        # self.collection_id.due_amount = self.collection_id.wallet_balance - self.collection_id.due_amount
         last_sl_no = len(self.collection_id.payment_ids) + 1
         last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
+
+        voucher_name = 'Invoice'
         type = 'invoice'
-        voucher_name = 'Receipt'
         if self.fee_type == 'Ancillary Fee(Non Taxable)':
             voucher_name = 'Collection A/c'
             type = 'ancillary'
-        else:
-            voucher_name = 'Invoice'
-            type = 'invoice'
-        if self.amount_exc_tax != 0:
-            exc_tax = self.amount_exc_tax
-        else:
-            exc_tax = self.amount_inc_tax - self.tax
+
+        exc_tax = self.amount_exc_tax if self.amount_exc_tax != 0 else self.amount_inc_tax - self.tax
+
         return {
             'sl_no': last_sl_no,
             'date': fields.Datetime.now(),
