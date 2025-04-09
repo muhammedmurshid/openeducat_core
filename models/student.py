@@ -156,6 +156,11 @@ class OpStudent(models.Model):
         student = super(OpStudent, self).create(vals)
 
         if student.batch_id:
+            if student.fee_type == 'lump_sum_fee':
+                student.due_amount = student.batch_id.total_lump_sum_fee
+            elif student.fee_type == 'installment':
+                student.due_amount = student.batch_id.total_installment_fee
+
             student.batch_id.total_no_of_students += 1
             student.batch_id.sudo().write({
                 'student_ids': [(0, 0, {
@@ -243,17 +248,17 @@ class OpStudent(models.Model):
     #         self.name = str(self.first_name) + " " + str(
     #             self.middle_name) + " " + str(self.last_name)
 
-    @api.depends('payment_ids.balance')
-    def _compute_due_amount(self):
-        for rec in self:
-            if rec.payment_ids:
-                last_balance = rec.payment_ids[-1].balance
-                if rec.payment_ids[-1].balance_type == 'debit':
-                    rec.due_amount = abs(last_balance)  # Ensure it's positive
-                else:
-                    rec.due_amount = -abs(last_balance)
+    # @api.depends('payment_ids.balance')
+    # def _compute_due_amount(self):
+    #     for rec in self:
+    #         if rec.payment_ids:
+    #             last_balance = rec.payment_ids[-1].balance
+    #             if rec.payment_ids[-1].balance_type == 'debit':
+    #                 rec.due_amount = abs(last_balance)  # Ensure it's positive
+    #             else:
+    #                 rec.due_amount = -abs(last_balance)
 
-    due_amount = fields.Float(string="Due Amount (Inc. Tax)", compute="_compute_due_amount", store=1)
+    due_amount = fields.Float(string="Due Amount (Inc. Tax)")
 
 
     @api.depends('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
@@ -605,6 +610,7 @@ class FeeCollectionWizard(models.TransientModel):
 
     def act_submit(self):
         print('hhi')
+        self.handle_wallet_payment()
 
         if self.fee_type == 'Other Fee' and self.other_fee == 'Admission Fee':
             if self.collection_id.admission_fee_paid:
@@ -662,20 +668,31 @@ class FeeCollectionWizard(models.TransientModel):
         lead.date_of_receipt = date.today()
         lead.state = 'qualified'
         lead.lead_quality = 'admission'
+
         lead.report = last_report.id
         self.collection_id.admission_fee_paid = True
         self.collection_id.admission_fee = self.amount_inc_tax
+        if self.other_fee == 'Admission Fee':
+            lead.admission_fee_paid = True
 
     def handle_wallet_payment(self):
-        if self.collection_id.wallet_balance == 0:
-            raise UserError("Student Wallet Amount is 0")
+        wallet_balance = self.collection_id.wallet_balance
 
-        if self.collection_id.wallet_balance < self.total_amount:
-            raise ValidationError("Invalid Wallet Amount!")
+        # Check if wallet has sufficient balance
+        if wallet_balance < self.total_amount:
+            # self.wallet_amount = 0  # Reset wallet amount shown in form
+            raise UserError(f"Insufficient wallet balance. Available: {wallet_balance}, Required: {self.total_amount}")
 
+        # Deduct total amount from wallet
         self.collection_id.wallet_balance -= self.total_amount
-        if self.other_fee == 'Admission Fee':
-            self.collection_id.admission_fee += self.amount_inc_tax
+
+
+        # If it's Admission Fee, also update that field
+        # if self.other_fee == 'Admission Fee':
+        #     self.collection_id.admission_fee += self.amount_inc_tax
+        # if self.fee_type == 'Ancillary Fee(Non Taxable)':
+        #     if self.other_fee != 'Admission Fee':
+        #         self.collection_id.due_amount -= self.total_amount
 
     def update_student_payment(self):
         if self.other_fee == 'Admission Fee':
@@ -693,7 +710,6 @@ class FeeCollectionWizard(models.TransientModel):
         last_sl_no = len(self.collection_id.payment_ids) + 1
         last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
         type = 'invoice'
-
         voucher_name = 'Receipt'
         if self.fee_type == 'Ancillary Fee(Non Taxable)':
             voucher_name = 'Collection A/c'

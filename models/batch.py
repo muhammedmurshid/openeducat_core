@@ -59,7 +59,7 @@ class OpBatch(models.Model):
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
         default=lambda self: self.env.user.company_id.currency_id.id)
-    academic_year = fields.Selection([('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year", required=1)
+    academic_year = fields.Selection([('2020-2021','2020-2021'), ('2021-2022','2021-2022'), ('2022-2023','2022-2023'), ('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year", required=1)
     total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1)
     batch_type = fields.Selection(
         [('present_batch', 'Running Batch'), ('future_batch', 'Future Batch'), ('ended_batch', 'Ended Batch') ],
@@ -277,7 +277,7 @@ class OpBatch(models.Model):
                     'course_id': [],
                 }
             }
-    course_id = fields.Many2one('op.course', 'Course', required=True, domain="[('department_id', '=', department_id)]")
+    course_id = fields.Many2one('op.course', 'Sub Course', domain="[('department_id', '=', department_id)]")
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
