@@ -37,7 +37,7 @@ class OpBatch(models.Model):
         'Start Date', required=True, default=fields.Date.today())
     end_date = fields.Date('End Date', store=1)
     active = fields.Boolean(default=True)
-    department_id = fields.Many2one('op.department', string="Department", required=1)
+    department_id = fields.Many2one('op.department', string="Department")
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
