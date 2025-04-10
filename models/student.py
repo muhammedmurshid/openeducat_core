@@ -437,6 +437,8 @@ class OpStudent(models.Model):
 
             })]
             rec.wallet_balance += rec.credit_balance_erp
+            if self.closing_balance != 0:
+                rec.due_amount = self.closing_balance
             # rec.due_amount = rec.closing_balance
 
 

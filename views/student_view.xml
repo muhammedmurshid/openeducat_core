@@ -476,6 +476,7 @@
                                     <group name="closing_balance" style="background-color:#d5dbd6">
                                         <field name="closing_balance" widget="monetary"/>
                                         <field name="credit_balance_erp" widget="monetary"/>
+                                        
 
                                         <div style="text-align: center; margin-top: 10px; margin-left:300px">
                                             <button name="act_add_closing_balance" string="Submit" type="object"
