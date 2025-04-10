@@ -351,14 +351,14 @@
 
 
                                 <field name="payment_ids">
-                                    <tree editable="bottom">
+                                    <tree editable="bottom" readonly="0">
                                         <field name="sl_no"/>
                                         <field name="currency_id" optional="hide"/>
-                                        <field name="date" options="{'format': 'dd/MM/yyyy'}"/>
+                                        <field name="date" readonly="0"/>
                                         <field name="payment_mode" optional="hide"/>
                                         <!--                                        <field name="payment_type"/>-->
                                         <field name="fee_type" optional="1"/>
-                                        <field name="voucher_no"/>
+                                        <field name="voucher_no" readonly="0"/>
                                         <field name="voucher_name"/>
                                         <field name="fee_name" string="Fee Name"/>
                                         <field name="type"/>
