@@ -34,6 +34,15 @@ class OpDepartment(models.Model):
     category_id = fields.Many2one('op.category', string="Category", required=1)
     type = fields.Selection([("regular", "Regular"), ("crash", "Crash")], string="Type")
     parent_id = fields.Many2one('op.department', 'Parent Department')
+    active = fields.Boolean(string='Active', default=True)
+
+    def action_archive(self):
+        for record in self:
+            record.active = False
+
+    def action_unarchive(self):
+        for record in self:
+            record.active = True
 
     # @api.model_create_multi
     # def create(self, vals):

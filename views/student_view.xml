@@ -316,7 +316,7 @@
                                             <!--                                            <field name="wallet_balance" readonly="1"/>-->
                                         </div>
                                     </div>
-                                    <div class="due_card_negative" invisible="state == 'stoped' or due_amount >= 0">
+                                    <div class="due_card_negative" invisible="state == 'stoped'">
                                         <div class="container">
                                             <h4>
                                                 <b style="color:white;" align="center">Payment Dues

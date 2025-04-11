@@ -316,6 +316,19 @@ class OpStudent(models.Model):
             'batch': self.batch_id.name
 
         })
+        return {
+            'name': _('Student Profile'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'op.student',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'target': 'current',
+            'effect': {
+                'fadeout': 'slow',
+                'message': 'Amount added Successfully Completed',
+                'type': 'rainbow_man',
+            }
+        }
 
 
 

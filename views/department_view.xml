@@ -67,6 +67,7 @@
                             <group>
                                 <field name="name"/>
                                 <field name="category_id"/>
+                                <field name="active" invisible="1"/>
 <!--                                <field name="parent_id"/>-->
                             </group>
                             <group>
