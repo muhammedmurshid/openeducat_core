@@ -137,6 +137,8 @@ class OpStudent(models.Model):
 
     @api.model
     def create(self, vals):
+        if vals.get('mobile'):
+            vals['mobile'] = vals['mobile'].replace(' ', '')
         # if vals.get('gr_no') in [False, "New"]:
             # current_year = datetime.today().year
             # prefix = f"L{current_year}/"
@@ -174,6 +176,8 @@ class OpStudent(models.Model):
         return student
 
     def write(self, vals):
+        if vals.get('mobile'):
+            vals['mobile'] = vals['mobile'].replace(' ', '')
         for student in self:
             old_batch = student.batch_id
             res = super(OpStudent, self).write(vals)
@@ -295,6 +299,7 @@ class OpStudent(models.Model):
         if self.mobile and self.mobile.isalpha():
             raise ValidationError(_("Enter Your Valid Mobile Number"))
 
+
     def act_add_amount_to_wallet(self):
         active_id = self.env.context.get('active_id')
         fee = self.env['fee.quick.pay'].browse(active_id)
@@ -406,6 +411,8 @@ class OpStudent(models.Model):
         for record in self:
             record.drop_date_title = f"Drop Date: {record.drop_date.strftime('%Y-%m-%d')}" if record.drop_date else "No Drop Date"
 
+    def act_enrollment_batch(self):
+        print('hi')
 
     def act_drop_student(self):
         return {'type': 'ir.actions.act_window',

@@ -237,7 +237,7 @@
                                 invisible="state == 'stoped'"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
-
+<!--                        <button name="act_enrollment_batch" string="Enrollment" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>-->
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -312,11 +312,9 @@
                                                 </b>
 
                                             </h4>
-
-                                            <!--                                            <field name="wallet_balance" readonly="1"/>-->
                                         </div>
                                     </div>
-                                    <div class="due_card_negative" invisible="state == 'stoped'">
+                                    <div class="due_card_negative" invisible="state == 'stoped' or due_amount >= 0">
                                         <div class="container">
                                             <h4>
                                                 <b style="color:white;" align="center">Payment Dues
@@ -324,8 +322,15 @@
                                                 </b>
 
                                             </h4>
-
-                                            <!--                                            <field name="wallet_balance" readonly="1"/>-->
+                                        </div>
+                                    </div>
+                                    <div class="due_card_negative" invisible="state == 'stoped' or due_amount != 0">
+                                        <div class="container">
+                                            <h4>
+                                                <b style="color:white;" align="center">Payment Dues
+                                                    <field name="due_amount"/>
+                                                </b>
+                                            </h4>
                                         </div>
                                     </div>
 
