@@ -139,21 +139,21 @@ class OpStudent(models.Model):
     def create(self, vals):
         if vals.get('mobile'):
             vals['mobile'] = vals['mobile'].replace(' ', '')
-        # if vals.get('gr_no') in [False, "New"]:
-            # current_year = datetime.today().year
-            # prefix = f"L{current_year}/"
-            #
-            # # Find the last record with the same year pattern
-            # last_batch = self.search([('gr_no', 'like', prefix + '%')], order='gr_no desc', limit=1)
-            # if last_batch and last_batch.gr_no:
-            #     match = re.search(r"/(\d+)$", last_batch.gr_no)
-            #     last_number = int(match.group(1)) if match else 0
-            # else:
-            #     last_number = 0
-            #
-            # new_number = last_number + 1
-            # vals['gr_no'] = f"{prefix}{new_number}"
-            # print(vals['gr_no'], 'Generated GR No')  # Debugging output
+        if vals.get('gr_no') in [False, "New"]:
+            current_year = datetime.today().year
+            prefix = f"L{current_year}/"
+
+            # Find the last record with the same year pattern
+            last_batch = self.search([('gr_no', 'like', prefix + '%')], order='gr_no desc', limit=1)
+            if last_batch and last_batch.gr_no:
+                match = re.search(r"/(\d+)$", last_batch.gr_no)
+                last_number = int(match.group(1)) if match else 0
+            else:
+                last_number = 0
+
+            new_number = last_number + 1
+            vals['gr_no'] = f"{prefix}{new_number}"
+            print(vals['gr_no'], 'Generated GR No')  # Debugging output
 
         student = super(OpStudent, self).create(vals)
 
