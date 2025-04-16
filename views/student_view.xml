@@ -234,7 +234,7 @@
                         <button name="act_create_receipt" string="Create Receipt" type="object"
                                 invisible="state == 'stoped'" class="btn-create-receipt"/>
                         <button name="act_collect_fee" string="Create Invoice" type="object" class="btn-collect_fee"
-                                invisible="state == 'stoped'"/>
+                                invisible="state == 'stoped' or make_visible_admission_officer == 1"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
                         <button name="act_enrollment_batch" string="Enrollment" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
@@ -460,6 +460,7 @@
                                         <field name="batch_id" style="background-color:#89d674;"/>
                                         <field name="course_id"/>
                                         <field name="admission_fee" widget="monetary"/>
+                                        <field name="make_visible_admission_officer" invisible="1"/>
 
 
                                         <!--                                        <field name="fee_type"/>-->

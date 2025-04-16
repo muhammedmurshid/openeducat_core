@@ -299,6 +299,19 @@ class OpStudent(models.Model):
         if self.mobile and self.mobile.isalpha():
             raise ValidationError(_("Enter Your Valid Mobile Number"))
 
+    @api.depends('make_visible_admission_officer')
+    def get_user(self):
+        print('kkkll')
+        user_crnt = self.env.user.id
+
+        res_user = self.env['res.users'].search([('id', '=', self.env.user.id)])
+        if res_user.has_group('custom_leads.group_lead_users'):
+            self.make_visible_admission_officer = True
+        else:
+            self.make_visible_admission_officer = False
+
+    make_visible_admission_officer = fields.Boolean(string="User", default=True, compute='get_user')
+
 
     def act_add_amount_to_wallet(self):
         active_id = self.env.context.get('active_id')
