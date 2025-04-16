@@ -219,11 +219,11 @@ class OpStudent(models.Model):
         return super(OpStudent, self).unlink()
 
 
-    # _sql_constraints = [(
-    #     'unique_gr_no',
-    #     'unique(gr_no)',
-    #     'Registration Number must be unique per student!'
-    # )]
+    _sql_constraints = [(
+        'unique_gr_no',
+        'unique(gr_no)',
+        'Registration Number must be unique per student!'
+    )]
 
     @api.depends('batch_id')
     def _compute_course_id(self):
@@ -263,7 +263,7 @@ class OpStudent(models.Model):
     #                 rec.due_amount = -abs(last_balance)
 
     due_amount = fields.Float(string="Due Amount (Inc. Tax)")
-
+    # batch_ids = fields.Many2many('op.student', string="Batches")
 
     @api.depends('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
     def _compute_batch_fee(self):
@@ -413,6 +413,13 @@ class OpStudent(models.Model):
 
     def act_enrollment_batch(self):
         print('hi')
+        return {'type': 'ir.actions.act_window',
+                'name': _('Enrollment Batch'),
+                'res_model': 'enrollment.batch.wizard',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_student_id': self.id}, }
 
     def act_drop_student(self):
         return {'type': 'ir.actions.act_window',

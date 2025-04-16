@@ -29,7 +29,7 @@
     'complexity': "easy",
     'author': 'OpenEduCat Inc',
     'website': 'https://www.openeducat.org',
-    'depends': ['board', 'hr', 'web', 'website','base',],
+    'depends': ['board', 'hr', 'web', 'website', 'base', ],
     'data': [
         'security/op_security.xml',
         'security/ir.model.access.csv',
@@ -63,7 +63,8 @@
         'views/fee_collection.xml',
         'views/group.xml',
         'views/receipt_wizard.xml',
-        'views/drop_wizard.xml'
+        'views/drop_wizard.xml',
+        'views/enrollment.xml',
     ],
     'demo': [
         'demo/homepage_template.xml',

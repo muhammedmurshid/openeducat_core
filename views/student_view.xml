@@ -237,7 +237,7 @@
                                 invisible="state == 'stoped'"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
-<!--                        <button name="act_enrollment_batch" string="Enrollment" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>-->
+                        <button name="act_enrollment_batch" string="Enrollment" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>

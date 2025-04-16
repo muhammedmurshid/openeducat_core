@@ -13,8 +13,10 @@ class CreateReceiptWizard(models.TransientModel):
     student_name = fields.Char(string="Name")
     cheque_no = fields.Char(string="Cheque No/Reference No")
     amount = fields.Float(string="Amount")
-    payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], string="Payment Mode")
+    # payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], string="Payment Mode")
     reference_no = fields.Char(string="Reference No.")
+    payment_mode = fields.Selection([('Cash', 'Cash'),], string="Payment Mode")
+
     # batch_id = fields.Many2one(string="Batch")
     # branch_id = fields.Many2one(string="Branch")
     branch = fields.Selection(
