@@ -13,12 +13,13 @@
                    <field name="student_name" string="Name" invisible="1"/>
 <!--                   <field name="branch_id"/>-->
                    <field name="branch" />
-                   <field name="payment_mode" required="1"/>
+                   <field name="payment_mode" required="1" readonly="admission_officer == 1"/>
                    <field name="reference_no" invisible="payment_mode == 'Cash'"/>
                    <field name="amount" />
                    <field name="amount_in_words" invisible="1"/>
 
                    <field name="collected_by"/>
+                   <field name="admission_officer"/>
                </group>
 
                <footer>

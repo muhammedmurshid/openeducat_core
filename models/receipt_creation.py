@@ -13,9 +13,9 @@ class CreateReceiptWizard(models.TransientModel):
     student_name = fields.Char(string="Name")
     cheque_no = fields.Char(string="Cheque No/Reference No")
     amount = fields.Float(string="Amount")
-    # payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], string="Payment Mode")
+    admission_officer = fields.Boolean(string='Admission Officer')
+    payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], string="Payment Mode")
     reference_no = fields.Char(string="Reference No.")
-    payment_mode = fields.Selection([('Cash', 'Cash'),], string="Payment Mode")
 
     # batch_id = fields.Many2one(string="Batch")
     # branch_id = fields.Many2one(string="Branch")
@@ -33,6 +33,11 @@ class CreateReceiptWizard(models.TransientModel):
         print('workssssss')
         for i in self:
             i.amount_in_words = num2words(i.amount, lang='en').upper()
+
+    @api.onchange('admission_officer')
+    def _onchange_admission_officer(self):
+        if self.admission_officer == 1:
+            self.payment_mode = 'Cash'
 
     def act_submit(self):
         print('hh')

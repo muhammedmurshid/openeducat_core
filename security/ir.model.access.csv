@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
-access_op_student_student,op_student_student,model_op_student,group_op_back_office_admin,1,1,1,1
-access_op_student_faculty,op_student_faculty,model_op_student,group_op_faculty,1,1,1,0
+access_op_student_student,op_student_student,model_op_student,group_op_back_office_admin,1,1,0,1
+access_op_student_faculty,op_student_faculty,model_op_student,group_op_faculty,1,1,0,0
 access_op_course_faculty,name_op_course_faculty,model_op_course,group_op_faculty,1,1,1,0
 access_op_course_back_office_admin,name_op_course_back_office_admin,model_op_course,group_op_back_office_admin,1,1,1,1
 access_op_batch_faculty,name_op_batch_faculty,model_op_batch,group_op_faculty,1,1,1,0
@@ -42,10 +42,10 @@ access_fee_changing_plan,access_fee_changing_plan,model_change_payment_plan,,1,1
 access_for_op_group_internal,access_for_op_group_internal,model_op_group,,1,1,1,1
 access_for_group_compo,access_for_group_compo,model_payment_group_compo,,1,1,1,1
 
-access_op_student_admission_team,access_op_student_admission_team,model_op_student,group_op_admission_team,1,1,1,1
-access_op_student_accounts,access_op_student_accounts,model_op_student,group_op_accounts,1,1,1,1
-access_op_student_admin,access_op_student_admin,model_op_student,group_op_admin,1,1,1,1
-access_op_student_admission_manager,access_op_student_admission_manager,model_op_student,group_op_admission_manager,1,1,1,1
+access_op_student_admission_team,access_op_student_admission_team,model_op_student,group_op_admission_team,1,1,0,1
+access_op_student_accounts,access_op_student_accounts,model_op_student,group_op_accounts,1,1,0,1
+access_op_student_admin,access_op_student_admin,model_op_student,group_op_admin,1,1,0,1
+access_op_student_admission_manager,access_op_student_admission_manager,model_op_student,group_op_admission_manager,1,1,0,1
 
 access_op_batch_admission_team,access_op_batch_admission_team,model_op_batch,group_op_admission_team,1,1,1,0
 access_op_batch_accounts,access_op_batch_accounts,model_op_batch,group_op_accounts,1,1,1,1

@@ -23,6 +23,7 @@
                     </group>
                     <group>
                         <field name="choose_payment_installment_plan" invisible="fee_plan != 'installment' or fee_type != 'Batch Fee' " style="background-color: #dae0db"/>
+                        <field name="excess_amount" invisible="1"/>
                         <field name="non_tax" invisible="1"/>
                         <field name="collection_id" invisible="1"/>
                         <field name="remarks"/>

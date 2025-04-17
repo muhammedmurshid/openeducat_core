@@ -82,6 +82,7 @@
                     <!--                    <field name="blood_group"/>-->
 <!--                    <field name="emergency_contact"/>-->
                     <field name="course_id"/>
+                    <field name="due_amount" string="Fees Pending"/>
                     <!--                    <field name="nationality"/>-->
                     <!--                    <field name="lang" options="hide"/>-->
                     <button name="act_add_amount_to_wallet" type="object"
@@ -547,6 +548,7 @@
                     <newline/>
                     <filter string="Wallet Not Empty" name="wallet_not_empty" domain="[('wallet_balance', '!=', 0)]"/>
                     <filter string="Wallet Empty" name="wallet_empty" domain="[('wallet_balance', '=', 0)]"/>
+                    <filter string="Fees Pending" name="fees_pending" domain="[('due_amount', '!=', 0)]"/>
                     <group expand="0" string="Group By...">
                         <filter name="blood_group" string="Blood Group"
                                 domain="[]" context="{'group_by':'blood_group'}"/>
