@@ -19,7 +19,7 @@
                    <field name="amount_in_words" invisible="1"/>
 
                    <field name="collected_by"/>
-                   <field name="admission_officer"/>
+                   <field name="admission_officer" invisible="1"/>
                </group>
 
                <footer>

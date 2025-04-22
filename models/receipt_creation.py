@@ -14,7 +14,7 @@ class CreateReceiptWizard(models.TransientModel):
     cheque_no = fields.Char(string="Cheque No/Reference No")
     amount = fields.Float(string="Amount")
     admission_officer = fields.Boolean(string='Admission Officer')
-    payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], string="Payment Mode")
+    payment_mode = fields.Selection([('Cash', 'Cash'), ('Bank Direct', 'Bank Direct'), ('Gateway', 'Gateway')], default='Cash', string="Payment Mode")
     reference_no = fields.Char(string="Reference No.")
 
     # batch_id = fields.Many2one(string="Batch")
@@ -40,7 +40,7 @@ class CreateReceiptWizard(models.TransientModel):
             self.payment_mode = 'Cash'
 
     def act_submit(self):
-        print('hh')
+        print('hh', self.payment_mode)
         if self.student_id:
             self.student_id.wallet_balance += self.amount
         receipt = self.env['receipts.report'].sudo().create({
@@ -51,7 +51,8 @@ class CreateReceiptWizard(models.TransientModel):
             'payment_mode': self.payment_mode,
             'student_id': self.student_id.id,
             'batch': self.student_id.batch_id.name,
-            'reference_no': self.reference_no
+            'reference_no': self.reference_no,
+            'fee_collector_id': self.env.user.id
 
         })
         voucher = self.env['receipts.report'].sudo().search([], order="id desc", limit=1)
