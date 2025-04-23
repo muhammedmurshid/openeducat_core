@@ -16,7 +16,7 @@
                     </group>
                 </group>
                 <footer>
-                    <!--                    <button name="act_submit" string="Submit" type="object" class="oe_highlight"/>-->
+                    <button name="enrollment_batch" string="Enrollment" type="object" class="oe_highlight"/>
                     <button name="cancel" string="Cancel" special="cancel"/>
                 </footer>
             </form>

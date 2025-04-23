@@ -263,7 +263,8 @@ class OpStudent(models.Model):
     #                 rec.due_amount = -abs(last_balance)
 
     due_amount = fields.Float(string="Due Amount (Inc. Tax)")
-    # batch_ids = fields.Many2many('op.student', string="Batches")
+    enrolled = fields.Boolean(string="Enrolled")
+    batch_ids = fields.Many2many('op.batch', string="Batches")
 
     @api.depends('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
     def _compute_batch_fee(self):
@@ -417,6 +418,7 @@ class OpStudent(models.Model):
                 raise ValidationError("Kindly assign a fee type to this student.")
         else:
             raise ValidationError("Kindly assign a batch to this student.")
+
     drop_reason = fields.Text(string="Drop Reason")
     drop_date = fields.Date(string="Drop Date")
     drop_date_title = fields.Char(compute="_compute_drop_date_title")
@@ -494,6 +496,13 @@ class OpStudent(models.Model):
                 'context': {'default_collection_id': self.id,
                             'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type }, }
 
+class EnrollmentBatches(models.Model):
+    _name = 'enrollment.details'
+    _description = 'Enrollment Details'
+
+    batch_id = fields.Many2one('op.batch', string="Batch")
+    course_id = fields.Many2one('op.course', string="Course")
+    fee_type = fields.Selection([('lump_sum_fee','Lump Sum Fee'), ('installment','Installment')], string="Fee Type")
 
 class FeeCollectionWizard(models.TransientModel):
     """This model is used for sending WhatsApp messages through Odoo."""

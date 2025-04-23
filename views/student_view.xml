@@ -292,6 +292,7 @@
                                         <field name="gr_no" string="Reg No"/>
                                         <field name="mobile" placeholder="Mobile Number"/>
                                         <field name="email" required="1" placeholder="Email Address"/>
+                                         <field name="make_visible_admission_officer" invisible="1"/>
                                     </group>
                                     <div class="card" invisible="state == 'stoped'">
                                         <div class="container">
@@ -455,15 +456,15 @@
                                 </group>
                             </page>
 
-                            <page name="course_details" string="Course Details">
+                            <page name="course_details" string="Course Details" >
                                 <group>
                                     <group>
-                                        <field name="batch_id" style="background-color:#89d674;"/>
-                                        <field name="course_id"/>
-                                        <field name="admission_fee" widget="monetary"/>
-                                        <field name="make_visible_admission_officer" invisible="1"/>
+                                        <field name="batch_id" style="background-color:#89d674;" readonly="make_visible_admission_officer == 1"/>
+                                        <field name="course_id" readonly="make_visible_admission_officer == 1"/>
+                                        <field name="admission_fee" widget="monetary" readonly="make_visible_admission_officer == 1"/>
 
-
+                                        <field name="enrolled"/>
+                                        <field name="batch_ids" widget="many2many_tags" invisible="enrolled == 0"/>
                                         <!--                                        <field name="fee_type"/>-->
                                         <!--                                        <field name="batch_id"/>-->
                                         <!--                                        <field name="branch_id"/>-->
@@ -481,25 +482,25 @@
                                     <!--                                    </group>-->
 
                                     <group name="closing_balance" style="background-color:#d5dbd6">
-                                        <field name="closing_balance" widget="monetary"/>
-                                        <field name="credit_balance_erp" widget="monetary"/>
+                                        <field name="closing_balance" widget="monetary" readonly="make_visible_admission_officer == 1"/>
+                                        <field name="credit_balance_erp" widget="monetary" readonly="make_visible_admission_officer == 1"/>
                                         
 
                                         <div style="text-align: center; margin-top: 10px; margin-left:300px">
                                             <button name="act_add_closing_balance" string="Submit" type="object"
-                                                    class="oe_highlight"/>
+                                                    class="oe_highlight" invisible="make_visible_admission_officer == 1"/>
                                         </div>
                                     </group>
 
 
                                     <div class="o_inner_group">
                                         <group style="background-color:#ede9dd">
-                                            <label for="fee_type"/>
+                                            <label for="fee_type" readonly="make_visible_admission_officer == 1"/>
                                             <div class="o_row">
-                                                <field name="fee_type"/>
+                                                <field name="fee_type" readonly="make_visible_admission_officer == 1"/>
                                                 <button name="act_change_fee_plan" string="Change Plan" type="object"
                                                         icon="fa-reply" class="change_plan_button"
-                                                        groups="openeducat_core.group_op_back_office_accounts"/>
+                                                        groups="openeducat_core.group_op_back_office_accounts" invisible="make_visible_admission_officer == 1"/>
                                             </div>
                                         </group>
 
@@ -525,6 +526,17 @@
                                     </div>
                                 </group>
                             </page>
+<!--                            <page name="enrollment_ids" string="Enrollment Details">-->
+
+
+<!--                                <field name="enrollment_ids">-->
+<!--                                    <tree editable="bottom" readonly="0">-->
+<!--                                        <field name="batch_id"/>-->
+<!--                                        <field name="course_id"/>-->
+<!--                                        <field name="fee_type"/>-->
+<!--                                    </tree>-->
+<!--                                </field>-->
+<!--                            </page>-->
 
                         </notebook>
                     </sheet>
