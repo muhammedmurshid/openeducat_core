@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <!-- Odoo View Definition for Whatsapp Message Form -->
-    <record id="enrollment_batch_wizard_view_form" model="ir.ui.view">
-        <field name="name">enrollment.batch.view.form</field>
-        <field name="model">enrollment.batch.wizard</field>
+    <record id="batch_transfer_wizard_view_form" model="ir.ui.view">
+        <field name="name">batch.transfer.view.form</field>
+        <field name="model">batch.transfer</field>
         <field name="priority" eval="8"/>
         <field name="arch" type="xml">
-            <form string="Batch Enrollment">
+            <form string="Batch Transfer">
                 <group>
                     <group>
                         <field name="student_id"/>
                         <field name="batch_id"/>
                         <field name="course_id"/>
-
-
                     </group>
                     <group>
                         <field name="fee_type"/>
-                        <field name="batch_fee"/>
                     </group>
                 </group>
                 <footer>
-                    <button name="enrollment_batch" string="Enrollment" type="object" class="oe_highlight"/>
+                    <button name="act_confirm" string="Confirm" type="object" class="oe_highlight"/>
                     <button name="cancel" string="Cancel" special="cancel"/>
                 </footer>
             </form>

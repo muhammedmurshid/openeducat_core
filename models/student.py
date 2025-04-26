@@ -114,7 +114,9 @@ class OpStudent(models.Model):
                               ('stoped', 'Droped')],
                              string="Status", default="confirm")
     active = fields.Boolean(default=True)
-    batch_id = fields.Many2one('op.batch', string="Batch", required=1)
+    batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
+    batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
+    batch_end_date = fields.Date(string="Batch End Date", related='batch_id.end_date')
     fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", required=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
@@ -310,8 +312,19 @@ class OpStudent(models.Model):
             self.make_visible_admission_officer = True
         else:
             self.make_visible_admission_officer = False
-
+    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments")
     make_visible_admission_officer = fields.Boolean(string="User", default=True, compute='get_user')
+
+    @api.depends('make_visible_lead_manager')
+    def get_lead_manager(self):
+        user_crnt = self.env.user.id
+        res_user = self.env['res.users'].search([('id', '=', self.env.user.id)])
+        if res_user.has_group('custom_leads.group_lead_manager'):
+            self.make_visible_lead_manager = True
+        else:
+            self.make_visible_lead_manager = False
+
+    make_visible_lead_manager = fields.Boolean(string="Lead Manager", default=True, compute='get_lead_manager')
 
 
     def act_add_amount_to_wallet(self):
@@ -349,7 +362,14 @@ class OpStudent(models.Model):
             }
         }
 
-
+    def act_batch_transfer(self):
+        return {'type': 'ir.actions.act_window',
+                'name': _('Batch Transfer'),
+                'res_model': 'batch.transfer',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_student_id': self.id}, }
 
     @api.model
     def get_import_templates(self):
@@ -484,9 +504,10 @@ class OpStudent(models.Model):
                 rec.due_amount = self.closing_balance
             # rec.due_amount = rec.closing_balance
 
-
     def act_collect_fee(self):
-        print('hi')
+
+        all_batch_ids = self.mapped('enrollment_ids.batch_id').ids
+        print('hi', all_batch_ids)
         return {'type': 'ir.actions.act_window',
                 'name': _('Create Invoice'),
                 'res_model': 'fee.collection.wizard',
@@ -494,7 +515,8 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_collection_id': self.id,
-                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type }, }
+                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type,'default_batch_ids': [(6, 0, all_batch_ids)],}, }
+
 
 class EnrollmentBatches(models.Model):
     _name = 'enrollment.details'
@@ -503,6 +525,8 @@ class EnrollmentBatches(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch")
     course_id = fields.Many2one('op.course', string="Course")
     fee_type = fields.Selection([('lump_sum_fee','Lump Sum Fee'), ('installment','Installment')], string="Fee Type")
+    student_id = fields.Many2one('op.student', string="Student")
+    batch_fee = fields.Float(string="Batch Fee")
 
 class FeeCollectionWizard(models.TransientModel):
     """This model is used for sending WhatsApp messages through Odoo."""
@@ -574,7 +598,7 @@ class FeeCollectionWizard(models.TransientModel):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     tax_id = fields.Many2one('account.tax', string="Tax")
     non_tax = fields.Boolean(string="Non Taxable")
-    batch_id = fields.Many2one('op.batch', string="Batch")
+
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")
     igst_amount = fields.Float(string="IGST Amount")
@@ -582,6 +606,12 @@ class FeeCollectionWizard(models.TransientModel):
     fee_plan = fields.Char(string="Fee Plan")
     excess_amount = fields.Char(string="Excess Amount")
     choose_payment_installment_plan = fields.Selection([('1st Installment','1st Installment'), ('2nd Installment','2nd Installment'), ('3rd Installment','3rd Installment')], string="Choose Installment Plan")
+
+            # self.batch_ids = [(6, 0, batch_ids)]
+
+    batch_ids = fields.Many2many('op.batch', string="Batches")
+
+    batch_id = fields.Many2one('op.batch', string="Batch")
 
     @api.onchange('fee_type','other_fee','amount_exc_tax')
     def _onchange_fee_types(self):
@@ -605,10 +635,15 @@ class FeeCollectionWizard(models.TransientModel):
             self.fee_name = False
             self.batch_id = False
         else:
-            self.excess_amount = False
-            self.batch_id = self.collection_id.batch_id.id
-            self.fee_name = False
-            self.other_fee = False
+            if self.collection_id.enrolled == 1:
+                self.excess_amount = False
+                self.fee_name = False
+                self.other_fee = False
+            else:
+                self.excess_amount = False
+                self.batch_id = self.collection_id.batch_id.id
+                self.fee_name = False
+                self.other_fee = False
 
     @api.onchange('fee_plan','choose_payment_installment_plan')
     def _onchange_batch_fee_plan(self):
@@ -702,7 +737,7 @@ class FeeCollectionWizard(models.TransientModel):
             print(exc_tax, 'withot')
         return self.env['invoice.reports'].sudo().create({
             'name': self.collection_id.name,
-            'branch': self.collection_id.branch_id.name,
+            'branch': self.batch_id.branch.name,
             'date': date.today(),
             'fee_type': self.fee_type,
             'reference_no': self.cheque_no,
@@ -711,7 +746,7 @@ class FeeCollectionWizard(models.TransientModel):
             'lead_id': self.collection_id.lead_id.id,
             'payment_mode': self.payment_mode,
             'cheque_no': self.cheque_no,
-            'batch': self.collection_id.batch_id.name,
+            'batch': self.batch_id.name,
             'student_id': self.collection_id.id,
             'cgst_amount': self.cgst_amount,
             'sgst_amount': self.sgst_amount,
@@ -774,6 +809,9 @@ class FeeCollectionWizard(models.TransientModel):
                 'amount_inc_tax': self.amount_inc_tax,
                 'voucher_no': last_report.invoice_number,
                 'voucher_name': voucher_name,
+                'batch_name': self.batch_id.name,
+                'branch_name': self.batch_id.branch.name,
+                'course_name': self.batch_id.course_id.name,
                 'type': type,
                 'cheque_no': self.cheque_no,
                 'branch': self.branch,
@@ -792,6 +830,9 @@ class FeeCollectionWizard(models.TransientModel):
                 'payment_mode': self.payment_mode,
                 'fee_type': self.fee_type,
                 'amount_exc_tax': exc_tax,
+                'batch_name': self.batch_id.name,
+                'branch_name': self.batch_id.branch.name,
+                'course_name': self.batch_id.course_id.name,
                 'amount_inc_tax': self.amount_inc_tax,
                 'voucher_no': last_report.invoice_number,
                 'voucher_name': voucher_name,
@@ -832,6 +873,9 @@ class PaymentHistoryFeeCollection(models.Model):
     payment_id = fields.Many2one('op.student', string="Payment")
     company_id = fields.Many2one(string='Company', comodel_name='res.company', default=lambda self: self.env.company)
     cgst_amount = fields.Float(string="CGST Amount")
+    batch_name = fields.Char(string="Batch")
+    course_name = fields.Char(string="Course")
+    branch_name = fields.Char(string="Branch")
     sgst_amount = fields.Float(string="SGST Amount")
     debit_amount = fields.Float(string="Debit Amount")
     credit_amount = fields.Float(string="Credit Amount")

@@ -77,3 +77,4 @@ access_drop_student_wizard,access_drop_student_wizard,model_drop_student_wizard,
 access_enrollment_batch,access_enrollment_batch,model_enrollment_batch_wizard,,1,1,1,1
 
 access_enrollment_details,access_enrollment_details,model_enrollment_details,,1,1,1,1
+access_batch_transfer,access_batch_transfer,model_batch_transfer,,1,1,1,1

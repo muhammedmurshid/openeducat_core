@@ -133,6 +133,14 @@
                         color: white;
                         text-align: center;
                         }
+                        .btn-batch-transfer {
+                        background-color: #4a8f25;
+                        width: 120px;
+                        height: 35px;
+                        font-size: 14px;
+                        color: white;
+                        text-align: center;
+                        }
                         .card {
                         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
                         transition: 0.3s;
@@ -228,7 +236,7 @@
                                 string="Create Student User"
                                 class="btn-create-student"
                                 groups="openeducat_core.group_op_back_office_admin"
-                                invisible="user_id != False or state == 'stoped'"/>
+                                invisible="1"/>
                         <button name="act_allocate_to_batch" type="object" string="Allocate to Batch"
                                 class="oe_highlight" invisible="state != 'confirm'"/>
 
@@ -240,6 +248,7 @@
                                 invisible="state == 'stoped'"/>
                         <button name="act_enrollment_batch" string="Enrollment" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
                         <field name="state" widget="statusbar"/>
+                        <button name="act_batch_transfer" string="Batch Transfer" type="object" class="btn-batch-transfer" invisible="state != 'batch_allocated' or make_visible_lead_manager == 0"/>
                     </header>
                     <sheet>
                         <!--                        <widget name="web_ribbon"-->
@@ -293,6 +302,7 @@
                                         <field name="mobile" placeholder="Mobile Number"/>
                                         <field name="email" required="1" placeholder="Email Address"/>
                                          <field name="make_visible_admission_officer" invisible="1"/>
+                                        <field name="make_visible_lead_manager" invisible="1"/>
                                     </group>
                                     <div class="card" invisible="state == 'stoped'">
                                         <div class="container">
@@ -363,6 +373,9 @@
                                         <field name="currency_id" optional="hide"/>
                                         <field name="date" readonly="0"/>
                                         <field name="payment_mode" optional="hide"/>
+                                        <field name="batch_name"/>
+                                        <field name="course_name"/>
+                                        <field name="branch_name"/>
                                         <!--                                        <field name="payment_type"/>-->
                                         <field name="fee_type" optional="1"/>
                                         <field name="voucher_no" readonly="0"/>
@@ -460,11 +473,12 @@
                                 <group>
                                     <group>
                                         <field name="batch_id" style="background-color:#89d674;" readonly="make_visible_admission_officer == 1"/>
+                                        <field name="batch_start_date"/>
+                                        <field name="batch_end_date"/>
                                         <field name="course_id" readonly="make_visible_admission_officer == 1"/>
                                         <field name="admission_fee" widget="monetary" readonly="make_visible_admission_officer == 1"/>
 
                                         <field name="enrolled"/>
-                                        <field name="batch_ids" widget="many2many_tags" invisible="enrolled == 0"/>
                                         <!--                                        <field name="fee_type"/>-->
                                         <!--                                        <field name="batch_id"/>-->
                                         <!--                                        <field name="branch_id"/>-->
@@ -526,17 +540,18 @@
                                     </div>
                                 </group>
                             </page>
-<!--                            <page name="enrollment_ids" string="Enrollment Details">-->
+                            <page name="enrollment_ids" string="Enrollment Details">
 
 
-<!--                                <field name="enrollment_ids">-->
-<!--                                    <tree editable="bottom" readonly="0">-->
-<!--                                        <field name="batch_id"/>-->
-<!--                                        <field name="course_id"/>-->
-<!--                                        <field name="fee_type"/>-->
-<!--                                    </tree>-->
-<!--                                </field>-->
-<!--                            </page>-->
+                                <field name="enrollment_ids">
+                                    <tree editable="bottom" readonly="0">
+                                        <field name="batch_id"/>
+                                        <field name="course_id"/>
+                                        <field name="fee_type"/>
+                                        <field name="batch_fee"/>
+                                    </tree>
+                                </field>
+                            </page>
 
                         </notebook>
                     </sheet>
