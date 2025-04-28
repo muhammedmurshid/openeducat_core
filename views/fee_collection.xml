@@ -12,9 +12,11 @@
                         <field name="wallet_amount" style="background-color:#283880; color:white;" invisible="payment_mode != 'Wallet'"/>
                         <field name="fee_type" style="background-color:#fc8f47;"/>
                         <field name="currency_id" invisible="1"/>
+                        <field name="enrolled" invisible="1"/>
                         <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
                         <field name="other_fee" invisible="fee_type != 'Other Fee'"/>
-                        <field name="batch_id" invisible="fee_type not in ['Batch Fee','admission_fee']" style="background-color: #dae0db" domain="[('id', 'in', batch_ids)]"/>
+                        <field name="batch_id" invisible="fee_type not in ['Batch Fee','admission_fee']  or enrolled == 0" style="background-color: #dae0db" domain="[('id', 'in', batch_ids)]"/>
+                        <field name="batch_id" invisible="fee_type not in ['Batch Fee','admission_fee'] or enrolled == 1" style="background-color: #dae0db" readonly="1"/>
                         <field name="amount_exc_tax" widget="monetary" readonly="fee_type != 'Ancillary Fee(Non Taxable)'"/>
                         <field name="tax_id" string="Tax id" invisible="1"/>
                         <field name="amount_inc_tax" widget="monetary" invisible="fee_type == 'Ancillary Fee(Non Taxable)'"/>

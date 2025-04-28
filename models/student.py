@@ -515,7 +515,7 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_collection_id': self.id,
-                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type,'default_batch_ids': [(6, 0, all_batch_ids)],}, }
+                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type,'default_batch_ids': [(6, 0, all_batch_ids)], 'default_enrolled': self.enrolled}, }
 
 
 class EnrollmentBatches(models.Model):
@@ -583,6 +583,7 @@ class FeeCollectionWizard(models.TransientModel):
     payment_mode = fields.Selection(
         [('Wallet', 'Wallet')],
         string="Payment Mode", default="Wallet")
+    enrolled = fields.Boolean(string="Enrolled")
     branch = fields.Selection(
         [('Corporate Office & City Campus', 'Corporate Office & City Campus'), ('Cochin Campus', 'Cochin Campus'), ('Calicut Campus', 'Calicut Campus'), ('Trivandrum Campus', 'Trivandrum Campus'), ('Kottayam Campus', 'Kottayam Campus'),
          ('Perinthalmanna Branch', 'Perinthalmanna Branch'), ('Bangalore Campus', 'Bangalore Campus')], string="Branch")
@@ -611,6 +612,11 @@ class FeeCollectionWizard(models.TransientModel):
     batch_ids = fields.Many2many('op.batch', string="Batches")
 
     batch_id = fields.Many2one('op.batch', string="Batch")
+
+    @api.onchange('enrolled','fee_type')
+    def _onchange_enrolled(self):
+        if self.enrolled == False:
+            self.batch_id = self.collection_id.batch_id.id
 
     @api.onchange('fee_type','other_fee','amount_exc_tax')
     def _onchange_fee_types(self):
