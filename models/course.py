@@ -24,7 +24,6 @@ from odoo.exceptions import ValidationError
 from datetime import date, datetime, time
 
 
-
 class OpCourse(models.Model):
     _name = "op.course"
     _inherit = "mail.thread"

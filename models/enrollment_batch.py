@@ -20,8 +20,6 @@ class BatchEnrollmentWizard(models.TransientModel):
                     i.batch_fee = i.batch_id.total_installment_fee
 
     def enrollment_batch(self):
-        print('hi')
-
         self.batch_id.sudo().write({
             'student_ids': [(0, 0, {'student_name': self.student_id.id, 'mobile': self.student_id.mobile, 'date_of_admission': self.student_id.admission_date})]
         })
@@ -57,3 +55,5 @@ class BatchEnrollmentWizard(models.TransientModel):
 
         self.student_id.enrolled = True
         self.student_id.due_amount += self.batch_fee
+        self.student_id.batch_id = self.batch_id.id
+        self.student_id.fee_type = self.fee_type

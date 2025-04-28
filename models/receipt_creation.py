@@ -27,6 +27,7 @@ class CreateReceiptWizard(models.TransientModel):
     collected_by = fields.Many2one('res.users', default=lambda self: self.env.user.id)
 
     amount_in_words = fields.Char(string="Amount in Words", compute="_compute_amount_in_words", store=1)
+    batch_id = fields.Many2one('op.batch', string="Batch")
 
     @api.depends('amount')
     def _compute_amount_in_words(self):
@@ -50,9 +51,10 @@ class CreateReceiptWizard(models.TransientModel):
             'branch': self.branch,
             'payment_mode': self.payment_mode,
             'student_id': self.student_id.id,
-            'batch': self.student_id.batch_id.name,
+            'batch': self.batch_id.name,
             'reference_no': self.reference_no,
-            'fee_collector_id': self.env.user.id
+            'fee_collector_id': self.env.user.id,
+            'batch_id': self.batch_id.id
 
         })
         voucher = self.env['receipts.report'].sudo().search([], order="id desc", limit=1)

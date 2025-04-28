@@ -13,6 +13,7 @@
                    <field name="student_name" string="Name" invisible="1"/>
 <!--                   <field name="branch_id"/>-->
                    <field name="branch" />
+                   <field name="batch_id"/>
                    <field name="payment_mode" required="1" readonly="admission_officer == 1"/>
                    <field name="reference_no" invisible="payment_mode == 'Cash'"/>
                    <field name="amount" />

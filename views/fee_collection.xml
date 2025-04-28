@@ -14,7 +14,7 @@
                         <field name="currency_id" invisible="1"/>
                         <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
                         <field name="other_fee" invisible="fee_type != 'Other Fee'"/>
-                        <field name="batch_id" invisible="fee_type != 'Batch Fee'" style="background-color: #dae0db" domain="[('id', 'in', batch_ids)]"/>
+                        <field name="batch_id" invisible="fee_type not in ['Batch Fee','admission_fee']" style="background-color: #dae0db" domain="[('id', 'in', batch_ids)]"/>
                         <field name="amount_exc_tax" widget="monetary" readonly="fee_type != 'Ancillary Fee(Non Taxable)'"/>
                         <field name="tax_id" string="Tax id" invisible="1"/>
                         <field name="amount_inc_tax" widget="monetary" invisible="fee_type == 'Ancillary Fee(Non Taxable)'"/>
@@ -24,7 +24,7 @@
                     </group>
                     <group>
                         <field name="choose_payment_installment_plan" invisible="fee_plan != 'installment' or fee_type != 'Batch Fee' " style="background-color: #dae0db"/>
-                        <field name="excess_amount" invisible="1"/>
+                        <field name="excess_amount"/>
                         <field name="non_tax" invisible="1"/>
                         <field name="collection_id" invisible="1"/>
                         <field name="remarks"/>

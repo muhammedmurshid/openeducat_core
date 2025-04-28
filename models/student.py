@@ -413,7 +413,7 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_student_id': self.id,
-                            'default_admission_officer': self.make_visible_admission_officer}, }
+                            'default_admission_officer': self.make_visible_admission_officer, 'default_batch_id': self.batch_id.id}, }
 
     def compute_count(self):
         for record in self:
@@ -534,8 +534,8 @@ class FeeCollectionWizard(models.TransientModel):
     _description = "Fee Collection Wizard"
 
     fee_type = fields.Selection(
-        [('Ancillary Fee(Non Taxable)', 'Ancillary Collection A/C'), ('Other Fee', 'Other Fee'),
-         ('Batch Fee', 'Course Fee'), ('excess_amount', 'Excess Amount')],
+        [('admission_fee', 'Admission Fee'), ('Ancillary Fee(Non Taxable)', 'Ancillary Collection A/C'),('Batch Fee', 'Course Fee'), ('Other Fee', 'Other Fee'),
+          ('excess_amount', 'Excess Amount')],
         string="Fee Type", required=1)
     remarks = fields.Text(string="Remarks")
     amount_inc_tax = fields.Float(string="Amount (Inc. Tax)")
@@ -598,7 +598,6 @@ class FeeCollectionWizard(models.TransientModel):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     tax_id = fields.Many2one('account.tax', string="Tax")
     non_tax = fields.Boolean(string="Non Taxable")
-
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")
     igst_amount = fields.Float(string="IGST Amount")
@@ -617,9 +616,9 @@ class FeeCollectionWizard(models.TransientModel):
     def _onchange_fee_types(self):
         if self.fee_type == 'Other Fee':
             self.excess_amount = False
-            if self.other_fee == 'Admission Fee':
-                self.amount_inc_tax = self.collection_id.batch_id.adm_inc_fee
-                self.amount_exc_tax = self.collection_id.batch_id.adm_exc_fee
+        if self.fee_type == 'admission_fee':
+            self.amount_inc_tax = self.batch_id.adm_inc_fee
+            self.amount_exc_tax = self.batch_id.adm_exc_fee
         if self.fee_type == 'Ancillary Fee(Non Taxable)':
             self.excess_amount = False
             print('anc')
@@ -641,7 +640,7 @@ class FeeCollectionWizard(models.TransientModel):
                 self.other_fee = False
             else:
                 self.excess_amount = False
-                self.batch_id = self.collection_id.batch_id.id
+                # self.batch_id = self.collection_id.batch_id.id
                 self.fee_name = False
                 self.other_fee = False
 
@@ -692,6 +691,19 @@ class FeeCollectionWizard(models.TransientModel):
         # else:
         #     self.amount_inc_tax = self.amount_exc_tax
 
+    @api.onchange('batch_id')
+    def _onchange_batch_fee(self):
+        if self.fee_type == 'admission_fee':
+            self.amount_exc_tax = self.batch_id.adm_exc_fee
+            self.amount_inc_tax = self.batch_id.adm_inc_fee
+        if self.fee_type == 'Batch Fee':
+            if self.collection_id.fee_type == 'lump_sum_fee':
+                self.amount_exc_tax = self.batch_id.lump_fee_excluding_tax
+                self.amount_inc_tax = self.batch_id.lump_fee_including_tax
+            elif self.collection_id.fee_type == 'installment':
+                self.amount_inc_tax = self.batch_id.inst_amount_inc
+                self.amount_exc_tax = self.batch_id.inst_amount_exc
+
 
     @api.depends('amount_exc_tax','amount_inc_tax','fee_type')
     def _compute_total_amount(self):
@@ -712,7 +724,7 @@ class FeeCollectionWizard(models.TransientModel):
         # ✅ Deduct from wallet
         self.collection_id.wallet_balance -= self.total_amount
 
-        if self.fee_type == 'Other Fee' and self.other_fee == 'Admission Fee':
+        if self.fee_type == 'Other Fee' and self.fee_type == 'admission_fee':
             if self.collection_id.admission_fee_paid:
                 raise UserError("Admission fee has already been paid!")
 
@@ -729,6 +741,8 @@ class FeeCollectionWizard(models.TransientModel):
 
     def create_invoice_report(self, fee_type):
         print(self.amount_exc_tax, 'rrrr')
+        fee_type_label = dict(self._fields['fee_type'].selection).get(self.fee_type)
+        print(fee_type_label, 'label')
         if self.amount_exc_tax != 0:
             exc_tax = self.amount_exc_tax
             print(exc_tax, 'ancill')
@@ -739,7 +753,7 @@ class FeeCollectionWizard(models.TransientModel):
             'name': self.collection_id.name,
             'branch': self.batch_id.branch.name,
             'date': date.today(),
-            'fee_type': self.fee_type,
+            'fee_type': fee_type_label,
             'reference_no': self.cheque_no,
             'amount_inc_tax': self.amount_inc_tax,
             'fee_collected_by': self.env.user.id,
@@ -768,11 +782,11 @@ class FeeCollectionWizard(models.TransientModel):
         lead.report = last_report.id
         self.collection_id.admission_fee_paid = True
         self.collection_id.admission_fee = self.amount_inc_tax
-        if self.other_fee == 'Admission Fee':
+        if self.fee_type == 'admission_fee':
             lead.admission_fee_paid = True
 
     def update_student_payment(self):
-        if self.other_fee == 'Admission Fee':
+        if self.fee_type == 'admission_fee':
             self.collection_id.admission_fee = self.amount_inc_tax
         if self.fee_type == 'Batch Fee':
             self.collection_id.paid_amount += self.amount_inc_tax
@@ -798,6 +812,30 @@ class FeeCollectionWizard(models.TransientModel):
             type = 'ancillary'
 
         exc_tax = self.amount_exc_tax if self.amount_exc_tax != 0 else self.amount_inc_tax - self.tax
+        if self.fee_type == 'admission_fee':
+            return {
+                'sl_no': last_sl_no,
+                'date': fields.Datetime.now(),
+                'payment_mode': self.payment_mode,
+                'fee_type': self.fee_type,
+                'amount_exc_tax': exc_tax,
+                'amount_inc_tax': self.amount_inc_tax,
+                'voucher_no': last_report.invoice_number,
+                'voucher_name': voucher_name,
+                'batch_name': self.batch_id.name,
+                'branch_name': self.batch_id.branch.name,
+                'course_name': self.batch_id.course_id.name,
+                'type': type,
+                'cheque_no': self.cheque_no,
+                'branch': self.branch,
+                'fee_name': 'Admission Fee',
+                'tax_amount': self.tax,
+                'cgst_amount': self.cgst_amount,
+                'sgst_amount': self.sgst_amount,
+                'total_amount': self.total_amount,
+                'credit_amount': self.total_amount,
+                'invoice_no': last_report.invoice_number,
+            }
         if self.fee_type == 'excess_amount':
 
             return {

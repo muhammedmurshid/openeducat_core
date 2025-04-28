@@ -246,7 +246,7 @@
                                 invisible="state == 'stoped' or make_visible_admission_officer == 1"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
-                        <button name="act_enrollment_batch" string="Enrollment" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
+                        <button name="act_enrollment_batch" string="Enroll To New Batch" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
                         <field name="state" widget="statusbar"/>
                         <button name="act_batch_transfer" string="Batch Transfer" type="object" class="btn-batch-transfer" invisible="state != 'batch_allocated' or make_visible_lead_manager == 0"/>
                     </header>
