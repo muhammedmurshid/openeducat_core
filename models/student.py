@@ -606,11 +606,7 @@ class FeeCollectionWizard(models.TransientModel):
     fee_plan = fields.Char(string="Fee Plan")
     excess_amount = fields.Char(string="Excess Amount")
     choose_payment_installment_plan = fields.Selection([('1st Installment','1st Installment'), ('2nd Installment','2nd Installment'), ('3rd Installment','3rd Installment')], string="Choose Installment Plan")
-
-            # self.batch_ids = [(6, 0, batch_ids)]
-
     batch_ids = fields.Many2many('op.batch', string="Batches")
-
     batch_id = fields.Many2one('op.batch', string="Batch")
 
     @api.onchange('enrolled','fee_type')
@@ -730,7 +726,7 @@ class FeeCollectionWizard(models.TransientModel):
         # ✅ Deduct from wallet
         self.collection_id.wallet_balance -= self.total_amount
 
-        if self.fee_type == 'Other Fee' and self.fee_type == 'admission_fee':
+        if self.fee_type == 'admission_fee':
             if self.collection_id.admission_fee_paid:
                 raise UserError("Admission fee has already been paid!")
 
@@ -798,9 +794,8 @@ class FeeCollectionWizard(models.TransientModel):
             self.collection_id.paid_amount += self.amount_inc_tax
             if self.collection_id.due_amount != 0:
                 self.collection_id.due_amount -= self.total_amount
-        if self.fee_type == 'Other Fee':
-            if self.other_fee != 'Admission Fee':
-                self.collection_id.due_amount -= self.total_amount
+        if self.fee_type != 'admission_fee':
+            self.collection_id.due_amount -= self.total_amount
 
     def create_payment_record(self):
         student = self.env['op.student'].browse(self.collection_id.id)
