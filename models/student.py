@@ -264,7 +264,7 @@ class OpStudent(models.Model):
     #             else:
     #                 rec.due_amount = -abs(last_balance)
 
-    due_amount = fields.Float(string="Due Amount (Inc. Tax)")
+    due_amount = fields.Float(string="Due Amount (Inc. Tax)", readonly=1)
     enrolled = fields.Boolean(string="Enrolled")
     batch_ids = fields.Many2many('op.batch', string="Batches")
 
@@ -641,10 +641,16 @@ class FeeCollectionWizard(models.TransientModel):
                 self.fee_name = False
                 self.other_fee = False
             else:
-                self.excess_amount = False
-                # self.batch_id = self.collection_id.batch_id.id
-                self.fee_name = False
-                self.other_fee = False
+                print('erty')
+                if self.fee_type != 'Ancillary Fee(Non Taxable)':
+                    self.excess_amount = False
+                    # self.batch_id = self.collection_id.batch_id.id
+                    self.fee_name = False
+                    self.other_fee = False
+                else:
+                    self.batch_id = self.collection_id.batch_id.id
+                    self.excess_amount = False
+                    self.other_fee = False
 
     @api.onchange('fee_plan','choose_payment_installment_plan')
     def _onchange_batch_fee_plan(self):
@@ -737,6 +743,7 @@ class FeeCollectionWizard(models.TransientModel):
             self.update_admission_fee(report)
         else:
             report = self.create_invoice_report(self.fee_name if self.fee_type != 'Other Fee' else self.other_fee)
+            print(report, 're port')
             self.update_student_payment()
 
         self.create_payment_record()
@@ -788,7 +795,7 @@ class FeeCollectionWizard(models.TransientModel):
             self.collection_id.admission_fee = self.amount_inc_tax
         if self.fee_type == 'Batch Fee':
             self.collection_id.paid_amount += self.amount_inc_tax
-            if self.collection_id.due_amount != 0:
+            if self.collection_id.due_amount != 0:  
                 self.collection_id.due_amount -= self.total_amount
         # if self.fee_type != 'admission_fee':
         #     self.collection_id.due_amount -= self.total_amount
