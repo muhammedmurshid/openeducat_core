@@ -45,7 +45,7 @@ class OpStudentCourse(models.Model):
     academic_term_id = fields.Many2one('op.academic.term', 'Terms')
     state = fields.Selection([('running', 'Running'),
                               ('finished', 'Finished')],
-                             string="Status", default="running")
+                             string="Status", default="running", tracking=1)
     currency_id = fields.Many2one(
         'res.currency',
         string="Currency",
@@ -112,7 +112,7 @@ class OpStudent(models.Model):
                                         tracking=True)
     state = fields.Selection([('confirm', 'Confirm'), ('batch_allocated', 'Batch Allocated'),
                               ('stoped', 'Droped')],
-                             string="Status", default="confirm")
+                             string="Status", default="confirm", tracking=1)
     active = fields.Boolean(default=True)
     batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
     batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
@@ -180,23 +180,30 @@ class OpStudent(models.Model):
     def write(self, vals):
         if vals.get('mobile'):
             vals['mobile'] = vals['mobile'].replace(' ', '')
+
         for student in self:
-            old_batch = student.batch_id
-            res = super(OpStudent, self).write(vals)
-            new_batch = self.batch_id if 'batch_id' in vals else old_batch
+            old_batch = student.batch_id  # Get the current batch for this student
+            res = super(OpStudent, student).write(vals)  # Update the student record
+
+            # Determine the new batch (use vals.get if batch_id is being updated)
+            new_batch = self.env['op.batch'].browse(vals['batch_id']) if 'batch_id' in vals else old_batch
+
+            # Remove student from old batch if it exists and is different from new batch
             if old_batch and old_batch != new_batch:
                 old_batch.total_no_of_students -= 1
-                for i in old_batch.student_ids:
-                    if i.student_name.id == self.id:
-                        print('remove')
-                        student_to_remove = old_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
-                        print(student_to_remove, 'remove name')
-                        old_batch.sudo().write({'student_ids': [(3, student_to_remove.id)]})
-                    # unlink(old_batch.student_ids.student_name.id)
+                # Find the student record in old_batch.student_ids
+                student_to_remove = old_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
+                if student_to_remove:  # Ensure a record was found
+                    # Ensure student_to_remove is a single record
+                    student_to_remove = student_to_remove[0] if len(student_to_remove) > 1 else student_to_remove
+                    print(f"Removing student {student.id} from old batch {old_batch.id}")
+                    old_batch.sudo().write({'student_ids': [(3, student_to_remove.id)]})
+
+            # Add student to new batch if it exists and is different from old batch
             if new_batch and new_batch != old_batch:
-                print('hiiiiii')
+                print(f"Adding student {student.id} to new batch {new_batch.id}")
                 new_batch.total_no_of_students += 1
-                # Check if the student already exists in `student_ids` before adding
+                # Check if the student already exists in new_batch.student_ids
                 existing_student = new_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
                 if not existing_student:
                     new_batch.sudo().write({
@@ -208,8 +215,7 @@ class OpStudent(models.Model):
                         })]
                     })
 
-
-            return res
+        return res
 
     def unlink(self):
         for student in self:
@@ -227,12 +233,29 @@ class OpStudent(models.Model):
         'Registration Number must be unique per student!'
     )]
 
+    @api.depends('enrollment_ids.batch_id')
+    def _compute_enrollment_count(self):
+        for rec in self:
+            count = len(rec.enrollment_ids)
+            print(count, 'sdfggg')
+            rec.enrollment_count = len(rec.enrollment_ids)
+    #
+    enrollment_count = fields.Integer(string="Enrollment Count", compute="_compute_enrollment_count", store=1)
+
+    @api.onchange('enrollment_count')
+    def _onchange_enrollment_count(self):
+        print('444sdfggg')
+
+
     @api.depends('batch_id')
     def _compute_course_id(self):
         for rec in self:
             if rec.batch_id:
                 rec.course_id = rec.batch_id.course_id.id
                 rec.branch_id = rec.batch_id.branch.id
+
+    def act_revert(self):
+        self.state = 'batch_allocated'
 
     # @api.onchange('batch_id', 'discount', 'total_payable_tax', 'paid_amount', )
     # def _onchange_batch_fee(self):
@@ -312,7 +335,7 @@ class OpStudent(models.Model):
             self.make_visible_admission_officer = True
         else:
             self.make_visible_admission_officer = False
-    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments")
+    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments",)
     make_visible_admission_officer = fields.Boolean(string="User", default=True, compute='get_user')
 
     @api.depends('make_visible_lead_manager')
@@ -527,6 +550,9 @@ class EnrollmentBatches(models.Model):
     fee_type = fields.Selection([('lump_sum_fee','Lump Sum Fee'), ('installment','Installment')], string="Fee Type")
     student_id = fields.Many2one('op.student', string="Student")
     batch_fee = fields.Float(string="Batch Fee")
+    start_date = fields.Date(string="Start Date")
+    end_date = fields.Date(string="End Date")
+    enrolled_date = fields.Date(string="Enrolled Date")
 
 class FeeCollectionWizard(models.TransientModel):
     """This model is used for sending WhatsApp messages through Odoo."""

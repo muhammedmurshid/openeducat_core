@@ -106,10 +106,10 @@ class OpBatch(models.Model):
         for record in self:
             record.active_badge = "Active" if record.active else ""
 
-    @api.depends('student_ids')
+    @api.depends('student_ids', 'student_ids.state')
     def _compute_total_students(self):
         for record in self:
-            record.total_no_of_students = len(record.student_ids)
+            record.total_no_of_students = len(record.student_ids.filtered(lambda s: s.state != 'stoped'))
 
     total_no_of_students = fields.Integer(string="No. of Students", compute="_compute_total_students", store=True)
 
@@ -329,6 +329,16 @@ class StudentList(models.Model):
     total_paid = fields.Integer(string="Total Paid", compute="_compute_total_paid_amount", store=1)
     batch_id = fields.Many2one('op.batch', ondelete="cascade")
     mobile = fields.Char(string="Mobile")
+    state = fields.Selection([('confirm', 'Confirm'), ('batch_allocated', 'Batch Allocated'),
+                              ('stoped', 'Droped')],
+                             string="Status", default="confirm",related='student_name.state')
+
+    # @api.depends('student_name')
+    # def _compute_student_status(self):
+    #     for i in self:
+    #         if i.student_name:
+    #             print('workingggd')
+    #             i.status = i.student_name.state
 
     @api.depends('course_fee', 'admission_fee')
     def _compute_total_paid_amount(self):

@@ -78,6 +78,7 @@
                     <field name="mobile"/>
                     <field name="email"/>
                     <field name="batch_id"/>
+                    <field name="enrollment_count" />
                     <!--                    <field name="branch"/>-->
                     <!--                    <field name="blood_group"/>-->
 <!--                    <field name="emergency_contact"/>-->
@@ -246,7 +247,9 @@
                                 invisible="state == 'stoped' or make_visible_admission_officer == 1"/>
                         <button name="act_drop_student" string="Drop" type="object" class="btn-drop"
                                 invisible="state == 'stoped'"/>
-                        <button name="act_enrollment_batch" string="Enroll To New Batch" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
+                        <button name="act_revert" string="Revert" type="object" class="oe_highlight"
+                                invisible="state != 'stoped'"/>
+                        <button name="act_enrollment_batch" string="Enroll To Next Batch" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
                         <field name="state" widget="statusbar"/>
                         <button name="act_batch_transfer" string="Batch Transfer" type="object" class="btn-batch-transfer" invisible="state != 'batch_allocated' or make_visible_lead_manager == 0"/>
                     </header>
@@ -479,6 +482,7 @@
                                         <field name="admission_fee" widget="monetary" readonly="make_visible_admission_officer == 1"/>
 
                                         <field name="enrolled"/>
+                                        <field name="enrollment_count" invisible="1"/>
                                         <!--                                        <field name="fee_type"/>-->
                                         <!--                                        <field name="batch_id"/>-->
                                         <!--                                        <field name="branch_id"/>-->
@@ -549,6 +553,9 @@
                                         <field name="course_id"/>
                                         <field name="fee_type"/>
                                         <field name="batch_fee"/>
+                                        <field name="start_date"/>
+                                        <field name="end_date"/>
+                                        <field name="enrolled_date"/>
                                     </tree>
                                 </field>
                             </page>

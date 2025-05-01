@@ -9,14 +9,17 @@
             <form string="Batch Enrollment">
                 <group>
                     <group>
-                        <field name="student_id"/>
                         <field name="batch_id"/>
-                        <field name="course_id"/>
-
-
+                        <field name="start_date"/>
+<!--                        <field name="branch_id"/>-->
+                        <field name="fee_type"/>
+                        <field name="student_id" />
                     </group>
                     <group>
-                        <field name="fee_type"/>
+
+                        <field name="course_id"/>
+                        <field name="end_date"/>
+                        <field name="enrollment_date"/>
                         <field name="batch_fee"/>
                     </group>
                 </group>

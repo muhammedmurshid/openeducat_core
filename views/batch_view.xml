@@ -11,14 +11,15 @@
                     <field name="code"/>
                     <field name="course_id"/>
                     <field name="total_no_of_students"
-                                       string="Students Enrolled Now"/>
+                           string="Students Enrolled Now"/>
                     <field name="start_date"/>
                     <field name="end_date"/>
-<!--                    <field name="days_to_batch_start"/>-->
-<!--                    <field name="remaining_days"/>-->
+                    <!--                    <field name="days_to_batch_start"/>-->
+                    <!--                    <field name="remaining_days"/>-->
 
                     <field name="create_uid" string="Created By"/>
-                    <field name="batch_type" widget="badge" decoration-warning="batch_type == 'present_batch'" decoration-info="batch_type == 'future_batch'"/>
+                    <field name="batch_type" widget="badge" decoration-warning="batch_type == 'present_batch'"
+                           decoration-info="batch_type == 'future_batch'"/>
                     <!--                    <field name="active" widget="badge"/>-->
                     <field name="active_badge" widget="badge" string="Status"
                            decoration-success="active_badge == 'Active'"/>
@@ -75,7 +76,8 @@
                                 <field name="academic_year" readonly="state == 'completed'"/>
                                 <field name="department_id" string="Main Course" readonly="state == 'completed'"/>
                                 <field name="start_date" readonly="state == 'completed'"/>
-                                <field name="total_duration" string="Total Duration (Days)" readonly="state == 'completed'"/>
+                                <field name="total_duration" string="Total Duration (Days)"
+                                       readonly="state == 'completed'"/>
                                 <field name="batch_type" readonly="state == 'completed'"/>
 
                                 <!--                                <field name="branch_id"/>-->
@@ -194,6 +196,9 @@
                                         <field name="student_name"/>
                                         <field name="mobile"/>
                                         <field name="date_of_admission"/>
+                                        <field name="state" widget="badge" decoration-info="state == 'confirm'"
+                                               decoration-success="state == 'batch_allocated'"
+                                               decoration-danger="state == 'stoped'"/>
                                         <!--                                        <field name="admission_fee"/>-->
                                         <!--                                        <field name="course_fee"/>-->
                                         <!--                                        <field name="total_paid"/>-->
@@ -236,7 +241,8 @@
                                                         <field name="active_badge" widget="badge" string="Status"
                                                                decoration-success="active_badge == 'Active'"/>
                                                         <field name="batch_type" widget="badge"
-                                                               decoration-warning="batch_type == 'present_batch'" decoration-info="batch_type == 'future_batch'"/>
+                                                               decoration-warning="batch_type == 'present_batch'"
+                                                               decoration-info="batch_type == 'future_batch'"/>
                                                     </div>
                                                 </li>
                                             </ul>
