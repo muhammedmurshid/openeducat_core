@@ -34,22 +34,22 @@ class OpBatch(models.Model):
     code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
-        'Start Date', required=True, default=fields.Date.today())
-    end_date = fields.Date('End Date', store=1)
+        'Start Date', required=True, default=fields.Date.today(), tracking=1)
+    end_date = fields.Date('End Date', store=1, required=1, tracking=1)
     active = fields.Boolean(default=True)
-    department_id = fields.Many2one('op.department', string="Department")
+    department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
     remaining_days = fields.Integer(string="Days to End Batch", compute="_compute_remaining_days", store=1)
     # branch_id = fields.Many2one('op.branch', string="Branch")
-    admission_fee = fields.Float(string="Admission Fee", compute="_compute_adm_total_fee", store=1)
+    admission_fee = fields.Float(string="Admission Fee", compute="_compute_adm_total_fee", store=1, tracking=1)
     adm_tax = fields.Float(string="Tax")
     adm_exc_fee = fields.Float(string="Admission Fee (Exc Fee)")
     adm_inc_fee = fields.Float(string="Admission Fee (Inc Fee)")
     course_fee = fields.Integer(string="Course Fee")
     student_ids = fields.One2many('logic.student.list', 'batch_id', )
-    initiated_id = fields.Many2one('res.users', string="Initiated By")
+    initiated_id = fields.Many2one('res.users', string="Initiated By", required=1)
     class_type = fields.Selection([('online', 'Online'), ('offline', 'Offline')], string="Class Type")
     fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('loan', 'Loan'), ('installment', 'Installment')],
                                 string="Fee Type", default="lump_sum_fee", required=1)
@@ -60,7 +60,7 @@ class OpBatch(models.Model):
         'res.currency', string='Currency',
         default=lambda self: self.env.user.company_id.currency_id.id)
     academic_year = fields.Selection([('2020-2021','2020-2021'), ('2021-2022','2021-2022'), ('2022-2023','2022-2023'), ('2023-2024','2023-2024'), ('2024-2025','2024-2025'), ('2025-2026','2025-2026'), ('2026-2027','2026-2027')], string="Academic Year", required=1)
-    total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1)
+    total_lump_sum_fee = fields.Float(string="Total Fee", compute='_compute_total_lump_sum_fee', store=1, tracking=1)
     batch_type = fields.Selection(
         [('present_batch', 'Running Batch'), ('future_batch', 'Future Batch'), ('ended_batch', 'Ended Batch') ],
         string="Type", default='present_batch', tracking=True)
@@ -142,7 +142,7 @@ class OpBatch(models.Model):
     inst_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_installment", store=1)
     inst_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_installment", store=1)
     inst_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_installment", store=1,)
-    total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1, readonly=0)
+    total_installment_fee = fields.Float(string="Total Fee", compute="_compute_total_installment_fee", store=1, readonly=0, tracking=1)
     compo_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_compo", store=1)
     compo_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_compo", store=1)
     compo_amount_inc = fields.Float(string="Amount (Inc Tax)", compute="_compute_total_amount_compo", store=1, )
@@ -209,7 +209,7 @@ class OpBatch(models.Model):
         ('unique_batch_code',
          'unique(code)', 'Code should be unique per batch!')]
 
-    total_duration = fields.Integer(string="Duration")
+    total_duration = fields.Integer(string="Duration", required=1)
 
     @api.onchange('start_date', 'total_duration')
     def _onchange_end_date(self):
@@ -248,6 +248,21 @@ class OpBatch(models.Model):
                     print('future batch')
 
                     # record.remaining_days = 0
+    def action_cron_batch_type(self):
+        today = date.today()
+        batches = self.env['op.batch'].search([])  # fetch all batches
+
+        for record in batches:
+            if record.start_date and record.end_date:
+                if record.start_date < today < record.end_date:
+                    record.batch_type = 'present_batch'
+                    print('running_batch')
+                elif today < record.start_date:
+                    record.batch_type = 'future_batch'
+                    print('future_batch')
+                elif today > record.end_date:
+                    record.batch_type = 'ended_batch'
+                    print('ended_batch')
 
     @api.constrains('start_date', 'end_date')
     def check_dates(self):
@@ -277,7 +292,7 @@ class OpBatch(models.Model):
                     'course_id': [],
                 }
             }
-    course_id = fields.Many2one('op.course', 'Sub Course', domain="[('department_id', '=', department_id)]")
+    course_id = fields.Many2one('op.course', 'Sub Course', domain="[('department_id', '=', department_id)]", required=1)
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
