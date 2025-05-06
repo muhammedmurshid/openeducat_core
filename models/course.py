@@ -51,6 +51,7 @@ class OpCourse(models.Model):
         [('indian', 'Indian'), ('international', 'International'), ('crash', 'Crash'), ('repeaters', 'Repeaters'),
          ('nil', 'Nil')], string="Type")
     academic_head_id = fields.Many2one('res.users', string="Academic Head")
+    board_registration = fields.Boolean(string="Board Registration")
 
     # related_product_id = fields.Many2one('product.product', string="Related Product")
     # course_fee = fields.Float(string="Course Fee", related="related_product_id.list_price")

@@ -56,6 +56,7 @@
 <!--                                <field name="parent_id"/>-->
 <!--                                <field name="max_unit_load"/>-->
                                 <field name="academic_head_id"/>
+                                <field name="board_registration"/>
 <!--                                <field name="related_product_id"/>-->
 <!--                                <field name="course_fee"/>-->
                             </group>
