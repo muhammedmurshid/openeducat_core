@@ -948,7 +948,7 @@ class PaymentHistoryFeeCollection(models.Model):
     credit_amount = fields.Float(string="Credit Amount")
     voucher_no = fields.Char(string="Voucher No.")
     voucher_name = fields.Char(string="Voucher Name")
-    type = fields.Selection([('receipt','Receipt'), ('invoice','Invoice'),('ancillary','Ancillary'),('opening','Opening')], string="Type")
+    type = fields.Selection([('receipt','Receipt'), ('invoice','Invoice'),('ancillary','Ancillary'),('opening','Opening'), ('credit_note', 'Credit Note')], string="Type")
     currency_id = fields.Many2one(
         'res.currency',
         string="Currency",
