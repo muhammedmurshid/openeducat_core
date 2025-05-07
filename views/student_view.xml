@@ -319,7 +319,7 @@
                                         <field name="email" required="1" placeholder="Email Address"/>
                                         <field name="make_visible_admission_officer" invisible="1"/>
                                         <field name="make_visible_lead_manager" invisible="1"/>
-                                        <field name="sended_welcome_mail"/>
+                                        <field name="sended_welcome_mail" invisible="1"/>
                                     </group>
                                     <div class="card" invisible="state == 'stoped'">
                                         <div class="container">
