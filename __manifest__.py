@@ -65,7 +65,8 @@
         'views/receipt_wizard.xml',
         'views/drop_wizard.xml',
         'views/enrollment.xml',
-        'views/batch_transfer.xml'
+        'views/batch_transfer.xml',
+        'views/welcome_mail.xml'
     ],
     'demo': [
         'demo/homepage_template.xml',

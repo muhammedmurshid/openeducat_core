@@ -78,10 +78,10 @@
                     <field name="mobile"/>
                     <field name="email"/>
                     <field name="batch_id"/>
-                    <field name="enrollment_count" />
+                    <field name="enrollment_count"/>
                     <!--                    <field name="branch"/>-->
                     <!--                    <field name="blood_group"/>-->
-<!--                    <field name="emergency_contact"/>-->
+                    <!--                    <field name="emergency_contact"/>-->
                     <field name="course_id"/>
                     <field name="due_amount" string="Fees Pending"/>
                     <!--                    <field name="nationality"/>-->
@@ -157,6 +157,14 @@
                         background-color: #b8453d;
                         color: white; /* Set font color to white */
                         text-align: center; /* Center the text within the card */
+                        }
+                        .welcome_mail {
+                        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+                        transition: 0.3s;
+                        width: 20%;
+                        background-color: #414a22;
+                        color: white;
+                        text-align: center;
                         }
                         .due_card_negative {
                         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
@@ -249,9 +257,14 @@
                                 invisible="state == 'stoped'"/>
                         <button name="act_revert" string="Revert" type="object" class="oe_highlight"
                                 invisible="state != 'stoped'"/>
-                        <button name="act_enrollment_batch" string="Enroll To Next Batch" type="object" class="oe_highlight" invisible="state != 'batch_allocated'"/>
+                        <button name="act_enrollment_batch" string="Enroll To Next Batch" type="object"
+                                class="oe_highlight" invisible="state != 'batch_allocated'"/>
                         <field name="state" widget="statusbar"/>
-                        <button name="act_batch_transfer" string="Batch Transfer" type="object" class="btn-batch-transfer" invisible="state != 'batch_allocated' or make_visible_lead_manager == 0"/>
+                        <button name="act_batch_transfer" string="Batch Transfer" type="object"
+                                class="btn-batch-transfer"
+                                invisible="state != 'batch_allocated' or make_visible_lead_manager == 0"/>
+                        <button name="act_sent_to_welcome_mail" type="object" string="Sent to Welcome Mail" class="welcome_mail"
+                                invisible="state != 'batch_allocated' or sended_welcome_mail == True"/>
                     </header>
                     <sheet>
                         <!--                        <widget name="web_ribbon"-->
@@ -304,8 +317,9 @@
                                         <field name="gr_no" string="Reg No"/>
                                         <field name="mobile" placeholder="Mobile Number"/>
                                         <field name="email" required="1" placeholder="Email Address"/>
-                                         <field name="make_visible_admission_officer" invisible="1"/>
+                                        <field name="make_visible_admission_officer" invisible="1"/>
                                         <field name="make_visible_lead_manager" invisible="1"/>
+                                        <field name="sended_welcome_mail"/>
                                     </group>
                                     <div class="card" invisible="state == 'stoped'">
                                         <div class="container">
@@ -472,14 +486,16 @@
                                 </group>
                             </page>
 
-                            <page name="course_details" string="Course Details" >
+                            <page name="course_details" string="Course Details">
                                 <group>
                                     <group>
-                                        <field name="batch_id" style="background-color:#89d674;" readonly="make_visible_admission_officer == 1"/>
+                                        <field name="batch_id" style="background-color:#89d674;"
+                                               readonly="make_visible_admission_officer == 1"/>
                                         <field name="batch_start_date"/>
                                         <field name="batch_end_date"/>
                                         <field name="course_id" readonly="make_visible_admission_officer == 1"/>
-                                        <field name="admission_fee" widget="monetary" readonly="make_visible_admission_officer == 1"/>
+                                        <field name="admission_fee" widget="monetary"
+                                               readonly="make_visible_admission_officer == 1"/>
 
                                         <field name="enrolled"/>
                                         <field name="enrollment_count" invisible="1"/>
@@ -500,13 +516,16 @@
                                     <!--                                    </group>-->
 
                                     <group name="closing_balance" style="background-color:#d5dbd6">
-                                        <field name="closing_balance" widget="monetary" readonly="make_visible_admission_officer == 1"/>
-                                        <field name="credit_balance_erp" widget="monetary" readonly="make_visible_admission_officer == 1"/>
-                                        
+                                        <field name="closing_balance" widget="monetary"
+                                               readonly="make_visible_admission_officer == 1"/>
+                                        <field name="credit_balance_erp" widget="monetary"
+                                               readonly="make_visible_admission_officer == 1"/>
+
 
                                         <div style="text-align: center; margin-top: 10px; margin-left:300px">
                                             <button name="act_add_closing_balance" string="Submit" type="object"
-                                                    class="oe_highlight" invisible="make_visible_admission_officer == 1"/>
+                                                    class="oe_highlight"
+                                                    invisible="make_visible_admission_officer == 1"/>
                                         </div>
                                     </group>
 
@@ -518,7 +537,8 @@
                                                 <field name="fee_type" readonly="make_visible_admission_officer == 1"/>
                                                 <button name="act_change_fee_plan" string="Change Plan" type="object"
                                                         icon="fa-reply" class="change_plan_button"
-                                                        groups="openeducat_core.group_op_back_office_accounts" invisible="make_visible_admission_officer == 1"/>
+                                                        groups="openeducat_core.group_op_back_office_accounts"
+                                                        invisible="make_visible_admission_officer == 1"/>
                                             </div>
                                         </group>
 

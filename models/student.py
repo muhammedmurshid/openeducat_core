@@ -136,6 +136,7 @@ class OpStudent(models.Model):
     admission_fee_paid = fields.Boolean(string="Paid Admission Fee")
     closing_balance = fields.Float(string="Receivable as per ERP on 31/03/2025 (Debit)")
     credit_balance_erp = fields.Float(string="Balance in ERP Wallet Amount 31/03/2025 (Credit)")
+    sended_welcome_mail = fields.Boolean(string="Sended Welcome Mail")
 
     @api.model
     def create(self, vals):
@@ -426,6 +427,16 @@ class OpStudent(models.Model):
             'domain': [('student_id', '=', self.id)],
             'context': "{'create': False}"
         }
+
+    def act_sent_to_welcome_mail(self):
+        print('sent')
+        return {'type': 'ir.actions.act_window',
+                'name': _('Welcome Mail'),
+                'res_model': 'welcome.mail',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_student_id': self.id}, }
 
     def act_create_receipt(self):
         print('hi')

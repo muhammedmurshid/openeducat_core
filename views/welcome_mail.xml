@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+   <!-- Odoo View Definition for Whatsapp Message Form -->
+   <record id="welcome_mail_view_form" model="ir.ui.view">
+       <field name="name">welcome.mail.view.form</field>
+       <field name="model">welcome.mail</field>
+       <field name="priority" eval="8"/>
+       <field name="arch" type="xml">
+           <form string="Welcome Mail">
+               <group>
+                   <field name="student_id" invisible="1"/>
+                   <field name="mail_id"/>
+                   <field name="message" style="background-color:#ebfaf9"/>
+               </group>
+
+               <footer>
+                   <button name="act_sent_mail" string="Send" type="object"/>
+                   <button name="cancel" string="Cancel" special="cancel"/>
+               </footer>
+           </form>
+       </field>
+   </record>
+</odoo>

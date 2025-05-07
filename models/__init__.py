@@ -40,3 +40,4 @@ from . import receipt_creation
 from . import drop_wizard
 from . import enrollment_batch
 from . import batch_transfer
+from . import welcome_mail

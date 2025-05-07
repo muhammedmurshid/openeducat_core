@@ -78,3 +78,4 @@ access_enrollment_batch,access_enrollment_batch,model_enrollment_batch_wizard,,1
 
 access_enrollment_details,access_enrollment_details,model_enrollment_details,,1,1,1,0
 access_batch_transfer,access_batch_transfer,model_batch_transfer,,1,1,1,1
+access_welcome_mail,access_welcome_mail,model_welcome_mail,,1,1,1,1
