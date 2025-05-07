@@ -436,7 +436,7 @@ class OpStudent(models.Model):
                 'target': 'new',
                 'view_mode': 'form',
                 'view_type': 'form',
-                'context': {'default_student_id': self.id}, }
+                'context': {'default_student_id': self.id, 'default_mail_id': self.email}, }
 
     def act_create_receipt(self):
         print('hi')
