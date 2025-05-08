@@ -142,23 +142,27 @@ class OpStudent(models.Model):
     def create(self, vals):
         if vals.get('mobile'):
             vals['mobile'] = vals['mobile'].replace(' ', '')
-        if vals.get('gr_no') in [False, "New"]:
+        if vals.get('gr_no') in [False, "New", None]:
             current_year = datetime.today().year
             prefix = f"L{current_year}/"
 
-            # Find the last record with the same year pattern
-            last_batch = self.search([('gr_no', 'like', prefix + '%')], order='gr_no desc', limit=1)
-            if last_batch and last_batch.gr_no:
-                match = re.search(r"/(\d+)$", last_batch.gr_no)
-                last_number = int(match.group(1)) if match else 0
-            else:
-                last_number = 0
+            # Search all gr_no starting with the current year prefix
+            all_records = self.search([('gr_no', 'like', f'{prefix}%')])
+            print('records', all_records)
 
-            new_number = last_number + 1
-            vals['gr_no'] = f"{prefix}{new_number}"
-            print(vals['gr_no'], 'Generated GR No')  # Debugging output
+            max_number = 0
+            for rec in all_records:
+                match = re.match(rf"{re.escape(prefix)}(\d+)", rec.gr_no or "")
+                if match:
+                    number = int(match.group(1))
+                    max_number = max(max_number, number)
 
-        student = super(OpStudent, self).create(vals)
+            # Generate new gr_no
+            next_number = max_number + 1
+            vals['gr_no'] = f"{prefix}{next_number}"
+            print(f"Generated GR No: {vals['gr_no']}")  # Optional debug
+
+        student =  super(OpStudent, self).create(vals)
 
         if student.batch_id:
             if student.fee_type == 'lump_sum_fee':
@@ -297,8 +301,10 @@ class OpStudent(models.Model):
         if self.fee_type:
             if self.fee_type == 'lump_sum_fee':
                 self.batch_fee = self.batch_id.total_lump_sum_fee
+                self.due_amount = self.batch_id.total_lump_sum_fee - self.paid_amount
             if self.fee_type == 'installment':
                 self.batch_fee = self.batch_id.total_installment_fee
+                self.due_amount = self.batch_id.total_installment_fee - self.paid_amount
         if self.batch_fee != 0:
             print('kkkl')
             if self.discount == 0:
