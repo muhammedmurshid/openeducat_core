@@ -247,7 +247,6 @@ class OpStudent(models.Model):
     def _onchange_enrollment_count(self):
         print('444sdfggg')
 
-
     @api.depends('batch_id')
     def _compute_course_id(self):
         for rec in self:
@@ -300,7 +299,6 @@ class OpStudent(models.Model):
                 self.batch_fee = self.batch_id.total_lump_sum_fee
             if self.fee_type == 'installment':
                 self.batch_fee = self.batch_id.total_installment_fee
-
         if self.batch_fee != 0:
             print('kkkl')
             if self.discount == 0:
@@ -349,7 +347,6 @@ class OpStudent(models.Model):
             self.make_visible_lead_manager = False
 
     make_visible_lead_manager = fields.Boolean(string="Lead Manager", default=True, compute='get_lead_manager')
-
 
     def act_add_amount_to_wallet(self):
         active_id = self.env.context.get('active_id')
@@ -571,7 +568,7 @@ class FeeCollectionWizard(models.TransientModel):
     _description = "Fee Collection Wizard"
 
     fee_type = fields.Selection(
-        [('admission_fee', 'Admission Fee'), ('Ancillary Fee(Non Taxable)', 'Ancillary Collection A/C'),('Batch Fee', 'Course Fee'), ('Other Fee', 'Other Fee'),
+        [('admission_fee', 'Admission Fee'), ('Ancillary Fee(Non Taxable)', 'Collection A/C'),('Batch Fee', 'Course Fee'), ('Other Fee', 'Other Fee'),
           ('excess_amount', 'Excess Amount')],
         string="Fee Type", required=1)
     remarks = fields.Text(string="Remarks")

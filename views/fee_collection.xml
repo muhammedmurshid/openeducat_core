@@ -13,7 +13,7 @@
                         <field name="fee_type" style="background-color:#fc8f47;"/>
                         <field name="currency_id" invisible="1"/>
                         <field name="enrolled" invisible="1"/>
-                        <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'"/>
+                        <field name="fee_name" invisible="fee_type != 'Ancillary Fee(Non Taxable)'" required="fee_type == 'Ancillary Fee(Non Taxable)'"/>
                         <field name="other_fee" invisible="fee_type != 'Other Fee'"/>
                         <field name="batch_id" invisible="fee_type not in ['Batch Fee','admission_fee']  or enrolled == 0" style="background-color: #dae0db" domain="[('id', 'in', batch_ids)]"/>
                         <field name="batch_id" invisible="fee_type not in ['Batch Fee','admission_fee'] or enrolled == 1" style="background-color: #dae0db" readonly="1"/>
