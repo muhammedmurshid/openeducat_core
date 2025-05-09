@@ -79,9 +79,9 @@ class OpStudent(models.Model):
     _inherits = {"res.partner": "partner_id"}
     _order = 'id desc'
 
-    # first_name = fields.Char('First Name', translate=True)
-    # middle_name = fields.Char('Middle Name', translate=True)
-    # last_name = fields.Char('Last Name', translate=True)
+    first_name = fields.Char('First Name', translate=True)
+    middle_name = fields.Char('Middle Name', translate=True)
+    last_name = fields.Char('Last Name', translate=True)
     birth_date = fields.Date('Birth Date')
     blood_group = fields.Selection([
         ('A+', 'A+ve'),
@@ -105,7 +105,7 @@ class OpStudent(models.Model):
     partner_id = fields.Many2one('res.partner', 'Partner',
                                  required=True, ondelete="cascade")
     user_id = fields.Many2one('res.users', 'User', ondelete="cascade")
-    gr_no = fields.Char("Registration Number", copy=False, readonly=0)
+    gr_no = fields.Char("Registration Number", copy=False, readonly=0, tracking=1)
     category_id = fields.Many2one('op.category', 'Category')
     course_detail_ids = fields.One2many('op.student.course', 'student_id',
                                         'Course Details',
@@ -117,7 +117,7 @@ class OpStudent(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
     batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
     batch_end_date = fields.Date(string="Batch End Date", related='batch_id.end_date')
-    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", required=1)
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", required=1, tracking=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
@@ -244,7 +244,7 @@ class OpStudent(models.Model):
             count = len(rec.enrollment_ids)
             print(count, 'sdfggg')
             rec.enrollment_count = len(rec.enrollment_ids)
-    #
+
     enrollment_count = fields.Integer(string="Enrollment Count", compute="_compute_enrollment_count", store=1)
 
     @api.onchange('enrollment_count')
@@ -271,15 +271,15 @@ class OpStudent(models.Model):
     #             self.total_payable_tax = self.batch_id.total_lump_sum_fee - self.discount
     #         self.due_amount = self.total_payable_tax - self.paid_amount
 
-    # @api.onchange('first_name', 'middle_name', 'last_name')
-    # def _onchange_name(self):
-    #     if not self.middle_name:
-    #         self.name = str(self.first_name) + " " + str(
-    #             self.last_name
-    #         )
-    #     else:
-    #         self.name = str(self.first_name) + " " + str(
-    #             self.middle_name) + " " + str(self.last_name)
+    @api.onchange('first_name', 'middle_name', 'last_name')
+    def _onchange_name(self):
+        if not self.middle_name:
+            self.name = str(self.first_name) + " " + str(
+                self.last_name
+            )
+        else:
+            self.name = str(self.first_name) + " " + str(
+                self.middle_name) + " " + str(self.last_name)
 
     # @api.depends('payment_ids.balance')
     # def _compute_due_amount(self):
