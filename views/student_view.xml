@@ -307,7 +307,7 @@
                                                         <field name="first_name" placeholder="First Name"/>
                                                     </td>
                                                     <td style="padding-right:10px;">
-                                                        <field name="last_name" required="1" placeholder="Last Name"/>
+                                                        <field name="last_name" placeholder="Last Name"/>
                                                     </td>
 <!--                                                    <field name="first_name" placeholder="First Name"-->
 <!--                                                           string="First Name" required="1"/>-->

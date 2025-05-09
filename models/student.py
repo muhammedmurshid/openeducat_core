@@ -79,9 +79,9 @@ class OpStudent(models.Model):
     _inherits = {"res.partner": "partner_id"}
     _order = 'id desc'
 
-    first_name = fields.Char('First Name', translate=True)
-    middle_name = fields.Char('Middle Name', translate=True)
-    last_name = fields.Char('Last Name', translate=True)
+    first_name = fields.Char('First Name', )
+    middle_name = fields.Char('Middle Name', )
+    last_name = fields.Char('Last Name',)
     birth_date = fields.Date('Birth Date')
     blood_group = fields.Selection([
         ('A+', 'A+ve'),
