@@ -35,7 +35,7 @@ class OpBatch(models.Model):
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today(), tracking=1)
-    end_date = fields.Date('End Date', store=1, required=1, tracking=1)
+    end_date = fields.Date('End Date', compute="_compute_end_date", store=1, required=1, tracking=1)
     active = fields.Boolean(default=True)
     department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
@@ -214,8 +214,8 @@ class OpBatch(models.Model):
 
     total_duration = fields.Integer(string="Duration", required=1)
 
-    @api.onchange('start_date', 'total_duration')
-    def _onchange_end_date(self):
+    @api.depends('start_date', 'total_duration')
+    def _compute_end_date(self):
         for record in self:
             if record.start_date and record.total_duration:
                 record.end_date = record.start_date + timedelta(days=record.total_duration - 1)
