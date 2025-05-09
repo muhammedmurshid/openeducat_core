@@ -71,6 +71,8 @@
                     <!--                    <field name="title" optional="show"/>-->
                     <field name="gr_no" string="Reg No"/>
                     <!--                    <field name="admission_date"/>-->
+<!--                    <field name="first_name"/>-->
+<!--                    <field name="last_name"/>-->
                     <field name="name"/>
                     <!--                    <field name="gender" optional="hide"/>-->
                     <!--                    <field name="birth_date" optional="hide"/>-->
@@ -91,6 +93,17 @@
                     <field name="state" widget="badge" decoration-info="state == 'confirm'"
                            decoration-success="state == 'batch_allocated'" decoration-danger="state == 'stoped'"/>
                 </tree>
+            </field>
+        </record>
+
+        <record id="add_student_first_name_and_last_name" model="ir.actions.server">
+            <field name="name">Add Names(First and Last)</field>
+            <field name="model_id" ref="openeducat_core.model_op_student"/>
+            <field name="binding_model_id" ref="openeducat_core.model_op_student"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = records.act_give_names()
             </field>
         </record>
 
@@ -302,20 +315,20 @@
 
                                         <table>
                                             <tr>
-<!--                                                <td style="padding-right:10px;">-->
-                                                    <td style="padding-right:10px;">
-                                                        <field name="first_name" placeholder="First Name"/>
-                                                    </td>
-                                                    <td style="padding-right:10px;">
-                                                        <field name="last_name" placeholder="Last Name"/>
-                                                    </td>
-<!--                                                    <field name="first_name" placeholder="First Name"-->
-<!--                                                           string="First Name" required="1"/>-->
-<!--                                                    <field name="last_name" placeholder="Last Name" string="Last Name"-->
-<!--                                                           required="1"/>-->
-                                                    <field name="name" required="1" placeholder="Student Name"
-                                                           invisible="1"/>
-<!--                                                </td>-->
+                                                <!--                                                <td style="padding-right:10px;">-->
+                                                <td style="padding-right:10px;">
+                                                    <field name="first_name" placeholder="First Name"/>
+                                                </td>
+                                                <td style="padding-right:10px;">
+                                                    <field name="last_name" placeholder="Last Name"/>
+                                                </td>
+                                                <!--                                                    <field name="first_name" placeholder="First Name"-->
+                                                <!--                                                           string="First Name" required="1"/>-->
+                                                <!--                                                    <field name="last_name" placeholder="Last Name" string="Last Name"-->
+                                                <!--                                                           required="1"/>-->
+                                                <field name="name" required="1" placeholder="Student Name" invisible="1"
+                                                />
+                                                <!--                                                </td>-->
                                             </tr>
 
                                         </table>

@@ -74,12 +74,12 @@
                         <group>
                             <group name="main">
                                 <field name="name" readonly="state == 'completed'"/>
-                                <field name="academic_year" />
-                                <field name="department_id" string="Main Course" />
-                                <field name="start_date" />
+                                <field name="academic_year" readonly="state == 'completed'"/>
+                                <field name="department_id" string="Main Course" readonly="state == 'completed'"/>
+                                <field name="start_date" readonly="state == 'completed'"/>
                                 <field name="total_duration" string="Total Duration (Days)"
-                                       />
-                                <field name="batch_type" />
+                                       readonly="state == 'completed'"/>
+                                <field name="batch_type" readonly="state == 'completed'"/>
 
                                 <!--                                <field name="branch_id"/>-->
                                 <field name="max_no_of_students"/>

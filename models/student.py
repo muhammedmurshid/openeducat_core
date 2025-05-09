@@ -102,8 +102,7 @@ class OpStudent(models.Model):
     emergency_contact = fields.Many2one('res.partner', 'Emergency Contact')
     visa_info = fields.Char('Visa Info', size=64)
     id_number = fields.Char('ID Card Number', size=64)
-    partner_id = fields.Many2one('res.partner', 'Partner',
-                                 required=True, ondelete="cascade")
+    partner_id = fields.Many2one('res.partner', 'Partner', required=True, ondelete="cascade")
     user_id = fields.Many2one('res.users', 'User', ondelete="cascade")
     gr_no = fields.Char("Registration Number", copy=False, readonly=0, tracking=1)
     category_id = fields.Many2one('op.category', 'Category')
@@ -137,6 +136,19 @@ class OpStudent(models.Model):
     closing_balance = fields.Float(string="Receivable as per ERP on 31/03/2025 (Debit)")
     credit_balance_erp = fields.Float(string="Balance in ERP Wallet Amount 31/03/2025 (Credit)")
     sended_welcome_mail = fields.Boolean(string="Sended Welcome Mail")
+
+    def act_give_names(self):
+        students = self.env['op.student'].search([])
+
+        for student in students:
+            name = (student.name or '').strip()
+            if ' ' in name:
+                first, last = name.split(' ', 1)
+            else:
+                first = name
+                last = ''
+            student.first_name = first
+            student.last_name = last
 
     @api.model
     def create(self, vals):
