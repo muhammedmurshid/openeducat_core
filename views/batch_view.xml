@@ -65,6 +65,7 @@
                                 class="oe_highlight"/>
                         <button name="action_done_batch" type="object" string="Done"
                                 invisible="state in ['draft','up_coming','completed']" class="done_button"/>
+                        <button name="act_revert" type="object" string="Revert to Batch Approval" invisible="state != 'completed'"/>
                     </header>
                     <sheet>
                         <field name="active" invisible="1"/>
@@ -73,12 +74,12 @@
                         <group>
                             <group name="main">
                                 <field name="name" readonly="state == 'completed'"/>
-                                <field name="academic_year" readonly="state == 'completed'"/>
-                                <field name="department_id" string="Main Course" readonly="state == 'completed'"/>
-                                <field name="start_date" readonly="state == 'completed'"/>
+                                <field name="academic_year" />
+                                <field name="department_id" string="Main Course" />
+                                <field name="start_date" />
                                 <field name="total_duration" string="Total Duration (Days)"
-                                       readonly="state == 'completed'"/>
-                                <field name="batch_type" readonly="state == 'completed'"/>
+                                       />
+                                <field name="batch_type" />
 
                                 <!--                                <field name="branch_id"/>-->
                                 <field name="max_no_of_students"/>

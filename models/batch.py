@@ -131,6 +131,9 @@ class OpBatch(models.Model):
             if i.total_lump_sum_fee != 0 and i.amount_inc_lump !=0:
                 i.difference_in_fee_lump = i.total_lump_sum_fee - i.amount_inc_lump
 
+    def act_revert(self):
+        self.sudo().write({'state': 'batch_approval'})
+
     @api.depends('lump_fee_including_tax','lump_fee_excluding_tax')
     def _compute_total_lump_sum_fee(self):
         for i in self:
