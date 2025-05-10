@@ -96,16 +96,16 @@
             </field>
         </record>
 
-        <record id="add_student_first_name_and_last_name" model="ir.actions.server">
-            <field name="name">Add Names(First and Last)</field>
-            <field name="model_id" ref="openeducat_core.model_op_student"/>
-            <field name="binding_model_id" ref="openeducat_core.model_op_student"/>
-            <field name="binding_view_types">list</field>
-            <field name="state">code</field>
-            <field name="code">
-                action = records.act_give_names()
-            </field>
-        </record>
+<!--        <record id="add_student_first_name_and_last_name" model="ir.actions.server">-->
+<!--            <field name="name">Add Names(First and Last)</field>-->
+<!--            <field name="model_id" ref="openeducat_core.model_op_student"/>-->
+<!--            <field name="binding_model_id" ref="openeducat_core.model_op_student"/>-->
+<!--            <field name="binding_view_types">list</field>-->
+<!--            <field name="state">code</field>-->
+<!--            <field name="code">-->
+<!--                action = records.act_give_names()-->
+<!--            </field>-->
+<!--        </record>-->
 
         <record id="view_op_student_form" model="ir.ui.view">
             <field name="name">op.student.form</field>
