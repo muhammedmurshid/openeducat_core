@@ -554,9 +554,9 @@
 
                                     <div class="o_inner_group">
                                         <group style="background-color:#ede9dd">
-                                            <label for="fee_type" readonly="make_visible_admission_officer == 1"/>
+                                            <label for="fee_type" readonly="1"/>
                                             <div class="o_row">
-                                                <field name="fee_type" readonly="make_visible_admission_officer == 1"/>
+                                                <field name="fee_type" readonly="1"/>
                                                 <button name="act_change_fee_plan" string="Change Plan" type="object"
                                                         icon="fa-reply" class="change_plan_button"
                                                         groups="openeducat_core.group_op_back_office_accounts"

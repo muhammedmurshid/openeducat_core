@@ -21,3 +21,7 @@ class FeePlanChangingWizard(models.TransientModel):
    def act_change_fee_type(self):
       if self.fee_type:
          self.student_id.fee_type = self.fee_type
+         if self.fee_type == 'lump_sum_fee':
+            self.student_id.due_amount = self.batch_id.total_lump_sum_fee - self.student_id.paid_amount
+         if self.fee_type == 'installment':
+            self.student_id.due_amount = self.batch_id.total_installment_fee - self.student_id.paid_amount

@@ -313,10 +313,10 @@ class OpStudent(models.Model):
         if self.fee_type:
             if self.fee_type == 'lump_sum_fee':
                 self.batch_fee = self.batch_id.total_lump_sum_fee
-                self.due_amount = self.batch_id.total_lump_sum_fee - self.paid_amount
+                # self.due_amount = self.batch_id.total_lump_sum_fee - self.paid_amount
             if self.fee_type == 'installment':
                 self.batch_fee = self.batch_id.total_installment_fee
-                self.due_amount = self.batch_id.total_installment_fee - self.paid_amount
+                # self.due_amount = self.batch_id.total_installment_fee - self.paid_amount
         if self.batch_fee != 0:
             print('kkkl')
             if self.discount == 0:
@@ -549,8 +549,12 @@ class OpStudent(models.Model):
 
             })]
             rec.wallet_balance += rec.credit_balance_erp
+            rec.wallet_balance += rec.credit_balance_erp
             if self.closing_balance != 0:
-                rec.due_amount = self.closing_balance
+                print('closing balance is not 0')
+                rec.due_amount += self.closing_balance
+            else:
+                print('closing balance is 0')
             # rec.due_amount = rec.closing_balance
 
     def act_collect_fee(self):
