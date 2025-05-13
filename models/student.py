@@ -116,7 +116,7 @@ class OpStudent(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
     batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
     batch_end_date = fields.Date(string="Batch End Date", related='batch_id.end_date')
-    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", required=1, tracking=1)
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", tracking=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
