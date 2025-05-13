@@ -961,7 +961,7 @@ class PaymentHistoryFeeCollection(models.Model):
     payment_mode = fields.Char(string="Payment Mode")
     # payment_type = fields.Char(string="Payment Type")
     fee_type = fields.Char(string="Fee Type")
-    invoice_no = fields.Char(string="Invoice No")
+    invoice_no = fields.Char(string="Invoice No",)
     reference_no = fields.Char(string="Reference No")
     amount_exc_tax = fields.Float(string="Amount (Exc. Tax)")
     amount_inc_tax = fields.Float(string="Amount (Inc. Tax)")
@@ -997,6 +997,7 @@ class PaymentHistoryFeeCollection(models.Model):
 
     balance = fields.Float(string="Balance", compute="_compute_balance_amount", store=True)
     balance_type = fields.Selection([('debit', 'Debit'), ('credit', 'Credit')], string="Balance Type", store=True)
+    cancellation_reason = fields.Text(string="Cancellation Reason", readonly=1)
 
     @api.depends('debit_amount', 'credit_amount')
     def _compute_balance_amount(self):
@@ -1041,12 +1042,15 @@ class PaymentHistoryFeeCollection(models.Model):
         return self.env.ref('logic_base_17.action_report_students_payment_history_non_taxable').report_action(self)
 
     def act_cancellation_invoice_or_receipt(self):
-        invoice = self.env['invoice.reports'].sudo().search([('invoice_number', '=', self.voucher_no)])
-        receipt = self.env['receipts.report'].sudo().search([('receipt_no', '=', self.voucher_no)])
-        print(invoice.name, 'invoice')
-        print(receipt.name, 'receipt')
-        self.state = 'cancelled'
-        invoice.state = 'cancelled'
-        receipt.state = 'cancelled'
+        return {'type': 'ir.actions.act_window',
+                'name': _('Bill Cancellation'),
+                'res_model': 'bill.cancellation',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_payment_id': self.id}}
+
+
+
 
 

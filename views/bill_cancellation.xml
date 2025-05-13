@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Odoo View Definition for Whatsapp Message Form -->
+    <record id="bill_cancellation_wizard_form_view" model="ir.ui.view">
+        <field name="name">bill.cancellation.view.form</field>
+        <field name="model">bill.cancellation</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <form string="Bill Cancellation">
+                <div align="center">
+                    <field name="clarification" readonly="1"/>
+                </div>
+
+                <field name="accepted"/>
+                <group>
+                    <field name="reason" required="1"/>
+                </group>
+                <footer>
+                    <button name="action_cancel_bill" string="Cancel Bill" type="object" invisible="accepted == 0" class="oe_highlight"/>
+                    <button name="cancel" string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

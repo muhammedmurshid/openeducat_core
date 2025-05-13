@@ -405,7 +405,7 @@
                         </div>
                         <notebook colspan="4">
                             <page name="payment_history" string="Payment History">
-                                <field name="payment_ids">
+                                <field name="payment_ids" readonly="1">
                                     <tree editable="bottom" readonly="0">
                                         <field name="sl_no"/>
                                         <field name="currency_id" optional="hide"/>
@@ -439,8 +439,9 @@
                                                 invisible="type != 'invoice' or state == 'cancelled'" string=" Invoice"/>
                                         <button name="act_print_invoice_non_taxable" type="object"
                                                 class="fa fa-download" invisible="type != 'receipt' or state == 'cancelled'" string=" Receipt"/>
-                                        <button name="act_cancellation_invoice_or_receipt" type="object" string="Cancellation" class="oe_highlight" invisible="state == 'cancelled'"/>
+                                        <button name="act_cancellation_invoice_or_receipt" type="object" string="Cancellation" class="oe_highlight" groups="openeducat_core.group_op_accounts_manager" invisible="state == 'cancelled'"/>
                                         <field name="state" widget="badge" decoration-success="state == 'completed'" decoration-danger="state == 'cancelled'"/>
+                                        <field name="cancellation_reason"/>
                                     </tree>
                                 </field>
                                 <!--                                        <field name="admission_fee"/>-->
