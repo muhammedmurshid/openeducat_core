@@ -517,7 +517,6 @@ class OpStudent(models.Model):
 
 
     def act_change_fee_plan(self):
-        print('k')
         return {'type': 'ir.actions.act_window',
                 'name': _('Change Plan'),
                 'res_model': 'change.payment.plan',
