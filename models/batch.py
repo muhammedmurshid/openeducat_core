@@ -38,6 +38,7 @@ class OpBatch(models.Model):
     end_date = fields.Date('End Date', compute="_compute_end_date", store=1, required=1, tracking=1)
     active = fields.Boolean(default=True)
     department_id = fields.Many2one('op.department', string="Department", required=1)
+    department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
@@ -222,7 +223,7 @@ class OpBatch(models.Model):
             else:
                 record.end_date = False
 
-    days_to_batch_start = fields.Integer(string="Days to Strat Batch", compute="_compute_remaining_days", store=1)
+    days_to_batch_start = fields.Integer(string="Days to Start Batch", compute="_compute_remaining_days", store=1)
 
     @api.depends('start_date', 'end_date','total_duration')
     def _compute_remaining_days(self):

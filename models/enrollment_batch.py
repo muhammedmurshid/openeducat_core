@@ -33,9 +33,7 @@ class BatchEnrollmentWizard(models.TransientModel):
         old_batch = self.student_id.batch_id
         old_batch.sudo().write({'student_ids': [(3, self.student_id.id)]})
         for record in self:  # Iterate over each enrollment_batch record
-            print(record.batch_id.id, 'oooi')
 
-            # Validate required fields
             if not record.student_id:
                 raise ValueError("No student specified for enrollment.")
             if not record.batch_id:
@@ -45,9 +43,10 @@ class BatchEnrollmentWizard(models.TransientModel):
             record.student_id.sudo().write({
                 'batch_id': record.batch_id.id
             })
-        self.batch_id.sudo().write({
-            'student_ids': [(0, 0, {'student_name': self.student_id.id, 'mobile': self.student_id.mobile, 'date_of_admission': self.enrollment_date})]
-        })
+        print(self.batch_id, 'batch')
+        # self.batch_id.sudo().write({
+        #     'student_ids': [(0, 0, {'student_name': self.student_id.id, 'mobile': self.student_id.mobile, 'date_of_admission': self.enrollment_date})]
+        # })
         if self.student_id.enrolled == 1:
             self.student_id.sudo().write({
                 'enrollment_ids': [
@@ -58,7 +57,6 @@ class BatchEnrollmentWizard(models.TransientModel):
                     # Add valid data
                 ]
             })
-            print('ya')
 
         else:
             print('naa')

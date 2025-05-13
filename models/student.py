@@ -977,6 +977,7 @@ class PaymentHistoryFeeCollection(models.Model):
     credit_amount = fields.Float(string="Credit Amount")
     voucher_no = fields.Char(string="Voucher No.")
     voucher_name = fields.Char(string="Voucher Name")
+    state = fields.Selection([('cancelled','Cancelled'), ('completed', 'Completed')], default="completed", string="Status")
     type = fields.Selection([('receipt','Receipt'), ('invoice','Invoice'),('ancillary','Ancillary'),('opening','Opening'), ('credit_note', 'Credit Note')], string="Type")
     currency_id = fields.Many2one(
         'res.currency',
@@ -1033,10 +1034,19 @@ class PaymentHistoryFeeCollection(models.Model):
             print(i.amount_in_words_non_tax, 'workssssss')
 
     def act_print_invoice(self):
-
         return self.env.ref('logic_base_17.action_report_students_payment_history').report_action(self)
 
 
     def act_print_invoice_non_taxable(self):
-
         return self.env.ref('logic_base_17.action_report_students_payment_history_non_taxable').report_action(self)
+
+    def act_cancellation_invoice_or_receipt(self):
+        invoice = self.env['invoice.reports'].sudo().search([('invoice_number', '=', self.voucher_no)])
+        receipt = self.env['receipts.report'].sudo().search([('receipt_no', '=', self.voucher_no)])
+        print(invoice.name, 'invoice')
+        print(receipt.name, 'receipt')
+        self.state = 'cancelled'
+        invoice.state = 'cancelled'
+        receipt.state = 'cancelled'
+
+
