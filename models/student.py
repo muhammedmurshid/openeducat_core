@@ -551,8 +551,8 @@ class OpStudent(models.Model):
                 'amount_exc_tax': 0,
                 'amount_inc_tax': 0,
                 'fee_name': 'Opening Balance',
-                'debit_amount': rec.closing_balance,
-                'credit_amount': rec.credit_balance_erp,
+                'debit_amount': rec.credit_balance_erp,
+                'credit_amount': rec.closing_balance,
                 'balance': rec.credit_balance_erp,  # Replace with actual calculation if needed
 
             })]
