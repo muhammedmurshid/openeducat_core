@@ -376,6 +376,9 @@ class OpStudent(models.Model):
         fee.student_id = self.id
         fee.assigned_by = self.env.user.id
         fee.assigned_date = fields.Datetime.now()
+        last_payment = len(self.payment_ids)
+        print(last_payment, 'last payment')
+
 
         receipt = self.env['receipts.report'].sudo().create({
             'date': fields.Datetime.now(),
@@ -387,6 +390,12 @@ class OpStudent(models.Model):
             'batch': self.batch_id.name
 
         })
+        rec_no = self.env['receipts.report'].sudo().search([], limit=1, order='id desc')
+        self.payment_ids =  [(0, 0, {'date': fields.Datetime.now(), 'payment_mode': 'Gateway Receipt',
+                                'voucher_name': 'Gateway Receipt', 'sl_no': last_payment + 1,
+                                'credit_amount': fee.amount, 'voucher_no': rec_no.receipt_no,
+                                'type': 'receipt', 'batch_name': self.batch_id.name,
+                                'course_name': self.course_id.name, 'fee_name': 'Gateway Receipt'})]
         return {
             'name': _('Student Profile'),
             'type': 'ir.actions.act_window',
@@ -891,7 +900,7 @@ class FeeCollectionWizard(models.TransientModel):
                 'cgst_amount': self.cgst_amount,
                 'sgst_amount': self.sgst_amount,
                 'total_amount': self.total_amount,
-                'credit_amount': self.total_amount,
+                'debit_amount': self.total_amount,
                 'invoice_no': last_report.invoice_number,
             }
         if self.fee_type == 'excess_amount':
