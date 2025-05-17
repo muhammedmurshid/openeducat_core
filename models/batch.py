@@ -31,7 +31,6 @@ class OpBatch(models.Model):
     _description = "OpenEduCat Batch"
     _order = 'id desc'
 
-    code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
     name = fields.Char('Name', required=True)
     start_date = fields.Date(
         'Start Date', required=True, default=fields.Date.today(), tracking=1)
@@ -76,27 +75,26 @@ class OpBatch(models.Model):
     max_no_of_students = fields.Integer(string="Max no.of Students")
     compo_ids = fields.One2many('payment.group.compo', 'compo_id')
 
+    code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
+
     @api.model
     def create(self, vals):
-        current_year = datetime.today().year
-        max_number = 0
+        if vals.get('code', 'New') == 'New':
+            current_year = datetime.today().year
+            max_number = 0
 
-        # Search all records for the current year
-        batches = self.search([('code', 'like', f'{current_year}/%')])
+            # Lock rows to avoid race conditions
+            batches = self.search([('code', 'like', f'{current_year}/%')], order='code desc')
 
-        for batch in batches:
-            if batch.code:
-                match = re.match(rf"{current_year}/(\d+)", batch.code)
-                if match:
-                    number = int(match.group(1))
-                    if number > max_number:
-                        max_number = number
+            for batch in batches:
+                if batch.code:
+                    match = re.match(rf"{current_year}/(\d+)", batch.code)
+                    if match:
+                        number = int(match.group(1))
+                        max_number = max(max_number, number)
 
-        # Increment the highest number found
-        new_number = str(max_number + 1).zfill(2)
-
-        # Assign the new code
-        vals['code'] = f"{current_year}/{new_number}"
+            new_number = str(max_number + 1).zfill(2)
+            vals['code'] = f"{current_year}/{new_number}"
 
         return super(OpBatch, self).create(vals)
 
@@ -209,9 +207,9 @@ class OpBatch(models.Model):
         self.state = 'batch_approval'
         print('hi')
 
-    _sql_constraints = [
-        ('unique_batch_code',
-         'unique(code)', 'Code should be unique per batch!')]
+    # _sql_constraints = [
+    #     ('unique_batch_code',
+    #      'unique(code)', 'Code should be unique per batch!')]
 
     total_duration = fields.Integer(string="Duration", required=1)
 

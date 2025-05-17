@@ -566,7 +566,6 @@
                                             </div>
                                         </group>
 
-
                                         <group string="Lump Sum Fee Details" name="fee_details"
                                                invisible="fee_type != 'lump_sum_fee'" style="background-color:#ede9dd">
 

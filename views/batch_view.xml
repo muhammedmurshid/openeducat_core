@@ -86,7 +86,7 @@
 
                             </group>
                             <group>
-                                <field name="code" readonly="state == 'completed'"/>
+                                <field name="code" invisible="state =='draft'" readonly="state == 'completed'"/>
                                 <field name="end_date" readonly="state == 'completed'"/>
                                 <field name="days_to_batch_start"/>
                                 <field name="remaining_days"/>
