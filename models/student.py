@@ -255,7 +255,7 @@ class OpStudent(models.Model):
         for rec in self:
             count = len(rec.enrollment_ids)
             print(count, 'sdfggg')
-            rec.enrollment_count = len(rec.enrollment_ids)
+            rec.enrollment_count = len(rec.enrollment_ids) - 1
 
     enrollment_count = fields.Integer(string="Enrollment Count", compute="_compute_enrollment_count", store=1)
 
