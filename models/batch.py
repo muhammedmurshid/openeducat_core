@@ -99,6 +99,19 @@ class OpBatch(models.Model):
         return super(OpBatch, self).create(vals)
 
     active_badge = fields.Char(string="Status", compute="_compute_active_badge")
+    crash_batch = fields.Boolean(string="Crash Batch", compute="_compute_crash_batch", store=1)
+
+    @api.depends('course_id')
+    def _compute_crash_batch(self):
+        for rec in self:
+            if rec.course_id:
+                print('course')
+                if rec.course_id.type == 'crash':
+                    print(rec.course_id.type, 'type')
+                    rec.crash_batch = 1
+                else:
+                    print(rec.course_id.type, 'type')
+                    rec.crash_batch = 0
 
     @api.depends('active')
     def _compute_active_badge(self):

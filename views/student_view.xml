@@ -62,32 +62,14 @@
             <field name="arch" type="xml">
 
                 <tree string="Student">
-                    <!--                    <style>-->
-                    <!--                        .custom-wallet-icon::before {-->
-                    <!--                        content: "\f555"; /* Unicode for wallet icon */-->
-                    <!--                        font-family: "FontAwesome";-->
-                    <!--                        }-->
-                    <!--                    </style>-->
-                    <!--                    <field name="title" optional="show"/>-->
                     <field name="gr_no" string="Reg No"/>
-                    <!--                    <field name="admission_date"/>-->
-<!--                    <field name="first_name"/>-->
-<!--                    <field name="last_name"/>-->
                     <field name="name"/>
-                    <!--                    <field name="gender" optional="hide"/>-->
-                    <!--                    <field name="birth_date" optional="hide"/>-->
-                    <!--                    <field name="gr_no" optional="hide"/>-->
                     <field name="mobile"/>
-                    <field name="email"/>
+<!--                    <field name="email"/>-->
                     <field name="batch_id"/>
                     <field name="enrollment_count"/>
-                    <!--                    <field name="branch"/>-->
-                    <!--                    <field name="blood_group"/>-->
-                    <!--                    <field name="emergency_contact"/>-->
                     <field name="course_id"/>
                     <field name="due_amount" string="Fees Pending"/>
-                    <!--                    <field name="nationality"/>-->
-                    <!--                    <field name="lang" options="hide"/>-->
                     <button name="act_add_amount_to_wallet" type="object"
                             icon="fa-credit-card" string="Add to Wallet"/>
                     <field name="state" widget="badge" decoration-info="state == 'confirm'"
@@ -538,22 +520,17 @@
                                     <!--                                            <field name="admission_fee_paid" readonly="1"/>-->
                                     <!--                                        </div>-->
                                     <!--                                    </group>-->
-
                                     <group name="closing_balance" style="background-color:#d5dbd6">
                                         <field name="closing_balance" widget="monetary"
                                                readonly="make_visible_admission_officer == 1"/>
                                         <field name="credit_balance_erp" widget="monetary"
                                                readonly="make_visible_admission_officer == 1"/>
-
-
                                         <div style="text-align: center; margin-top: 10px; margin-left:300px">
                                             <button name="act_add_closing_balance" string="Submit" type="object"
                                                     class="oe_highlight"
                                                     invisible="make_visible_admission_officer == 1"/>
                                         </div>
                                     </group>
-
-
                                     <div class="o_inner_group">
                                         <group style="background-color:#ede9dd">
                                             <label for="fee_type" readonly="1"/>
@@ -565,10 +542,8 @@
                                                         invisible="make_visible_admission_officer == 1"/>
                                             </div>
                                         </group>
-
                                         <group string="Lump Sum Fee Details" name="fee_details"
                                                invisible="fee_type != 'lump_sum_fee'" style="background-color:#ede9dd">
-
                                             <field name="batch_fee" widget="monetary"/>
                                             <field name="discount" widget="monetary"/>
                                             <field name="total_payable_tax" widget="monetary"/>
@@ -588,8 +563,6 @@
                                 </group>
                             </page>
                             <page name="enrollment_ids" string="Enrollment Details">
-
-
                                 <field name="enrollment_ids">
                                     <tree editable="bottom" readonly="0">
                                         <field name="batch_id"/>

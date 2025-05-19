@@ -118,13 +118,13 @@
             <field name="domain_force">['|',('user_id','=',user.id),('emp_id.user_id','=',user.id)]</field>
         </record>
 
-<!--        <record model="ir.rule" id="admission_team_rules">-->
-<!--            <field name="name">Admission Team rules</field>-->
-<!--            <field name="model_id" ref="model_op_student"/>-->
-<!--            <field name="groups"-->
-<!--                   eval="[(4, ref('openeducat_core.group_op_admission_team'))]"/>-->
-<!--            <field name="domain_force">['|',('create_uid','=',user.id),('admission_officer_id.id','=',user.id)]</field>-->
-<!--        </record>-->
+        <record model="ir.rule" id="batch_coordinators_rules">
+            <field name="name">Academic coordinators rules</field>
+            <field name="model_id" ref="model_op_batch"/>
+            <field name="groups"
+                   eval="[(4, ref('openeducat_core.group_op_class_coordinators'))]"/>
+            <field name="domain_force">['|',('create_uid','=',user.id),('initiated_id','=',user.id)]</field>
+        </record>
 
         <record model="ir.rule" id="view_faculty_rule">
             <field name="name">View Faculties</field>

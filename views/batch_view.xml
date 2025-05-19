@@ -10,14 +10,13 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="course_id"/>
+                    <field name="crash_batch"/>
                     <field name="total_no_of_students"
                            string="Students Enrolled Now"/>
                     <field name="start_date"/>
                     <field name="end_date"/>
-                    <!--                    <field name="days_to_batch_start"/>-->
-                    <!--                    <field name="remaining_days"/>-->
-
-                    <field name="create_uid" string="Created By"/>
+                    <field name="initiated_id" widget="many2one_avatar_user"/>
+                    <field name="create_uid" string="Created By" widget="many2one_avatar_user"/>
                     <field name="batch_type" widget="badge" decoration-warning="batch_type == 'present_batch'"
                            decoration-info="batch_type == 'future_batch'"/>
                     <!--                    <field name="active" widget="badge"/>-->
@@ -80,10 +79,8 @@
                                 <field name="total_duration" string="Total Duration (Days)"
                                        readonly="state == 'completed'"/>
                                 <field name="batch_type" readonly="state == 'completed'"/>
-
-                                <!--                                <field name="branch_id"/>-->
                                 <field name="max_no_of_students"/>
-
+                                <field name="initiated_id" string="Coordinator"/>
                             </group>
                             <group>
                                 <field name="code" invisible="state =='draft'" readonly="state == 'completed'"/>
@@ -96,8 +93,7 @@
                                        string="Students Enrolled Now"/>
                                 <field name="currency_id" invisible="1"/>
                                 <field name="course_id" options="{'no_create': True}"/>
-                                <field name="initiated_id" string="Coordinator"/>
-
+                                <field name="crash_batch"/>
                             </group>
                         </group>
                         <notebook>
