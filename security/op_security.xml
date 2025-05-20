@@ -126,6 +126,14 @@
             <field name="domain_force">['|',('create_uid','=',user.id),('initiated_id','=',user.id)]</field>
         </record>
 
+        <record model="ir.rule" id="students_own_documents_for_coordinators">
+            <field name="name">Academic coordinators rules for students</field>
+            <field name="model_id" ref="model_op_student"/>
+            <field name="groups"
+                   eval="[(4, ref('openeducat_core.group_op_class_coordinators'))]"/>
+            <field name="domain_force">['|',('create_uid','=',user.id),('batch_id.initiated_id','=',user.id)]</field>
+        </record>
+
         <record model="ir.rule" id="view_faculty_rule">
             <field name="name">View Faculties</field>
             <field name="model_id" ref="model_op_faculty"/>
