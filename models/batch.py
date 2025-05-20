@@ -100,6 +100,7 @@ class OpBatch(models.Model):
 
     active_badge = fields.Char(string="Status", compute="_compute_active_badge")
     crash_batch = fields.Boolean(string="Crash Batch", compute="_compute_crash_batch", store=1)
+    crash_status = fields.Selection([('yes','Yes'), ('no','No')], string="Crash Batch")
 
     @api.depends('course_id')
     def _compute_crash_batch(self):
@@ -109,9 +110,11 @@ class OpBatch(models.Model):
                 if rec.course_id.type == 'crash':
                     print(rec.course_id.type, 'type')
                     rec.crash_batch = 1
+                    rec.crash_status = 'yes'
                 else:
                     print(rec.course_id.type, 'type')
                     rec.crash_batch = 0
+                    rec.crash_status = 'no'
 
     @api.depends('active')
     def _compute_active_badge(self):
