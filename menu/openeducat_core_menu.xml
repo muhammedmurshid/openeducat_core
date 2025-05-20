@@ -10,11 +10,11 @@
         <field name="context">{'module' : 'openeducat_core'}</field>
     </record>
     <!-- Openeducat Menu -->
-    <menuitem id="menu_op_school_root"
-              name="SIS"
-              sequence="220"
-              web_icon="openeducat_core,static/description/sis.png"
-              groups="group_op_back_office_admin"/>
+<!--    <menuitem id="menu_op_school_root"-->
+<!--              name="SIS"-->
+<!--              sequence="220"-->
+<!--              web_icon="openeducat_core,static/description/sis.png"-->
+<!--              groups="group_op_back_office_admin"/>-->
 
     <menuitem id="menu_op_school_main"
               name="Students"
