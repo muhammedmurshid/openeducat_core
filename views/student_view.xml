@@ -77,6 +77,28 @@
                 </tree>
             </field>
         </record>
+        <record id="view_op_student_tree_enrollment" model="ir.ui.view">
+            <field name="name">op.student.tree.enrollment</field>
+            <field name="model">op.student</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+
+                <tree string="Student">
+                    <field name="gr_no" string="Reg No"/>
+                    <field name="name"/>
+                    <field name="mobile"/>
+<!--                    <field name="email"/>-->
+                    <field name="batch_id"/>
+                    <field name="enrollment_count"/>
+                    <field name="course_id"/>
+                    <field name="due_amount" string="Fees Pending"/>
+                    <button name="act_add_amount_to_wallet" type="object"
+                            icon="fa-credit-card" string="Add to Wallet"/>
+                    <field name="state" widget="badge" decoration-info="state == 'confirm'"
+                           decoration-success="state == 'batch_allocated'" decoration-danger="state == 'stoped'"/>
+                </tree>
+            </field>
+        </record>
 
 <!--        <record id="add_student_first_name_and_last_name" model="ir.actions.server">-->
 <!--            <field name="name">Add Names(First and Last)</field>-->
@@ -137,7 +159,7 @@
                         color: white;
                         text-align: center;
                         }
-                        .card {
+                        .wallet_card {
                         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
                         transition: 0.3s;
                         width: 20%;
@@ -327,7 +349,7 @@
                                         <field name="make_visible_lead_manager" invisible="1"/>
                                         <field name="sended_welcome_mail" invisible="1"/>
                                     </group>
-                                    <div class="card" invisible="state == 'stoped'">
+                                    <div class="wallet_card" invisible="state == 'stoped'">
                                         <div class="container">
                                             <h4>
                                                 <b style="color:white;" align="center">Wallet Balance

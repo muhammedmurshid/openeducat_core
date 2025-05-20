@@ -250,12 +250,15 @@ class OpStudent(models.Model):
         'Registration Number must be unique per student!'
     )]
 
-    @api.depends('enrollment_ids.batch_id')
+    @api.depends('enrollment_ids.batch_id','enrolled')
     def _compute_enrollment_count(self):
         for rec in self:
             count = len(rec.enrollment_ids)
             print(count, 'sdfggg')
-            rec.enrollment_count = len(rec.enrollment_ids) - 1
+            if self.enrolled == 1:
+                rec.enrollment_count = len(rec.enrollment_ids) - 1
+            else:
+                rec.enrollment_count = 0
 
     enrollment_count = fields.Integer(string="Enrollment Count", compute="_compute_enrollment_count", store=1)
 
