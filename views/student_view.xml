@@ -67,7 +67,6 @@
                     <field name="mobile"/>
 <!--                    <field name="email"/>-->
                     <field name="batch_id"/>
-                    <field name="enrollment_count"/>
                     <field name="course_id"/>
                     <field name="due_amount" string="Fees Pending"/>
                     <button name="act_add_amount_to_wallet" type="object"
