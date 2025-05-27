@@ -8,7 +8,7 @@ class CreateReceiptWizard(models.TransientModel):
     _description = "Receipt Wizard"
 
     remarks = fields.Text(string="Remarks")
-    date = fields.Date(string="Date")
+    date = fields.Date(string="Date", required=1)
     student_id = fields.Many2one('op.student', string="Student")
     student_name = fields.Char(string="Name")
     cheque_no = fields.Char(string="Cheque No/Reference No")

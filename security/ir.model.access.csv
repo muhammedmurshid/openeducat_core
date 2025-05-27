@@ -82,3 +82,4 @@ access_welcome_mail,access_welcome_mail,model_welcome_mail,,1,1,1,1
 
 
 access_bill_cancellation,access_bill_cancellation,model_bill_cancellation,,1,1,1,1
+access_discount_request,access_discount_request,model_discount_request,,1,1,1,0

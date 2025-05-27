@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="discount_request_tree_view" model="ir.ui.view">
+        <field name="name">discount.request.tree</field>
+        <field name="model">discount.request</field>
+        <field name="arch" type="xml">
+            <tree multi_edit="1">
+                <field name="student_id"/>
+                <field name="request_date"/>
+                <field name="mobile"/>
+                <field name="discount_scheme"/>
+                <field name="amount"/>
+            </tree>
+        </field>
+    </record>
+    <record id="discount_request_form_view" model="ir.ui.view">
+        <field name="name">discount.request.form</field>
+        <field name="model">discount.request</field>
+        <field name="arch" type="xml">
+            <form string="Discount Request">
+                <header>
+                    <button name="act_confirm_request" class="oe_highlight" type="object" string="Confirm" invisible="state != 'draft'"/>
+                    <button name="act_approve" type="object"
+                            string="Approve"
+                            invisible="state != 'head_approval'" class="oe_highlight" groups="openeducat_core.group_op_accounts_manager"/>
+                    <button name="act_reject" type="object"
+                            string="Reject"
+                            invisible="state != 'head_approval'" groups="openeducat_core.group_op_accounts_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="student_id"/>
+                            <field name="request_date"/>
+                            <field name="mobile"/>
+                            <field name="amount"/>
+                        </group>
+                        <group>
+                            <field name="approval_date" invisible="state != 'draft'"/>
+                            <field name="discount_scheme"/>
+                            <field name="reason" required="1"/>
+                        </group>
+
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_discount_requests" model="ir.actions.act_window">
+        <field name="name">Discount Request</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">discount.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

@@ -281,6 +281,7 @@
                         <button name="act_sent_to_welcome_mail" type="object" string="Send Welcome Mail"
                                 class="welcome_mail"
                                 invisible="state != 'batch_allocated' or sended_welcome_mail == True"/>
+                        <button name="act_fee_discount" string="Add Discount" type="object" class="oe_highlight" groups="openeducat_core.group_op_accounts"/>
                     </header>
                     <sheet>
                         <!--                        <widget name="web_ribbon"-->

@@ -358,6 +358,16 @@ class OpStudent(models.Model):
     enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments",)
     make_visible_admission_officer = fields.Boolean(string="User", default=True, compute='get_user')
 
+    def act_fee_discount(self):
+        print('print discount')
+        return {'type': 'ir.actions.act_window',
+                'name': _('Discount Request'),
+                'res_model': 'discount.request',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_student_id': self.id}, }
+
     @api.depends('make_visible_lead_manager')
     def get_lead_manager(self):
         user_crnt = self.env.user.id
@@ -990,7 +1000,7 @@ class PaymentHistoryFeeCollection(models.Model):
     voucher_no = fields.Char(string="Voucher No.")
     voucher_name = fields.Char(string="Voucher Name")
     state = fields.Selection([('cancelled','Cancelled'), ('completed', 'Completed')], default="completed", string="Status")
-    type = fields.Selection([('receipt','Receipt'), ('invoice','Invoice'),('ancillary','Ancillary'),('opening','Opening'), ('credit_note', 'Credit Note')], string="Type")
+    type = fields.Selection([('receipt','Receipt'), ('invoice','Invoice'),('ancillary','Ancillary'),('opening','Opening'), ('discount','Discount'), ('credit_note', 'Credit Note')], string="Type")
     currency_id = fields.Many2one(
         'res.currency',
         string="Currency",
