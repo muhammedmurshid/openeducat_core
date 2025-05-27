@@ -64,7 +64,7 @@
                                 class="oe_highlight"/>
                         <button name="action_done_batch" type="object" string="Done"
                                 invisible="state in ['draft','up_coming','completed']" class="done_button"/>
-                        <button name="act_revert" type="object" string="Revert to Batch Approval" invisible="state != 'completed'"/>
+                        <button name="act_revert" type="object" string="Revert to Batch Approval" invisible="state != 'completed'" groups="openeducat_core.group_op_admin"/>
                     </header>
                     <sheet>
                         <field name="active" invisible="1"/>

@@ -9,7 +9,7 @@
            <form string="Whatsapp Message">
                <group>
                    <field name="student_id" string="Student Name"/>
-                   <field name="date" required="1"/>
+                   <field name="date" readonly="1"/>
                    <field name="student_name" string="Name" invisible="1"/>
 <!--                   <field name="branch_id"/>-->
                    <field name="branch" />
