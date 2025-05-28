@@ -5,11 +5,14 @@
         <field name="model">discount.request</field>
         <field name="arch" type="xml">
             <tree multi_edit="1">
-                <field name="student_id"/>
                 <field name="request_date"/>
+                <field name="student_id"/>
+                <field name="batch_id"/>
                 <field name="mobile"/>
+                <field name="requested_by"/>
                 <field name="discount_scheme"/>
-                <field name="amount"/>
+                <field name="amount" sum="Total"/>
+                <field name="state" widget="badge"/>
             </tree>
         </field>
     </record>
@@ -19,10 +22,12 @@
         <field name="arch" type="xml">
             <form string="Discount Request">
                 <header>
-                    <button name="act_confirm_request" class="oe_highlight" type="object" string="Confirm" invisible="state != 'draft'"/>
+                    <button name="act_confirm_request" class="oe_highlight" type="object" string="Confirm"
+                            invisible="state != 'draft'"/>
                     <button name="act_approve" type="object"
                             string="Approve"
-                            invisible="state != 'head_approval'" class="oe_highlight" groups="openeducat_core.group_op_accounts_manager"/>
+                            invisible="state != 'head_approval'" class="oe_highlight"
+                            groups="openeducat_core.group_op_accounts_manager"/>
                     <button name="act_reject" type="object"
                             string="Reject"
                             invisible="state != 'head_approval'" groups="openeducat_core.group_op_accounts_manager"/>
@@ -32,14 +37,19 @@
                     <group>
                         <group>
                             <field name="student_id"/>
+                            <field name="batch_id"/>
                             <field name="request_date"/>
+                            <field name="requested_by" readonly="1"/>
                             <field name="mobile"/>
-                            <field name="amount"/>
+
                         </group>
                         <group>
-                            <field name="approval_date" invisible="state != 'draft'"/>
+                            <field name="approval_date" invisible="state != 'draft'" readonly="1"/>
+                            <field name="approved_by" invisible="state != 'approved'" readonly="1"/>
+                            <field invisible="state != 'rejected'" name="rejected_by" readonly="1"/>
                             <field name="discount_scheme"/>
                             <field name="reason" required="1"/>
+                            <field name="amount"/>
                         </group>
 
                     </group>

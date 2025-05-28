@@ -15,11 +15,16 @@ class Discount(models.Model):
    amount = fields.Float(string="Amount", required=1)
    reason = fields.Text(string="Reason", requied=1)
    approval_date = fields.Date(string="Approval Date")
+   approved_by = fields.Many2one('res.users', string="Approved By")
+   rejected_by = fields.Many2one('res.users', string="Rejected By")
+   requested_by = fields.Many2one('res.users', string="Requested By")
+   batch_id = fields.Many2one('op.batch', string="Batch", related="student_id.batch_id")
    state = fields.Selection([('draft', 'Draft'), ('head_approval', 'Head Approval'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='draft', string="Status", tracking=1)
 
    def act_approve(self):
       self.state = 'approved'
       self.approval_date = fields.Date.today()
+      self.approved_by = self.env.user.id
       discount = self.env['discount.report'].sudo().create({
          'approved_date': fields.Datetime.now(),
          'amount': self.amount,
@@ -39,7 +44,9 @@ class Discount(models.Model):
       self.student_id.due_amount -= self.amount
 
    def act_reject(self):
+      self.rejected_by = self.env.user.id
       self.state = 'rejected'
 
    def act_confirm_request(self):
+      self.requested_by = self.env.user.id
       self.state = 'head_approval'
