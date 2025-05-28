@@ -7,6 +7,7 @@ class Discount(models.Model):
    _description = "Discount Requests"
    _inherit = ['mail.thread', 'mail.activity.mixin']
    _rec_name = "student_id"
+   _order = "id desc"
 
    student_id = fields.Many2one('op.student', string="Student", required=1)
    request_date = fields.Date(string="Request Date", default=fields.Date.today)
@@ -32,6 +33,9 @@ class Discount(models.Model):
          'student_id': self.student_id.id,
          'added_date': self.request_date,
          'discount_scheme': self.discount_scheme,
+         'approved_by': self.env.user.id,
+         'requested_by': self.requested_by.id,
+         'batch_id': self.batch_id.id,
 
       })
       sl_no = len(self.student_id.payment_ids)
