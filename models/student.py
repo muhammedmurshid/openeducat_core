@@ -863,9 +863,12 @@ class FeeCollectionWizard(models.TransientModel):
 
         lead.report = last_report.id
         self.collection_id.admission_fee_paid = True
+
         self.collection_id.admission_fee = self.amount_inc_tax
         if self.fee_type == 'admission_fee':
             lead.admission_fee_paid = True
+            lead.admission_date = fields.Datetime.now()
+            self.collection_id.admission_date = fields.Datetime.now()
 
     def update_student_payment(self):
         if self.fee_type == 'admission_fee':
@@ -874,8 +877,6 @@ class FeeCollectionWizard(models.TransientModel):
             self.collection_id.paid_amount += self.amount_inc_tax
             if self.collection_id.due_amount != 0:  
                 self.collection_id.due_amount -= self.total_amount
-        # if self.fee_type != 'admission_fee':
-        #     self.collection_id.due_amount -= self.total_amount
 
     def create_payment_record(self):
         student = self.env['op.student'].browse(self.collection_id.id)
@@ -916,8 +917,8 @@ class FeeCollectionWizard(models.TransientModel):
                 'debit_amount': self.total_amount,
                 'invoice_no': last_report.invoice_number,
             }
-        if self.fee_type == 'excess_amount':
 
+        if self.fee_type == 'excess_amount':
             return {
                 'sl_no': last_sl_no,
                 'date': fields.Datetime.now(),
