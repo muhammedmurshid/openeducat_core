@@ -23,7 +23,7 @@ from os import unlink
 from odoo import models, fields, api, _, tools, exceptions
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
-from datetime import date,datetime
+from datetime import date, datetime
 import re
 
 from odoo.tools.populate import compute
@@ -81,7 +81,7 @@ class OpStudent(models.Model):
 
     first_name = fields.Char('First Name', )
     middle_name = fields.Char('Middle Name', )
-    last_name = fields.Char('Last Name',)
+    last_name = fields.Char('Last Name', )
     birth_date = fields.Date('Birth Date')
     blood_group = fields.Selection([
         ('A+', 'A+ve'),
@@ -116,7 +116,8 @@ class OpStudent(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
     batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
     batch_end_date = fields.Date(string="Batch End Date", related='batch_id.end_date')
-    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", tracking=1)
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type",
+                                tracking=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
@@ -174,7 +175,7 @@ class OpStudent(models.Model):
             vals['gr_no'] = f"{prefix}{next_number}"
             print(f"Generated GR No: {vals['gr_no']}")  # Optional debug
 
-        student =  super(OpStudent, self).create(vals)
+        student = super(OpStudent, self).create(vals)
 
         if student.batch_id:
             if student.fee_type == 'lump_sum_fee':
@@ -243,14 +244,13 @@ class OpStudent(models.Model):
                 student.batch_id.sudo().write({'student_ids': [(3, student_to_remove.id)]})
         return super(OpStudent, self).unlink()
 
-
     _sql_constraints = [(
         'unique_gr_no',
         'unique(gr_no)',
         'Registration Number must be unique per student!'
     )]
 
-    @api.depends('enrollment_ids.batch_id','enrolled')
+    @api.depends('enrollment_ids.batch_id', 'enrolled')
     def _compute_enrollment_count(self):
         for rec in self:
             count = len(rec.enrollment_ids)
@@ -310,7 +310,7 @@ class OpStudent(models.Model):
     enrolled = fields.Boolean(string="Enrolled")
     batch_ids = fields.Many2many('op.batch', string="Batches")
 
-    @api.depends('fee_type','batch_id', 'batch_fee','discount','total_payable_tax','paid_amount','due_amount')
+    @api.depends('fee_type', 'batch_id', 'batch_fee', 'discount', 'total_payable_tax', 'paid_amount', 'due_amount')
     def _compute_batch_fee(self):
         print('jjjjj')
         if self.fee_type:
@@ -355,7 +355,8 @@ class OpStudent(models.Model):
             self.make_visible_admission_officer = True
         else:
             self.make_visible_admission_officer = False
-    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments",)
+
+    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments", )
     make_visible_admission_officer = fields.Boolean(string="User", default=True, compute='get_user')
 
     def act_fee_discount(self):
@@ -392,7 +393,6 @@ class OpStudent(models.Model):
         last_payment = len(self.payment_ids)
         print(last_payment, 'last payment')
 
-
         receipt = self.env['receipts.report'].sudo().create({
             'date': fields.Datetime.now(),
             'amount': fee.amount,
@@ -404,11 +404,11 @@ class OpStudent(models.Model):
 
         })
         rec_no = self.env['receipts.report'].sudo().search([], limit=1, order='id desc')
-        self.payment_ids =  [(0, 0, {'date': fields.Datetime.now(), 'payment_mode': 'Gateway Receipt',
-                                'voucher_name': 'Gateway Receipt', 'sl_no': last_payment + 1,
-                                'credit_amount': fee.amount, 'voucher_no': rec_no.receipt_no,
-                                'type': 'receipt', 'batch_name': self.batch_id.name,
-                                'course_name': self.course_id.name, 'fee_name': 'Gateway Receipt'})]
+        self.payment_ids = [(0, 0, {'date': fields.Datetime.now(), 'payment_mode': 'Gateway Receipt',
+                                    'voucher_name': 'Gateway Receipt', 'sl_no': last_payment + 1,
+                                    'credit_amount': fee.amount, 'voucher_no': rec_no.receipt_no,
+                                    'type': 'receipt', 'batch_name': self.batch_id.name,
+                                    'course_name': self.course_id.name, 'fee_name': 'Gateway Receipt'})]
         return {
             'name': _('Student Profile'),
             'type': 'ir.actions.act_window',
@@ -473,7 +473,29 @@ class OpStudent(models.Model):
                 'target': 'new',
                 'view_mode': 'form',
                 'view_type': 'form',
-                'context': {'default_student_id': self.id, 'default_mail_id': self.email}, }
+                'context': {'default_student_id': self.id, 'default_mail_id': self.email, 'default_message': (
+                    "Hello Student,\n\n"
+                    "Have an awesome day!\n\n"
+                    "Congratulations on joining "f"{self.batch_id.name} Ernakulam\n\n"
+                    "We are thrilled to have you on board for our upcoming batch starting shortly.\n"
+                    "Your journey with us is about to begin.\n\n"
+                    "Key details:\n"
+                    "Course name: "f"{self.course_id.name}\n"
+                    "Course duration: "f"{self.batch_id.total_duration} days\n"
+                    "Timing: "f"{self.batch_id.timing}\n\n"
+                    "What to expect:\n"
+                    "- Engaging sessions with expert faculties.\n"
+                    "- Interactive learning experience.\n"
+                    "- Opportunities to network with peers.\n\n"
+                    "Support: Manjusha H (90720 57888)\n"
+                    "https://logiceducation.org/\n\n"
+                    "Excited to have you learn and grow with us.\n"
+                    "Class commencement date will be informed in the coming months.\n\n"
+                    "Best Regards,\n"
+                    "Manjusha H,\n"
+                    "Placements cum Client Relationship Executive,\n"
+                    "Logic School Of Management, Palarivattom, Kochi."
+                ), }, }
 
     def act_create_receipt(self):
         print('hi')
@@ -484,7 +506,8 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_student_id': self.id,
-                            'default_admission_officer': self.make_visible_admission_officer, 'default_batch_id': self.batch_id.id}, }
+                            'default_admission_officer': self.make_visible_admission_officer,
+                            'default_batch_id': self.batch_id.id}, }
 
     def compute_count(self):
         for record in self:
@@ -499,8 +522,9 @@ class OpStudent(models.Model):
                 batch = self.env['op.batch'].sudo().search([('id', '=', self.batch_id.id)])
                 batch.sudo().write({
                     'student_ids': [
-                        (0, 0, {'student_id': self.id, 'student_name': self.id, 'date_of_admission': self.admission_date,
-                                'mobile': self.mobile}),  # Add valid data
+                        (0, 0,
+                         {'student_id': self.id, 'student_name': self.id, 'date_of_admission': self.admission_date,
+                          'mobile': self.mobile}),  # Add valid data
                     ]
                 })
                 self.state = 'batch_allocated'
@@ -536,7 +560,6 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_student_id': self.id}, }
-
 
     def act_change_fee_plan(self):
         return {'type': 'ir.actions.act_window',
@@ -589,7 +612,8 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_collection_id': self.id,
-                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type,'default_batch_ids': [(6, 0, all_batch_ids)], 'default_enrolled': self.enrolled}, }
+                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type,
+                            'default_batch_ids': [(6, 0, all_batch_ids)], 'default_enrolled': self.enrolled}, }
 
 
 class EnrollmentBatches(models.Model):
@@ -598,12 +622,13 @@ class EnrollmentBatches(models.Model):
 
     batch_id = fields.Many2one('op.batch', string="Batch")
     course_id = fields.Many2one('op.course', string="Course")
-    fee_type = fields.Selection([('lump_sum_fee','Lump Sum Fee'), ('installment','Installment')], string="Fee Type")
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type")
     student_id = fields.Many2one('op.student', string="Student")
     batch_fee = fields.Float(string="Batch Fee")
     start_date = fields.Date(string="Start Date")
     end_date = fields.Date(string="End Date")
     enrolled_date = fields.Date(string="Enrolled Date")
+
 
 class FeeCollectionWizard(models.TransientModel):
     """This model is used for sending WhatsApp messages through Odoo."""
@@ -611,8 +636,9 @@ class FeeCollectionWizard(models.TransientModel):
     _description = "Fee Collection Wizard"
 
     fee_type = fields.Selection(
-        [('admission_fee', 'Admission Fee'), ('Ancillary Fee(Non Taxable)', 'Collection A/C'),('Batch Fee', 'Course Fee'), ('Other Fee', 'Other Fee'),
-          ('excess_amount', 'Excess Amount')],
+        [('admission_fee', 'Admission Fee'), ('Ancillary Fee(Non Taxable)', 'Collection A/C'),
+         ('Batch Fee', 'Course Fee'), ('Other Fee', 'Other Fee'),
+         ('excess_amount', 'Excess Amount')],
         string="Fee Type", required=1)
     remarks = fields.Text(string="Remarks")
     amount_inc_tax = fields.Float(string="Amount (Inc. Tax)")
@@ -655,14 +681,16 @@ class FeeCollectionWizard(models.TransientModel):
         ('UP', 'Uttar Pradesh'),
         ('UK', 'Uttarakhand'),
         ('WB', 'West Bengal'),
-        ('FC','Foreign Country')
+        ('FC', 'Foreign Country')
     ], string="Place of Supply", default='KL')
     payment_mode = fields.Selection(
         [('Wallet', 'Wallet')],
         string="Payment Mode", default="Wallet")
     enrolled = fields.Boolean(string="Enrolled")
     branch = fields.Selection(
-        [('Corporate Office & City Campus', 'Corporate Office & City Campus'), ('Cochin Campus', 'Cochin Campus'), ('Calicut Campus', 'Calicut Campus'), ('Trivandrum Campus', 'Trivandrum Campus'), ('Kottayam Campus', 'Kottayam Campus'),
+        [('Corporate Office & City Campus', 'Corporate Office & City Campus'), ('Cochin Campus', 'Cochin Campus'),
+         ('Calicut Campus', 'Calicut Campus'), ('Trivandrum Campus', 'Trivandrum Campus'),
+         ('Kottayam Campus', 'Kottayam Campus'),
          ('Perinthalmanna Branch', 'Perinthalmanna Branch'), ('Bangalore Campus', 'Bangalore Campus')], string="Branch")
     cheque_no = fields.Char(string="Cheque No/Reference No")
     wallet_amount = fields.Float(string="Amount in Wallet", readonly=1)
@@ -682,16 +710,18 @@ class FeeCollectionWizard(models.TransientModel):
     total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=1)
     fee_plan = fields.Char(string="Fee Plan")
     excess_amount = fields.Char(string="Excess Amount")
-    choose_payment_installment_plan = fields.Selection([('1st Installment','1st Installment'), ('2nd Installment','2nd Installment'), ('3rd Installment','3rd Installment')], string="Choose Installment Plan")
+    choose_payment_installment_plan = fields.Selection(
+        [('1st Installment', '1st Installment'), ('2nd Installment', '2nd Installment'),
+         ('3rd Installment', '3rd Installment')], string="Choose Installment Plan")
     batch_ids = fields.Many2many('op.batch', string="Batches")
     batch_id = fields.Many2one('op.batch', string="Batch")
 
-    @api.onchange('enrolled','fee_type')
+    @api.onchange('enrolled', 'fee_type')
     def _onchange_enrolled(self):
         if self.enrolled == False:
             self.batch_id = self.collection_id.batch_id.id
 
-    @api.onchange('fee_type','other_fee','amount_exc_tax')
+    @api.onchange('fee_type', 'other_fee', 'amount_exc_tax')
     def _onchange_fee_types(self):
         if self.fee_type == 'Other Fee':
             self.excess_amount = False
@@ -729,7 +759,7 @@ class FeeCollectionWizard(models.TransientModel):
                     self.excess_amount = False
                     self.other_fee = False
 
-    @api.onchange('fee_plan','choose_payment_installment_plan')
+    @api.onchange('fee_plan', 'choose_payment_installment_plan')
     def _onchange_batch_fee_plan(self):
         if self.fee_plan != 'installment':
             self.choose_payment_installment_plan = False
@@ -789,8 +819,7 @@ class FeeCollectionWizard(models.TransientModel):
                 self.amount_inc_tax = self.batch_id.inst_amount_inc
                 self.amount_exc_tax = self.batch_id.inst_amount_exc
 
-
-    @api.depends('amount_exc_tax','amount_inc_tax','fee_type')
+    @api.depends('amount_exc_tax', 'amount_inc_tax', 'fee_type')
     def _compute_total_amount(self):
         for rec in self:
             if rec.fee_type == 'Ancillary Fee(Non Taxable)':
@@ -875,7 +904,7 @@ class FeeCollectionWizard(models.TransientModel):
             self.collection_id.admission_fee = self.amount_inc_tax
         if self.fee_type == 'Batch Fee':
             self.collection_id.paid_amount += self.amount_inc_tax
-            if self.collection_id.due_amount != 0:  
+            if self.collection_id.due_amount != 0:
                 self.collection_id.due_amount -= self.total_amount
 
     def create_payment_record(self):
@@ -984,7 +1013,7 @@ class PaymentHistoryFeeCollection(models.Model):
     payment_mode = fields.Char(string="Payment Mode")
     # payment_type = fields.Char(string="Payment Type")
     fee_type = fields.Char(string="Fee Type")
-    invoice_no = fields.Char(string="Invoice No",)
+    invoice_no = fields.Char(string="Invoice No", )
     reference_no = fields.Char(string="Reference No")
     amount_exc_tax = fields.Float(string="Amount (Exc. Tax)")
     amount_inc_tax = fields.Float(string="Amount (Inc. Tax)")
@@ -1000,8 +1029,11 @@ class PaymentHistoryFeeCollection(models.Model):
     credit_amount = fields.Float(string="Credit Amount")
     voucher_no = fields.Char(string="Voucher No.")
     voucher_name = fields.Char(string="Voucher Name")
-    state = fields.Selection([('cancelled','Cancelled'), ('completed', 'Completed')], default="completed", string="Status")
-    type = fields.Selection([('receipt','Receipt'), ('invoice','Invoice'),('ancillary','Ancillary'),('opening','Opening'), ('discount','Discount'), ('credit_note', 'Credit Note')], string="Type")
+    state = fields.Selection([('cancelled', 'Cancelled'), ('completed', 'Completed')], default="completed",
+                             string="Status")
+    type = fields.Selection(
+        [('receipt', 'Receipt'), ('invoice', 'Invoice'), ('ancillary', 'Ancillary'), ('opening', 'Opening'),
+         ('discount', 'Discount'), ('credit_note', 'Credit Note')], string="Type")
     currency_id = fields.Many2one(
         'res.currency',
         string="Currency",
@@ -1040,13 +1072,10 @@ class PaymentHistoryFeeCollection(models.Model):
                 record.balance = 0
                 record.balance_type = False  # No balance
 
-
-
     @api.depends('amount_inc_tax')
     def _compute_amount_in_words(self):
         print('workssssss')
         for i in self:
-
             i.amount_in_words = num2words(i.amount_inc_tax, lang='en').upper()
         # print(f"Amount in words: {amount_in_words}")
 
@@ -1060,7 +1089,6 @@ class PaymentHistoryFeeCollection(models.Model):
     def act_print_invoice(self):
         return self.env.ref('logic_base_17.action_report_students_payment_history').report_action(self)
 
-
     def act_print_invoice_non_taxable(self):
         return self.env.ref('logic_base_17.action_report_students_payment_history_non_taxable').report_action(self)
 
@@ -1072,8 +1100,3 @@ class PaymentHistoryFeeCollection(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_payment_id': self.id}}
-
-
-
-
-

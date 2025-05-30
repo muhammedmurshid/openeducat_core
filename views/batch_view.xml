@@ -78,6 +78,7 @@
                                 <field name="start_date" readonly="state == 'completed'"/>
                                 <field name="total_duration" string="Total Duration (Days)"
                                        readonly="state == 'completed'"/>
+                                <field name="timing"/>
                                 <field name="batch_type" readonly="state == 'completed'"/>
                                 <field name="max_no_of_students"/>
                                 <field name="initiated_id" string="Coordinator"/>

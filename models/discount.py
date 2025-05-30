@@ -38,6 +38,7 @@ class Discount(models.Model):
          'batch_id': self.batch_id.id,
 
       })
+
       sl_no = len(self.student_id.payment_ids)
       last_record = self.env['discount.report'].sudo().search([], order='id desc', limit=1)
       self.student_id.payment_ids = [(0, 0, {'date': self.approval_date, 'payment_mode': 'Discount',

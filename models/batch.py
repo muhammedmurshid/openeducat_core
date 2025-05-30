@@ -74,7 +74,7 @@ class OpBatch(models.Model):
     installment_ids = fields.One2many('payment.installment.type', 'installment_id')
     max_no_of_students = fields.Integer(string="Max no.of Students")
     compo_ids = fields.One2many('payment.group.compo', 'compo_id')
-
+    timing = fields.Char(string="Timing")
     code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
 
     @api.model
