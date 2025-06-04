@@ -18,6 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from email.policy import default
 from os import unlink
 
 from odoo import models, fields, api, _, tools, exceptions
@@ -137,6 +138,7 @@ class OpStudent(models.Model):
     closing_balance = fields.Float(string="Receivable as per ERP on 31/03/2025 (Debit)")
     credit_balance_erp = fields.Float(string="Balance in ERP Wallet Amount 31/03/2025 (Credit)")
     sended_welcome_mail = fields.Boolean(string="Sended Welcome Mail")
+    integrated_student = fields.Boolean(string="Integrated Student", default=1)
 
     def act_give_names(self):
         students = self.env['op.student'].search([])
@@ -155,25 +157,25 @@ class OpStudent(models.Model):
     def create(self, vals):
         if vals.get('mobile'):
             vals['mobile'] = vals['mobile'].replace(' ', '')
+
         if vals.get('gr_no') in [False, "New", None]:
             current_year = datetime.today().year
             prefix = f"L{current_year}/"
 
-            # Search all gr_no starting with the current year prefix
-            all_records = self.search([('gr_no', 'like', f'{prefix}%')])
-            print('records', all_records)
-
+            # Search for existing GR numbers with the current year prefix
+            existing_records = self.search([('gr_no', 'like', f'{prefix}%')])
             max_number = 0
-            for rec in all_records:
+
+            for rec in existing_records:
                 match = re.match(rf"{re.escape(prefix)}(\d+)", rec.gr_no or "")
                 if match:
                     number = int(match.group(1))
                     max_number = max(max_number, number)
 
-            # Generate new gr_no
+            # Generate next GR number
             next_number = max_number + 1
-            vals['gr_no'] = f"{prefix}{next_number}"
-            print(f"Generated GR No: {vals['gr_no']}")  # Optional debug
+            vals['gr_no'] = f"{prefix}{str(next_number).zfill(3)}"
+            print(f"Generated GR No: {vals['gr_no']}")
 
         student = super(OpStudent, self).create(vals)
 
@@ -207,15 +209,15 @@ class OpStudent(models.Model):
             new_batch = self.env['op.batch'].browse(vals['batch_id']) if 'batch_id' in vals else old_batch
 
             # Remove student from old batch if it exists and is different from new batch
-            if old_batch and old_batch != new_batch:
-                old_batch.total_no_of_students -= 1
-                # Find the student record in old_batch.student_ids
-                student_to_remove = old_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
-                if student_to_remove:  # Ensure a record was found
-                    # Ensure student_to_remove is a single record
-                    student_to_remove = student_to_remove[0] if len(student_to_remove) > 1 else student_to_remove
-                    print(f"Removing student {student.id} from old batch {old_batch.id}")
-                    old_batch.sudo().write({'student_ids': [(3, student_to_remove.id)]})
+            # if old_batch and old_batch != new_batch:
+            #     old_batch.total_no_of_students -= 1
+            #     # Find the student record in old_batch.student_ids
+            #     student_to_remove = old_batch.student_ids.filtered(lambda s: s.student_name.id == student.id)
+            #     if student_to_remove:  # Ensure a record was found
+            #         # Ensure student_to_remove is a single record
+            #         student_to_remove = student_to_remove[0] if len(student_to_remove) > 1 else student_to_remove
+            #         print(f"Removing student {student.id} from old batch {old_batch.id}")
+            #         old_batch.sudo().write({'student_ids': [(3, student_to_remove.id)]})
 
             # Add student to new batch if it exists and is different from old batch
             if new_batch and new_batch != old_batch:
@@ -232,7 +234,6 @@ class OpStudent(models.Model):
                             'date_of_admission': student.admission_date,
                         })]
                     })
-
         return res
 
     def unlink(self):
@@ -709,6 +710,7 @@ class FeeCollectionWizard(models.TransientModel):
     igst_amount = fields.Float(string="IGST Amount")
     total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=1)
     fee_plan = fields.Char(string="Fee Plan")
+
     excess_amount = fields.Char(string="Excess Amount")
     choose_payment_installment_plan = fields.Selection(
         [('1st Installment', '1st Installment'), ('2nd Installment', '2nd Installment'),

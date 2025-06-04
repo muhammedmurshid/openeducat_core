@@ -36,7 +36,6 @@ class BatchEnrollmentWizard(models.TransientModel):
                 raise ValueError("No student specified for enrollment.")
             if not record.batch_id:
                 raise ValueError("No batch specified for enrollment.")
-
             # Capture old batch details before changing
             old_batch = record.student_id.batch_id
             old_fee_type = record.student_id.fee_type
@@ -46,7 +45,7 @@ class BatchEnrollmentWizard(models.TransientModel):
             old_admission_date = record.student_id.admission_date
 
             # Remove student from old batch
-            old_batch.sudo().write({'student_ids': [(3, record.student_id.id)]})
+            # old_batch.sudo().write({'student_ids': [(3, record.student_id.id)]})
 
             # Update student batch
             record.student_id.sudo().write({

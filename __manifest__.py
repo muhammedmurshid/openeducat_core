@@ -68,7 +68,7 @@
         'views/batch_transfer.xml',
         'views/welcome_mail.xml',
         'views/bill_cancellation.xml',
-        'views/discount_request.xml'
+        'views/discount_request.xml',
     ],
     'demo': [
         'demo/homepage_template.xml',
