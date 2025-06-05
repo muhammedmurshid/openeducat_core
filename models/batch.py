@@ -125,6 +125,7 @@ class OpBatch(models.Model):
     def _compute_total_students(self):
         for record in self:
             record.total_no_of_students = len(record.student_ids.filtered(lambda s: s.state != 'stoped'))
+            print(record.total_no_of_students, 'tot no stud')
 
     total_no_of_students = fields.Integer(string="No. of Students", compute="_compute_total_students", store=True)
 
