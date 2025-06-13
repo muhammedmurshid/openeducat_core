@@ -21,7 +21,7 @@
                            decoration-info="batch_type == 'future_batch'"/>
                     <!--                    <field name="active" widget="badge"/>-->
                     <field name="active_badge" widget="badge" string="Status"
-                           decoration-success="active_badge == 'Active'"/>
+                           decoration-success="active_badge == 'active'"/>
                     <field name="state" widget="badge" string="Batch Approvals"/>
                 </tree>
             </field>

@@ -37,7 +37,7 @@ class OpBatch(models.Model):
     end_date = fields.Date('End Date', compute="_compute_end_date", store=1, required=1, tracking=1)
     active = fields.Boolean(default=True)
     department_id = fields.Many2one('op.department', string="Department", required=1)
-    department_id = fields.Many2one('op.department', string="Department", required=1)
+    # department_id = fields.Many2one('op.department', string="Department", required=1)
     state = fields.Selection(
         [('draft', 'Draft'), ('batch_approval', 'Batch Approval'), ('marketing', 'Marketing'), ('accounts', 'Accounts'), ('completed', 'Completed'), ('up_coming', 'Up Coming')],
         string="Status", default='draft', tracking=True)
@@ -98,7 +98,7 @@ class OpBatch(models.Model):
 
         return super(OpBatch, self).create(vals)
 
-    active_badge = fields.Char(string="Status", compute="_compute_active_badge")
+    active_badge = fields.Selection([('active', 'Active'), ('in_active','In Active')], string="Status", compute="_compute_active_badge", store=1)
     crash_batch = fields.Boolean(string="Crash Batch", compute="_compute_crash_batch", store=1)
     crash_status = fields.Selection([('yes','Yes'), ('no','No')], string="Crash Batch")
 
@@ -119,7 +119,11 @@ class OpBatch(models.Model):
     @api.depends('active')
     def _compute_active_badge(self):
         for record in self:
-            record.active_badge = "Active" if record.active else ""
+            if record.active == 1:
+                record.active_badge = 'active'
+            else:
+                record.active_badge = 'in_active'
+            # record.active_badge = "Active" if record.active else ""
 
     @api.depends('student_ids', 'student_ids.state')
     def _compute_total_students(self):
