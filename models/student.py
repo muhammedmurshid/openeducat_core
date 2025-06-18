@@ -362,13 +362,15 @@ class OpStudent(models.Model):
 
     def act_fee_discount(self):
         print('print discount')
+        all_batch_ids = self.mapped('enrollment_ids.batch_id').ids
         return {'type': 'ir.actions.act_window',
                 'name': _('Discount Request'),
                 'res_model': 'discount.request',
                 'target': 'new',
                 'view_mode': 'form',
                 'view_type': 'form',
-                'context': {'default_student_id': self.id}, }
+                'context': {'default_student_id': self.id,
+                            'default_batch_ids': [(6, 0, all_batch_ids)], 'default_enrolled': self.enrolled}}
 
     @api.depends('make_visible_lead_manager')
     def get_lead_manager(self):
@@ -465,6 +467,16 @@ class OpStudent(models.Model):
             'domain': [('student_id', '=', self.id)],
             'context': "{'create': False}"
         }
+    def get_current_discount(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Wallet Collections',
+            'view_mode': 'tree,form',
+            'res_model': 'discount.request',
+            'domain': [('student_id', '=', self.id)],
+            'context': "{'create': False}"
+        }
 
     def act_sent_to_welcome_mail(self):
         print('sent')
@@ -516,6 +528,13 @@ class OpStudent(models.Model):
                 [('student_id', '=', self.id)])
 
     wallet_smart_count = fields.Integer(compute='compute_count')
+
+    def compute_discount_count(self):
+        for record in self:
+            record.discount_smart_count = self.env['discount.request'].sudo().search_count(
+                [('student_id', '=', self.id)])
+
+    discount_smart_count = fields.Integer(compute='compute_discount_count')
 
     def act_allocate_to_batch(self):
         if self.batch_id:
@@ -698,7 +717,11 @@ class FeeCollectionWizard(models.TransientModel):
     fee_name = fields.Selection(
         [('IMA Membership Fee', 'IMA Membership Fee'), ('IMA Exam Fee', 'IMA Exam Fee'),
          ('ACCA Exam Fee', 'ACCA Exam Fee'), ('ACCA Board Registration', 'ACCA Board Registration')], string="Fee Name")
-    other_fee = fields.Char(string="Fee Name")
+    other_fee = fields.Selection(
+        [('Admission Fee', 'Admission Fee'), ('Coaching Fee 1st Installment', 'Coaching Fee 1st Installment'),
+         ('Coaching Fee 2nd Installment', 'Coaching Fee 2nd Installment'),
+         ('Coaching Fee 3rd Installment', 'Coaching Fee 3rd Installment')], string="Fee Name")
+    other_amount = fields.Char(string="Fee Name")
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     tax_id = fields.Many2one('account.tax', string="Tax")
     non_tax = fields.Boolean(string="Non Taxable")
@@ -720,7 +743,7 @@ class FeeCollectionWizard(models.TransientModel):
         if self.enrolled == False:
             self.batch_id = self.collection_id.batch_id.id
 
-    @api.onchange('fee_type', 'other_fee', 'amount_exc_tax')
+    @api.onchange('fee_type', 'other_amount', 'amount_exc_tax')
     def _onchange_fee_types(self):
         if self.fee_type == 'Other Fee':
             self.excess_amount = False
@@ -732,7 +755,7 @@ class FeeCollectionWizard(models.TransientModel):
             print('anc')
             # self.amount_inc_tax = self.amount_exc_tax
             self.tax = 0
-            self.other_fee = False
+            self.other_amount = False
             self.batch_id = False
         if self.fee_type == 'excess_amount':
             self.amount_inc_tax = self.wallet_amount
@@ -745,18 +768,18 @@ class FeeCollectionWizard(models.TransientModel):
             if self.collection_id.enrolled == 1:
                 self.excess_amount = False
                 self.fee_name = False
-                self.other_fee = False
+                self.other_amount = False
             else:
                 print('erty')
                 if self.fee_type != 'Ancillary Fee(Non Taxable)':
                     self.excess_amount = False
                     # self.batch_id = self.collection_id.batch_id.id
                     self.fee_name = False
-                    self.other_fee = False
+                    self.other_amount = False
                 else:
                     self.batch_id = self.collection_id.batch_id.id
                     self.excess_amount = False
-                    self.other_fee = False
+                    self.other_amount = False
 
     @api.onchange('fee_plan', 'choose_payment_installment_plan')
     def _onchange_batch_fee_plan(self):
@@ -844,10 +867,10 @@ class FeeCollectionWizard(models.TransientModel):
             if self.amount_inc_tax != self.collection_id.batch_id.adm_inc_fee:
                 raise ValidationError("Invalid amount. Please enter the correct admission fee.")
 
-            report = self.create_invoice_report(self.other_fee)
+            report = self.create_invoice_report(self.other_amount)
             self.update_admission_fee(report)
         else:
-            report = self.create_invoice_report(self.fee_name if self.fee_type != 'Other Fee' else self.other_fee)
+            report = self.create_invoice_report(self.fee_name if self.fee_type != 'Other Fee' else self.other_amount)
             print(report, 're port')
             self.update_student_payment()
 
@@ -874,7 +897,7 @@ class FeeCollectionWizard(models.TransientModel):
             'student_id': self.collection_id.id,
             'cgst_amount': self.cgst_amount,
             'sgst_amount': self.sgst_amount,
-            'fee_name': self.other_fee or self.fee_name or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
+            'fee_name': self.other_amount or self.fee_name or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
             'tax': self.tax,
             'amount_exc_tax': exc_tax
         })
@@ -962,7 +985,7 @@ class FeeCollectionWizard(models.TransientModel):
                 'type': type,
                 'cheque_no': self.cheque_no,
                 'branch': self.branch,
-                'fee_name': self.fee_name or self.other_fee or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
+                'fee_name': self.fee_name or self.other_amount or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
                 'tax_amount': self.tax,
                 'cgst_amount': self.cgst_amount,
                 'sgst_amount': self.sgst_amount,
@@ -986,7 +1009,7 @@ class FeeCollectionWizard(models.TransientModel):
                 'type': type,
                 'cheque_no': self.cheque_no,
                 'branch': self.branch,
-                'fee_name': self.fee_name or self.other_fee or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
+                'fee_name': self.fee_name or self.other_amount or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
                 'tax_amount': self.tax,
                 'cgst_amount': self.cgst_amount,
                 'sgst_amount': self.sgst_amount,

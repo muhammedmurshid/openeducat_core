@@ -307,9 +307,14 @@
                                     icon="fa-book">
                                 <field string="Wallet Collections" name="wallet_smart_count" widget="statinfo"/>
                             </button>
+                            <button class="oe_stat_button" type="object" name="get_current_discount"
+                                    icon="fa-money">
+                                <field string="Discounts" name="discount_smart_count" widget="statinfo"/>
+                            </button>
                         </div>
-                        <div name="button_box" class="oe_button_box">
-                        </div>
+<!--                        <div name="button_box" class="oe_button_box">-->
+
+<!--                        </div>-->
                         <field name="active" invisible="1"/>
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
                                 invisible="active == True"/>

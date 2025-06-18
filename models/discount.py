@@ -19,8 +19,9 @@ class Discount(models.Model):
    approved_by = fields.Many2one('res.users', string="Approved By")
    rejected_by = fields.Many2one('res.users', string="Rejected By")
    requested_by = fields.Many2one('res.users', string="Requested By")
-   batch_id = fields.Many2one('op.batch', string="Batch", related="student_id.batch_id")
+   batch_id = fields.Many2one('op.batch', string="Batch", required=1)
    state = fields.Selection([('draft', 'Draft'), ('head_approval', 'Head Approval'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='draft', string="Status", tracking=1)
+   batch_ids = fields.Many2many('op.batch', string="Batches")
 
    def act_approve(self):
       self.state = 'approved'
@@ -36,7 +37,6 @@ class Discount(models.Model):
          'approved_by': self.env.user.id,
          'requested_by': self.requested_by.id,
          'batch_id': self.batch_id.id,
-
       })
 
       sl_no = len(self.student_id.payment_ids)
@@ -46,6 +46,7 @@ class Discount(models.Model):
                                   'credit_amount': self.amount, 'voucher_no': last_record,
                                   'type': 'discount', 'batch_name': self.student_id.batch_id.name,
                                   'course_name': self.student_id.course_id.name, 'fee_name': 'Discount'})]
+
       self.student_id.due_amount -= self.amount
 
    def act_reject(self):
