@@ -698,10 +698,7 @@ class FeeCollectionWizard(models.TransientModel):
     fee_name = fields.Selection(
         [('IMA Membership Fee', 'IMA Membership Fee'), ('IMA Exam Fee', 'IMA Exam Fee'),
          ('ACCA Exam Fee', 'ACCA Exam Fee'), ('ACCA Board Registration', 'ACCA Board Registration')], string="Fee Name")
-    other_fee = fields.Selection(
-        [('Admission Fee', 'Admission Fee'), ('Coaching Fee 1st Installment', 'Coaching Fee 1st Installment'),
-         ('Coaching Fee 2nd Installment', 'Coaching Fee 2nd Installment'),
-         ('Coaching Fee 3rd Installment', 'Coaching Fee 3rd Installment')], string="Fee Name")
+    other_fee = fields.Char(string="Fee Name")
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     tax_id = fields.Many2one('account.tax', string="Tax")
     non_tax = fields.Boolean(string="Non Taxable")
