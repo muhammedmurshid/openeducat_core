@@ -357,7 +357,7 @@ class OpStudent(models.Model):
         else:
             self.make_visible_admission_officer = False
 
-    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments", )
+    enrollment_ids = fields.One2many('enrollment.details', 'student_id', string="Enrollments")
     make_visible_admission_officer = fields.Boolean(string="User", default=True, compute='get_user')
 
     def act_fee_discount(self):
@@ -648,6 +648,10 @@ class EnrollmentBatches(models.Model):
     start_date = fields.Date(string="Start Date")
     end_date = fields.Date(string="End Date")
     enrolled_date = fields.Date(string="Enrolled Date")
+    discount = fields.Float(string="Discount")
+    total_payable = fields.Float(string="Total Payable")
+    paid_inc_tax = fields.Float(string="Paid (Inc Tax)")
+    due_amount = fields.Float(string="Due Amount(Inc Tax)")
 
 
 class FeeCollectionWizard(models.TransientModel):
@@ -851,7 +855,6 @@ class FeeCollectionWizard(models.TransientModel):
 
     def act_submit(self):
         print('hhi')
-
         # ✅ Check wallet balance first
         wallet_balance = self.collection_id.wallet_balance
         if self.wallet_amount < self.total_amount:
@@ -873,6 +876,11 @@ class FeeCollectionWizard(models.TransientModel):
             report = self.create_invoice_report(self.fee_name if self.fee_type != 'Other Fee' else self.other_amount)
             print(report, 're port')
             self.update_student_payment()
+            for enrollment in self.collection_id.enrollment_ids:
+                if enrollment.batch_id == self.batch_id:
+                    enrollment.total_payable = enrollment.batch_fee - enrollment.discount
+                    enrollment.paid_inc_tax += self.total_amount
+                    enrollment.due_amount = enrollment.total_payable - enrollment.paid_inc_tax
 
         self.create_payment_record()
 
@@ -1051,6 +1059,7 @@ class PaymentHistoryFeeCollection(models.Model):
     credit_amount = fields.Float(string="Credit Amount")
     voucher_no = fields.Char(string="Voucher No.")
     voucher_name = fields.Char(string="Voucher Name")
+
     state = fields.Selection([('cancelled', 'Cancelled'), ('completed', 'Completed')], default="completed",
                              string="Status")
     type = fields.Selection(

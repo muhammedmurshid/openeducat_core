@@ -95,6 +95,7 @@
                                 <field name="currency_id" invisible="1"/>
                                 <field name="course_id" options="{'no_create': True}"/>
                                 <field name="crash_batch"/>
+                                <field name="add_on_batch"/>
                             </group>
                         </group>
                         <notebook>

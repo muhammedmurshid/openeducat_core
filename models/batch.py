@@ -76,6 +76,7 @@ class OpBatch(models.Model):
     compo_ids = fields.One2many('payment.group.compo', 'compo_id')
     timing = fields.Char(string="Timing")
     code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
+    add_on_batch = fields.Boolean(string="Add On Batch")
 
     @api.model
     def create(self, vals):

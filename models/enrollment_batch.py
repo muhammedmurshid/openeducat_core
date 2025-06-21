@@ -48,9 +48,14 @@ class BatchEnrollmentWizard(models.TransientModel):
             # old_batch.sudo().write({'student_ids': [(3, record.student_id.id)]})
 
             # Update student batch
-            record.student_id.sudo().write({
-                'batch_id': record.batch_id.id
-            })
+            if self.batch_id.add_on_batch == 1:
+                record.student_id.sudo().write({
+                    'batch_id': old_batch.id
+                })
+            else:
+                record.student_id.sudo().write({
+                    'batch_id': record.batch_id.id
+                })
 
             # Add enrollment records
             if record.student_id.enrolled == 1:
@@ -63,6 +68,7 @@ class BatchEnrollmentWizard(models.TransientModel):
                             'batch_fee': record.batch_fee,
                             'start_date': record.start_date,
                             'end_date': record.end_date,
+                            'branch_id': record.branch_id.id,
                             'enrolled_date': record.enrollment_date,
                         }),
                     ]
@@ -77,6 +83,7 @@ class BatchEnrollmentWizard(models.TransientModel):
                             'course_id': old_course.id,
                             'start_date': old_start_date,
                             'end_date': old_end_date,
+                            'branch_id': old_batch.branch.id,
                             'enrolled_date': old_admission_date,
                         }),
                         (0, 0, {
@@ -86,6 +93,7 @@ class BatchEnrollmentWizard(models.TransientModel):
                             'batch_fee': record.batch_fee,
                             'start_date': record.start_date,
                             'end_date': record.end_date,
+                            'branch_id': old_batch.branch.id,
                             'enrolled_date': record.enrollment_date,
                         }),
                     ]
