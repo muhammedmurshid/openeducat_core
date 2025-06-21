@@ -43,6 +43,8 @@ class BatchEnrollmentWizard(models.TransientModel):
             old_start_date = record.student_id.batch_start_date
             old_end_date = record.student_id.batch_end_date
             old_admission_date = record.student_id.admission_date
+            old_payable_fee = record.student_id.total_payable_tax
+            old_due_amount = record.student_id.due_amount
 
             # Remove student from old batch
             # old_batch.sudo().write({'student_ids': [(3, record.student_id.id)]})
@@ -68,8 +70,9 @@ class BatchEnrollmentWizard(models.TransientModel):
                             'batch_fee': record.batch_fee,
                             'start_date': record.start_date,
                             'end_date': record.end_date,
-                            'branch_id': record.branch_id.id,
+                            'total_payable': record.batch_fee,
                             'enrolled_date': record.enrollment_date,
+                            'due_amount': record.batch_fee,
                         }),
                     ]
                 })
@@ -83,8 +86,9 @@ class BatchEnrollmentWizard(models.TransientModel):
                             'course_id': old_course.id,
                             'start_date': old_start_date,
                             'end_date': old_end_date,
-                            'branch_id': old_batch.branch.id,
+                            'total_payable': old_payable_fee,
                             'enrolled_date': old_admission_date,
+                            'due_amount': old_due_amount,
                         }),
                         (0, 0, {
                             'batch_id': record.batch_id.id,
@@ -93,8 +97,9 @@ class BatchEnrollmentWizard(models.TransientModel):
                             'batch_fee': record.batch_fee,
                             'start_date': record.start_date,
                             'end_date': record.end_date,
-                            'branch_id': old_batch.branch.id,
+                            'total_payable': record.batch_fee,
                             'enrolled_date': record.enrollment_date,
+                            'due_amount': record.batch_fee,
                         }),
                     ]
                 })
@@ -104,5 +109,6 @@ class BatchEnrollmentWizard(models.TransientModel):
         student.due_amount += self.batch_fee
         # student.batch_id = self.batch_id.id
         student.fee_type = self.fee_type
+        student.branch_id = self.branch_id.id
         student.admission_date = self.enrollment_date
         # student.message_post(body=msg)
