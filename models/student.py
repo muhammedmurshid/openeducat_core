@@ -363,6 +363,8 @@ class OpStudent(models.Model):
     def act_fee_discount(self):
         print('print discount')
         all_batch_ids = self.mapped('enrollment_ids.batch_id').ids
+        if self.batch_id:
+            all_batch_ids = list(set(all_batch_ids + [self.batch_id.id]))
         return {'type': 'ir.actions.act_window',
                 'name': _('Discount Request'),
                 'res_model': 'discount.request',
