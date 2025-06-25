@@ -937,7 +937,8 @@ class FeeCollectionWizard(models.TransientModel):
         if self.fee_type == 'Batch Fee':
             self.collection_id.paid_amount += self.amount_inc_tax
             if self.collection_id.due_amount != 0:
-                self.collection_id.due_amount -= self.total_amount
+                if self.batch_id.add_on_batch == 0:
+                    self.collection_id.due_amount -= self.total_amount
 
     def create_payment_record(self):
         student = self.env['op.student'].browse(self.collection_id.id)
