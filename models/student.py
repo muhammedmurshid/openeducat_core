@@ -137,6 +137,7 @@ class OpStudent(models.Model):
     credit_balance_erp = fields.Float(string="Balance in ERP Wallet Amount 31/03/2025 (Credit)")
     sended_welcome_mail = fields.Boolean(string="Sended Welcome Mail")
     integrated_student = fields.Boolean(string="Integrated Student", default=1)
+    re_enrolled_date = fields.Date(string="Re Enrolled Date")
 
     def act_give_names(self):
         students = self.env['op.student'].search([])

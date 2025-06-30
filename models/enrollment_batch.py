@@ -110,5 +110,5 @@ class BatchEnrollmentWizard(models.TransientModel):
         # student.batch_id = self.batch_id.id
         student.fee_type = self.fee_type
         student.branch_id = self.branch_id.id
-        student.admission_date = self.enrollment_date
+        student.re_enrolled_date = self.enrollment_date
         # student.message_post(body=msg)

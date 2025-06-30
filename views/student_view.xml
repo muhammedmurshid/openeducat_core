@@ -520,6 +520,7 @@
                                         <field name="category_id"/>
                                         <field name="user_id" string="User" readonly="1"/>
                                         <field name="partner_id" placeholder="Partner" required="0"/>
+                                        <field name="re_enrolled_date" readonly="1"/>
                                         <!--                                        <field name="branch_id"/>-->
                                     </group>
 
