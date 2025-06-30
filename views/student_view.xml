@@ -311,6 +311,10 @@
                                     icon="fa-money">
                                 <field string="Discounts" name="discount_smart_count" widget="statinfo"/>
                             </button>
+                            <button class="oe_stat_button" type="object" name="get_current_lead_profile"
+                                    icon="fa-wrench" string="Lead">
+                                <field string="Lead" name="lead_smart_count" widget="statinfo"/>
+                            </button>
                         </div>
 <!--                        <div name="button_box" class="oe_button_box">-->
 

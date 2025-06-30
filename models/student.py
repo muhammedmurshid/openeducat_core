@@ -72,7 +72,6 @@ class OpStudentCourse(models.Model):
             'template': '/openeducat_core/static/xls/op_student_course.xls'
         }]
 
-
 class OpStudent(models.Model):
     _name = "op.student"
     _description = "Student"
@@ -117,8 +116,7 @@ class OpStudent(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
     batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
     batch_end_date = fields.Date(string="Batch End Date", related='batch_id.end_date')
-    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type",
-                                tracking=1)
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", tracking=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
@@ -560,6 +558,7 @@ class OpStudent(models.Model):
     drop_date = fields.Date(string="Drop Date")
     drop_date_title = fields.Char(compute="_compute_drop_date_title")
 
+
     def _compute_drop_date_title(self):
         for record in self:
             record.drop_date_title = f"Drop Date: {record.drop_date.strftime('%Y-%m-%d')}" if record.drop_date else "No Drop Date"
@@ -582,6 +581,22 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_student_id': self.id}, }
+    def get_current_lead_profile(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Lead',
+            'view_mode': 'tree,form',
+            'res_model': 'leads.logic',
+            'domain': [('id', '=', self.lead_id.id)],
+            'context': "{'create': False}"
+        }
+    def compute_lead_count(self):
+        for record in self:
+            record.lead_smart_count = self.env['leads.logic'].sudo().search_count(
+                [('id', '=', self.lead_id.id)])
+
+    lead_smart_count = fields.Integer(compute='compute_lead_count')
 
     def act_change_fee_plan(self):
         return {'type': 'ir.actions.act_window',
@@ -885,6 +900,8 @@ class FeeCollectionWizard(models.TransientModel):
                     enrollment.due_amount = enrollment.total_payable - enrollment.paid_inc_tax
 
         self.create_payment_record()
+
+
 
     def create_invoice_report(self, fee_type):
         fee_type_label = dict(self._fields['fee_type'].selection).get(self.fee_type)
