@@ -1019,7 +1019,7 @@ class FeeCollectionWizard(models.TransientModel):
                 'cgst_amount': self.cgst_amount,
                 'sgst_amount': self.sgst_amount,
                 'total_amount': self.total_amount,
-                'credit_amount': self.total_amount,
+                'debit_amount': self.total_amount,
                 'invoice_no': last_report.invoice_number,
             }
         else:

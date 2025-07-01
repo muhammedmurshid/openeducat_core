@@ -14,7 +14,7 @@
                     <field name="standard_hour"/>
                     <field name="subject_type"/>
                     <field name="group"/>
-<!--                    <field name="grade_weightage"/>-->
+                    <!--                    <field name="grade_weightage"/>-->
                     <field name="department_id" groups="openeducat_core.group_multi_department"/>
                 </tree>
             </field>
@@ -26,11 +26,15 @@
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
                 <form string="Subject">
-                    <header/>
+                    <header>
+                        <button name="act_add_to_course" type="object" string="Add To Course" class="oe_highlight" invisible="state == 'done'"/>
+                        <button name="revert" type="object" string="Revert" invisible="state == 'draft'"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
                     <sheet>
                         <field name="active" invisible="1"/>
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
-                                invisible = "active == True"/>
+                                invisible="active == True"/>
                         <group>
                             <group>
                                 <field name="name"/>
@@ -42,8 +46,9 @@
                             <group>
                                 <field name="code"/>
                                 <field name="standard_hour" required="1"/>
-<!--                                <field name="grade_weightage"/>-->
+                                <!--                                <field name="grade_weightage"/>-->
                                 <field name="group"/>
+                                <field name="course_id"/>
                             </group>
                         </group>
                     </sheet>

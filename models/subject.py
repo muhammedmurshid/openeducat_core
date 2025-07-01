@@ -48,6 +48,17 @@ class OpSubject(models.Model):
     group = fields.Many2one('op.group', string="Group")
     mode_of_study = fields.Selection([('online', 'Online'), ('offline', 'Offline'), ('nil', 'Nil')],
                                      string="Mode of Study", default="offline")
+    course_id = fields.Many2one('op.course', string="Course", required=1)
+    state = fields.Selection([('draft','Draft'), ('done','Done')], string="Status", default="draft")
+
+    def act_add_to_course(self):
+        for i in self:
+            if i.course_id:
+                i.course_id.subject_ids = [(4, i.id)]
+                i.state = 'done'
+
+    def revert(self):
+        self.state = 'draft'
 
     _sql_constraints = [
         ('unique_subject_code',

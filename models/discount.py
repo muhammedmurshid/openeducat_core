@@ -43,8 +43,8 @@ class Discount(models.Model):
       last_record = self.env['discount.report'].sudo().search([], order='id desc', limit=1)
       self.student_id.payment_ids = [(0, 0, {'date': self.approval_date, 'payment_mode': 'Discount',
                                   'voucher_name': 'Gateway Receipt', 'sl_no': sl_no + 1,
-                                  'credit_amount': self.amount, 'voucher_no': last_record,
-                                  'type': 'discount', 'batch_name': self.student_id.batch_id.name,
+                                  'credit_amount': self.amount, 'voucher_no': last_record.sequence_no,
+                                  'type': 'discount', 'batch_name': last_record.batch_id.name,
                                   'course_name': self.student_id.course_id.name, 'fee_name': 'Discount'})]
       for enrollment in self.student_id.enrollment_ids:
          if enrollment.batch_id == self.batch_id:
