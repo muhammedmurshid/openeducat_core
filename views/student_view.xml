@@ -85,6 +85,7 @@
                 <tree string="Student">
                     <field name="gr_no" string="Reg No"/>
                     <field name="name"/>
+                    <field name="re_enrolled_date"/>
                     <field name="mobile"/>
                     <!--                    <field name="email"/>-->
                     <field name="batch_id"/>

@@ -384,9 +384,16 @@ class OpStudent(models.Model):
 
     make_visible_lead_manager = fields.Boolean(string="Lead Manager", default=True, compute='get_lead_manager')
 
+    from odoo.exceptions import ValidationError
+
     def act_add_amount_to_wallet(self):
         active_id = self.env.context.get('active_id')
         fee = self.env['fee.quick.pay'].browse(active_id)
+
+        # Validation: Amount must be greater than 0
+        if not fee.amount or fee.amount == 0:
+            raise ValidationError("Amount is empty. Please enter a valid amount.")
+
         print('hi', fee.amount)
         self.wallet_balance += fee.amount
         fee.receipt_no = fee._generate_receipt_number()
@@ -405,14 +412,22 @@ class OpStudent(models.Model):
             'payment_mode': 'Gateway',
             'student_id': self.id,
             'batch': self.batch_id.name
-
         })
+
         rec_no = self.env['receipts.report'].sudo().search([], limit=1, order='id desc')
-        self.payment_ids = [(0, 0, {'date': fields.Datetime.now(), 'payment_mode': 'Gateway Receipt',
-                                    'voucher_name': 'Gateway Receipt', 'sl_no': last_payment + 1,
-                                    'credit_amount': fee.amount, 'voucher_no': rec_no.receipt_no,
-                                    'type': 'receipt', 'batch_name': self.batch_id.name,
-                                    'course_name': self.course_id.name, 'fee_name': 'Gateway Receipt'})]
+        self.payment_ids = [(0, 0, {
+            'date': fields.Datetime.now(),
+            'payment_mode': 'Gateway Receipt',
+            'voucher_name': 'Gateway Receipt',
+            'sl_no': last_payment + 1,
+            'credit_amount': fee.amount,
+            'voucher_no': rec_no.receipt_no,
+            'type': 'receipt',
+            'batch_name': self.batch_id.name,
+            'course_name': self.course_id.name,
+            'fee_name': 'Gateway Receipt'
+        })]
+
         return {
             'name': _('Student Profile'),
             'type': 'ir.actions.act_window',

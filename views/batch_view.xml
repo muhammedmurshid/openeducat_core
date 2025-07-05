@@ -157,7 +157,7 @@
                                 <group name="installment" string="Installment">
                                     <field name="installment_ids">
                                         <tree editable="bottom">
-                                            <field name="currency_id" invisible="1"/>
+                                            <field name="currency_id" optional="hide"/>
                                             <field name="term"/>
                                             <field name="amount_exc_installment" widget="monetary"/>
                                             <field name="tax_amount" widget="monetary"/>
