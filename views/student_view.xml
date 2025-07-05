@@ -612,6 +612,15 @@
                                             <field name="paid_amount" widget="monetary"/>
                                             <field name="due_amount" widget="monetary"/>
                                         </group>
+                                        <group string="Bajaj Finance Payment Plan Details" name="bajaj_fee_plan"
+                                               invisible="fee_type != 'bajaj_finance_payment_plan'" style="background-color:#ede9dd">
+
+                                            <field name="batch_fee" widget="monetary"/>
+                                            <field name="discount" widget="monetary"/>
+                                            <field name="total_payable_tax" widget="monetary"/>
+                                            <field name="paid_amount" widget="monetary"/>
+                                            <field name="due_amount" widget="monetary"/>
+                                        </group>
                                     </div>
                                 </group>
                                 <group name="integrated_details" string="Integrated Status">
@@ -690,6 +699,9 @@
                             <field name="total_amount"/>
                         </group>
                         <group string="Installment Plan" invisible="fee_type != 'installment'">
+                            <field name="total_amount"/>
+                        </group>
+                        <group string="Bajaj Finance Payment Plan" invisible="fee_type != 'bajaj_finance_payment_plan'">
                             <field name="total_amount"/>
                         </group>
                     </group>

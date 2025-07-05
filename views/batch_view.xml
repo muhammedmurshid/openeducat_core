@@ -10,7 +10,8 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="course_id"/>
-                    <field name="crash_status" decoration-success="crash_status == 'yes'" decoration-danger="crash_status == 'no'" widget="badge"/>
+                    <field name="crash_status" decoration-success="crash_status == 'yes'"
+                           decoration-danger="crash_status == 'no'" widget="badge"/>
                     <field name="total_no_of_students"
                            string="Students Enrolled Now"/>
                     <field name="start_date"/>
@@ -64,7 +65,8 @@
                                 class="oe_highlight"/>
                         <button name="action_done_batch" type="object" string="Done"
                                 invisible="state in ['draft','up_coming','completed']" class="done_button"/>
-                        <button name="act_revert" type="object" string="Revert to Batch Approval" invisible="state != 'completed'" groups="openeducat_core.group_op_admin"/>
+                        <button name="act_revert" type="object" string="Revert to Batch Approval"
+                                invisible="state != 'completed'" groups="openeducat_core.group_op_admin"/>
                     </header>
                     <sheet>
                         <field name="active" invisible="1"/>
@@ -115,6 +117,15 @@
                                         <field name="lump_fee_including_tax" placeholder="lump sum fee including tax"
                                                widget="monetary"/>
                                         <field name="total_lump_sum_fee" widget="monetary"
+                                               style="background-color:#d3ecf2"/>
+                                    </group>
+                                    <group name="bajaj_plan"
+                                           string="Bajaj Finance Payment Plan">
+                                        <field name="bajaj_emi_amount" placeholder="EMI Scheme Amount"
+                                               widget="monetary"/>
+                                        <field name="bajaj_emi_tax" placeholder="Tax" widget="monetary"/>
+                                        <field name="bajaj_including_tax" placeholder="EMI Scheme Including Tax" widget="monetary"/>
+                                        <field name="bajaj_emi_total" placeholder="Total" widget="monetary"
                                                style="background-color:#d3ecf2"/>
                                     </group>
                                     <!--                                    <group string="Lump sum Payment Plan - Offer Price" name="plan_lump_offer">-->

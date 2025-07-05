@@ -77,6 +77,10 @@ class OpBatch(models.Model):
     timing = fields.Char(string="Timing")
     code = fields.Char('Batch ID No.', copy=False, readonly=False, default="New")
     add_on_batch = fields.Boolean(string="Add On Batch")
+    bajaj_emi_amount = fields.Float(string="Bajaj 10/2 EMI Scheme Amount", help="Amount excluding tax")
+    bajaj_including_tax = fields.Float(string="Including Tax")
+    bajaj_emi_tax = fields.Float(string="Tax")
+    bajaj_emi_total = fields.Float(string="Total Amount", compute="_compute_bajaj_emi_total", store=True)
 
     @api.model
     def create(self, vals):
@@ -99,6 +103,11 @@ class OpBatch(models.Model):
 
         return super(OpBatch, self).create(vals)
 
+    @api.depends('bajaj_emi_amount', 'bajaj_emi_tax')
+    def _compute_bajaj_emi_total(self):
+        for rec in self:
+            rec.bajaj_emi_total = rec.bajaj_emi_amount + rec.bajaj_emi_tax
+
     active_badge = fields.Selection([('active', 'Active'), ('in_active','In Active')], string="Status", compute="_compute_active_badge", store=1)
     crash_batch = fields.Boolean(string="Crash Batch", compute="_compute_crash_batch", store=1)
     crash_status = fields.Selection([('yes','Yes'), ('no','No')], string="Crash Batch")
@@ -116,6 +125,23 @@ class OpBatch(models.Model):
                     print(rec.course_id.type, 'type')
                     rec.crash_batch = 0
                     rec.crash_status = 'no'
+
+    @api.depends('bajaj_emi_amount', 'bajaj_including_tax', 'bajaj_emi_tax')
+    def _compute_bajaj_emi_total(self):
+        for rec in self:
+            # Case 1: If excluding tax is entered
+            if rec.bajaj_emi_amount != 0:
+                rec.bajaj_emi_tax = rec.bajaj_emi_amount * 18 / 100
+                rec.bajaj_including_tax = rec.bajaj_emi_amount + rec.bajaj_emi_tax
+                rec.bajaj_emi_total = rec.bajaj_including_tax
+
+            # Case 2: If including tax and tax are entered but excluding is not
+            elif rec.bajaj_including_tax and rec.bajaj_emi_tax:
+                rec.bajaj_emi_amount = rec.bajaj_including_tax - rec.bajaj_emi_tax
+                rec.bajaj_emi_total = rec.bajaj_including_tax
+
+            else:
+                rec.bajaj_emi_total = 0.0
 
     @api.depends('active')
     def _compute_active_badge(self):
@@ -155,13 +181,22 @@ class OpBatch(models.Model):
     def act_revert(self):
         self.sudo().write({'state': 'batch_approval'})
 
-    @api.depends('lump_fee_including_tax','lump_fee_excluding_tax')
+    @api.depends('lump_fee_excluding_tax', 'lump_fee_including_tax', 'tax')
     def _compute_total_lump_sum_fee(self):
-        for i in self:
-            if i.lump_fee_excluding_tax != 0:
-                i.tax = i.lump_fee_excluding_tax * 18 / 100
-            i.lump_fee_including_tax = i.lump_fee_excluding_tax + i.tax
-            i.total_lump_sum_fee = i.lump_fee_excluding_tax + i.tax
+        for rec in self:
+            # If excluding tax is provided, calculate tax and total
+            if rec.lump_fee_excluding_tax != 0:
+                rec.tax = rec.lump_fee_excluding_tax * 18 / 100
+                rec.lump_fee_including_tax = rec.lump_fee_excluding_tax + rec.tax
+                rec.total_lump_sum_fee = rec.lump_fee_including_tax
+
+            # If only including tax is entered and excluding is not set
+            elif rec.lump_fee_including_tax and rec.tax:
+                rec.lump_fee_excluding_tax = rec.lump_fee_including_tax - rec.tax
+                rec.total_lump_sum_fee = rec.lump_fee_including_tax
+
+            else:
+                rec.total_lump_sum_fee = 0.0
 
     inst_amount_exc = fields.Float(string="Amount (Exc Tax)", compute="_compute_total_amount_installment", store=1)
     inst_amount_tax = fields.Float(string="Tax", compute="_compute_total_amount_installment", store=1)

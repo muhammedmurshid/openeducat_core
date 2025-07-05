@@ -116,7 +116,7 @@ class OpStudent(models.Model):
     batch_id = fields.Many2one('op.batch', string="Batch", required=1, tracking=True)
     batch_start_date = fields.Date(string="Start Date", related='batch_id.start_date')
     batch_end_date = fields.Date(string="Batch End Date", related='batch_id.end_date')
-    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment')], string="Fee Type", tracking=1)
+    fee_type = fields.Selection([('lump_sum_fee', 'Lump Sum Fee'), ('installment', 'Installment'), ('bajaj_finance_payment_plan','Bajaj Finance Payment Plan')], string="Fee Type", tracking=1)
     # branch_id = fields.Many2one('logic.branches', string="Branch")
     course_id = fields.Many2one('op.course', string="Course", compute="_compute_course_id", store=1)
     wallet_balance = fields.Float(string="Wallet Balance", readonly=1)
@@ -312,20 +312,20 @@ class OpStudent(models.Model):
 
     @api.depends('fee_type', 'batch_id', 'batch_fee', 'discount', 'total_payable_tax', 'paid_amount', 'due_amount')
     def _compute_batch_fee(self):
-        print('jjjjj')
-        if self.fee_type:
-            if self.fee_type == 'lump_sum_fee':
-                self.batch_fee = self.batch_id.total_lump_sum_fee
-                # self.due_amount = self.batch_id.total_lump_sum_fee - self.paid_amount
-            if self.fee_type == 'installment':
-                self.batch_fee = self.batch_id.total_installment_fee
-                # self.due_amount = self.batch_id.total_installment_fee - self.paid_amount
-        if self.batch_fee != 0:
-            print('kkkl')
-            if self.discount == 0:
-                self.total_payable_tax = self.batch_fee
-            else:
-                self.total_payable_tax = self.batch_fee - self.discount
+        for rec in self:
+            if rec.fee_type:
+                if rec.fee_type == 'lump_sum_fee':
+                    rec.batch_fee = rec.batch_id.total_lump_sum_fee
+                elif rec.fee_type == 'installment':
+                    rec.batch_fee = rec.batch_id.total_installment_fee
+                elif rec.fee_type == 'bajaj_finance_payment_plan':
+                    rec.batch_fee = rec.batch_id.bajaj_emi_total
+
+            if rec.batch_fee != 0:
+                if rec.discount == 0:
+                    rec.total_payable_tax = rec.batch_fee
+                else:
+                    rec.total_payable_tax = rec.batch_fee - rec.discount
 
     @api.constrains('birth_date')
     def _check_birthdate(self):
@@ -865,18 +865,22 @@ class FeeCollectionWizard(models.TransientModel):
         # else:
         #     self.amount_inc_tax = self.amount_exc_tax
 
-    @api.onchange('batch_id')
+    @api.onchange('batch_id', 'fee_type', 'collection_id.fee_type')
     def _onchange_batch_fee(self):
         if self.fee_type == 'admission_fee':
             self.amount_exc_tax = self.batch_id.adm_exc_fee
             self.amount_inc_tax = self.batch_id.adm_inc_fee
-        if self.fee_type == 'Batch Fee':
+
+        elif self.fee_type == 'Batch Fee':
             if self.collection_id.fee_type == 'lump_sum_fee':
                 self.amount_exc_tax = self.batch_id.lump_fee_excluding_tax
                 self.amount_inc_tax = self.batch_id.lump_fee_including_tax
             elif self.collection_id.fee_type == 'installment':
-                self.amount_inc_tax = self.batch_id.inst_amount_inc
                 self.amount_exc_tax = self.batch_id.inst_amount_exc
+                self.amount_inc_tax = self.batch_id.inst_amount_inc
+            elif self.collection_id.fee_type == 'bajaj_finance_payment_plan':
+                self.amount_exc_tax = self.batch_id.bajaj_emi_amount
+                self.amount_inc_tax = self.batch_id.bajaj_including_tax
 
     @api.depends('amount_exc_tax', 'amount_inc_tax', 'fee_type')
     def _compute_total_amount(self):
@@ -983,11 +987,16 @@ class FeeCollectionWizard(models.TransientModel):
         last_report = self.env['invoice.reports'].sudo().search([], order="id desc", limit=1)
         voucher_name = 'Invoice'
         type = 'invoice'
+
+        # Special case for Ancillary Fee
         if self.fee_type == 'Ancillary Fee(Non Taxable)':
             voucher_name = 'Collection A/c'
             type = 'ancillary'
 
+        # Tax Calculation
         exc_tax = self.amount_exc_tax if self.amount_exc_tax != 0 else self.amount_inc_tax - self.tax
+
+        # Special case for Admission Fee
         if self.fee_type == 'admission_fee':
             return {
                 'sl_no': last_sl_no,
@@ -1013,54 +1022,37 @@ class FeeCollectionWizard(models.TransientModel):
                 'invoice_no': last_report.invoice_number,
             }
 
-        if self.fee_type == 'excess_amount':
-            return {
-                'sl_no': last_sl_no,
-                'date': fields.Datetime.now(),
-                'payment_mode': self.payment_mode,
-                'fee_type': self.fee_type,
-                'amount_exc_tax': exc_tax,
-                'amount_inc_tax': self.amount_inc_tax,
-                'voucher_no': last_report.invoice_number,
-                'voucher_name': voucher_name,
-                'batch_name': self.batch_id.name,
-                'branch_name': self.batch_id.branch.name,
-                'course_name': self.batch_id.course_id.name,
-                'type': type,
-                'cheque_no': self.cheque_no,
-                'branch': self.branch,
-                'fee_name': self.fee_name or self.other_amount or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
-                'tax_amount': self.tax,
-                'cgst_amount': self.cgst_amount,
-                'sgst_amount': self.sgst_amount,
-                'total_amount': self.total_amount,
-                'debit_amount': self.total_amount,
-                'invoice_no': last_report.invoice_number,
-            }
-        else:
-            return {
-                'sl_no': last_sl_no,
-                'date': fields.Datetime.now(),
-                'payment_mode': self.payment_mode,
-                'fee_type': self.fee_type,
-                'amount_exc_tax': exc_tax,
-                'batch_name': self.batch_id.name,
-                'branch_name': self.batch_id.branch.name,
-                'course_name': self.batch_id.course_id.name,
-                'amount_inc_tax': self.amount_inc_tax,
-                'voucher_no': last_report.invoice_number,
-                'voucher_name': voucher_name,
-                'type': type,
-                'cheque_no': self.cheque_no,
-                'branch': self.branch,
-                'fee_name': self.fee_name or self.other_amount or self.choose_payment_installment_plan or self.excess_amount or 'Lump sum Fee',
-                'tax_amount': self.tax,
-                'cgst_amount': self.cgst_amount,
-                'sgst_amount': self.sgst_amount,
-                'total_amount': self.total_amount,
-                'debit_amount': self.total_amount,
-                'invoice_no': last_report.invoice_number,
-            }
+        # Determine default label based on fee type and collection plan
+        is_bajaj = self.collection_id.fee_type == 'bajaj_finance_payment_plan'
+        default_fee_name = 'Bajaj Finance Payment' if is_bajaj else 'Lump sum Fee'
+
+        # Resolve final fee_name
+        fee_name = self.fee_name or self.other_amount or self.choose_payment_installment_plan or self.excess_amount or default_fee_name
+
+        # Return the final common structure
+        return {
+            'sl_no': last_sl_no,
+            'date': fields.Datetime.now(),
+            'payment_mode': self.payment_mode,
+            'fee_type': self.fee_type,
+            'amount_exc_tax': exc_tax,
+            'amount_inc_tax': self.amount_inc_tax,
+            'voucher_no': last_report.invoice_number,
+            'voucher_name': voucher_name,
+            'batch_name': self.batch_id.name,
+            'branch_name': self.batch_id.branch.name,
+            'course_name': self.batch_id.course_id.name,
+            'type': type,
+            'cheque_no': self.cheque_no,
+            'branch': self.branch,
+            'fee_name': fee_name,
+            'tax_amount': self.tax,
+            'cgst_amount': self.cgst_amount,
+            'sgst_amount': self.sgst_amount,
+            'total_amount': self.total_amount,
+            'debit_amount': self.total_amount,
+            'invoice_no': last_report.invoice_number,
+        }
 
     @api.onchange('payment_mode')
     def _onchange_payment_mode(self):
