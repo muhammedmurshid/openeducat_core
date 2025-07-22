@@ -20,6 +20,7 @@
 ###############################################################################
 
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 
 class OpSubject(models.Model):
@@ -49,7 +50,19 @@ class OpSubject(models.Model):
     mode_of_study = fields.Selection([('online', 'Online'), ('offline', 'Offline'), ('nil', 'Nil')],
                                      string="Mode of Study", default="offline")
     course_id = fields.Many2one('op.course', string="Course", required=1)
+    opening_hour = fields.Float(string="Opening Hours", readonly=1)
+    description = fields.Text(string="Description")
+    active_add_on = fields.Boolean(string="Active Add On")
     state = fields.Selection([('draft','Draft'), ('done','Done')], string="Status", default="draft")
+
+    def act_add_opening_balance(self):
+        return {'type': 'ir.actions.act_window',
+                'name': _('Add On Hours'),
+                'res_model': 'add.on.hours',
+                'target': 'new',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'context': {'default_record_id': self.id}, }
 
     def act_add_to_course(self):
         for i in self:
@@ -71,3 +84,21 @@ class OpSubject(models.Model):
             'label': _('Import Template for Subjects'),
             'template': '/openeducat_core/static/xls/op_subject.xls'
         }]
+
+
+class AddOnStandardHours(models.TransientModel):
+   _name = 'add.on.hours'
+   _description = "Add On Hours Wizard"
+
+   record_id = fields.Many2one('op.subject', string="Record")
+   add_on_time = fields.Float(string="Add On Time", required=True)
+   description = fields.Text(string="Description", required=True)
+
+   def act_confirm(self):
+       if self.add_on_time == 0:
+           raise UserError(_("Please add Time"))
+       else:
+           self.record_id.opening_hour = self.add_on_time
+           self.record_id.description = self.description
+           self.record_id.active_add_on = True
+

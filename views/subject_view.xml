@@ -27,8 +27,11 @@
             <field name="arch" type="xml">
                 <form string="Subject">
                     <header>
-                        <button name="act_add_to_course" type="object" string="Add To Course" class="oe_highlight" invisible="state == 'done'"/>
+                        <button name="act_add_to_course" type="object" string="Add To Course" class="oe_highlight"
+                                invisible="state == 'done'"/>
                         <button name="revert" type="object" string="Revert" invisible="state == 'draft'"/>
+                        <button name="act_add_opening_balance" type="object" string="Add Opening Balance"
+                                invisible="state != 'draft'"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -51,6 +54,19 @@
                                 <field name="course_id"/>
                             </group>
                         </group>
+                        <notebook>
+                            <page string="Add On Hours Details">
+                                <group>
+                                    <group>
+                                        <field name="opening_hour"/>
+                                        <field name="active_add_on"/>
+                                        <field name="description" readonly="1"/>
+                                    </group>
+                                </group>
+
+                            </page>
+
+                        </notebook>
                     </sheet>
                     <div class="oe_chatter">
                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
@@ -106,4 +122,25 @@
             <field name="view_id" ref="view_op_subject_tree"/>
         </record>
     </data>
+    <record id="subject_add_on_std_hours_view_form" model="ir.ui.view">
+        <field name="name">add.on.hours.view.form</field>
+        <field name="model">add.on.hours</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <form string="Add On Hours">
+                <group>
+                    <field name="record_id"/>
+                    <field name="add_on_time"/>
+                </group>
+                <group>
+                    <field name="description"/>
+                </group>
+                <footer>
+                    <button name="act_confirm" string="Confirm" type="object"/>
+                    <button name="cancel" string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
 </odoo>

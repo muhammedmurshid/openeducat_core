@@ -430,7 +430,7 @@
                                 </group>
                             </div>
                         </div>
-                        <notebook colspan="4">
+                        <notebook>
                             <page name="payment_history" string="Payment History">
                                 <field name="payment_ids" readonly="1">
                                     <tree editable="bottom" readonly="0">

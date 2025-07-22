@@ -143,7 +143,6 @@
 
                                     <field name="compo_ids" string="">
                                         <tree editable="bottom">
-
                                             <field name="term" string="Paper"/>
                                             <field name="amount_exc_compo"/>
                                             <field name="tax_amount_compo"/>
