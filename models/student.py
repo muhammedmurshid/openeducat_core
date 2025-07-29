@@ -262,6 +262,14 @@ class OpStudent(models.Model):
 
     enrollment_count = fields.Integer(string="Enrollment Count", compute="_compute_enrollment_count", store=1)
 
+    wallet_balance_rounded = fields.Float(string="Rounded Wallet Balance", compute='_compute_wallet_balance_rounded',
+                                          store=False)
+
+    @api.depends('wallet_balance')
+    def _compute_wallet_balance_rounded(self):
+        for rec in self:
+            rec.wallet_balance_rounded = math.ceil(rec.wallet_balance)
+
     @api.onchange('enrollment_count')
     def _onchange_enrollment_count(self):
         print('444sdfggg')
@@ -655,7 +663,6 @@ class OpStudent(models.Model):
             # rec.due_amount = rec.closing_balance
 
     def act_collect_fee(self):
-
         all_batch_ids = self.mapped('enrollment_ids.batch_id').ids
         print('hi', self.wallet_balance)
         wallet_amount = math.ceil(self.wallet_balance)

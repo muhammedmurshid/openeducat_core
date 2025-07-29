@@ -376,7 +376,7 @@
                                         <div class="container">
                                             <h4>
                                                 <b style="color:white;" align="center">Wallet Balance
-                                                    <field name="wallet_balance"/>
+                                                    <field name="wallet_balance_rounded"/>
                                                 </b>
 
                                             </h4>
@@ -665,8 +665,8 @@
                     <field name="name"/>
                     <field name="blood_group"/>
                     <newline/>
-                    <filter string="Wallet Not Empty" name="wallet_not_empty" domain="[('wallet_balance', '!=', 0)]"/>
-                    <filter string="Wallet Empty" name="wallet_empty" domain="[('wallet_balance', '=', 0)]"/>
+                    <filter string="Wallet Not Empty" name="wallet_not_empty" domain="[('wallet_balance_rounded', '!=', 0)]"/>
+                    <filter string="Wallet Empty" name="wallet_empty" domain="[('wallet_balance_rounded', '=', 0)]"/>
                     <filter string="Fees Pending" name="fees_pending" domain="[('due_amount', '!=', 0)]"/>
                     <group expand="0" string="Group By...">
                         <filter name="blood_group" string="Blood Group"
