@@ -26,7 +26,7 @@ from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 from datetime import date, datetime
 import re
-
+import math
 from odoo.tools.populate import compute
 
 
@@ -657,7 +657,8 @@ class OpStudent(models.Model):
     def act_collect_fee(self):
 
         all_batch_ids = self.mapped('enrollment_ids.batch_id').ids
-        print('hi', all_batch_ids)
+        print('hi', self.wallet_balance)
+        wallet_amount = math.ceil(self.wallet_balance)
         return {'type': 'ir.actions.act_window',
                 'name': _('Create Invoice'),
                 'res_model': 'fee.collection.wizard',
@@ -665,7 +666,7 @@ class OpStudent(models.Model):
                 'view_mode': 'form',
                 'view_type': 'form',
                 'context': {'default_collection_id': self.id,
-                            'default_wallet_amount': self.wallet_balance, 'default_fee_plan': self.fee_type,
+                            'default_wallet_amount': wallet_amount, 'default_fee_plan': self.fee_type,
                             'default_batch_ids': [(6, 0, all_batch_ids)], 'default_enrolled': self.enrolled}, }
 
 
